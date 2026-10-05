@@ -1,0 +1,80 @@
+{
+  "identifier": "NEONBREAK_LOCAL_STORE",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "29.99",
+      "familyShareable": false,
+      "internalID": "COINS1K",
+      "localizations": [
+        {
+          "description": "Mağazada kullanmak için 1.000 Coin.",
+          "displayName": "1.000 Coin",
+          "locale": "tr_TR"
+        }
+      ],
+      "productID": "com.aydworks.neonbreak.coins.1000",
+      "referenceName": "Coins 1000",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "79.99",
+      "familyShareable": false,
+      "internalID": "COINS3K",
+      "localizations": [
+        {
+          "description": "Mağazada kullanmak için 3.000 Coin.",
+          "displayName": "3.000 Coin",
+          "locale": "tr_TR"
+        }
+      ],
+      "productID": "com.aydworks.neonbreak.coins.3000",
+      "referenceName": "Coins 3000",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "179.99",
+      "familyShareable": false,
+      "internalID": "COINS7K",
+      "localizations": [
+        {
+          "description": "Mağazada kullanmak için 7.500 Coin.",
+          "displayName": "7.500 Coin",
+          "locale": "tr_TR"
+        }
+      ],
+      "productID": "com.aydworks.neonbreak.coins.7500",
+      "referenceName": "Coins 7500",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "399.99",
+      "familyShareable": false,
+      "internalID": "COINS18K",
+      "localizations": [
+        {
+          "description": "Mağazada kullanmak için 18.000 Coin.",
+          "displayName": "18.000 Coin",
+          "locale": "tr_TR"
+        }
+      ],
+      "productID": "com.aydworks.neonbreak.coins.18000",
+      "referenceName": "Coins 18000",
+      "type": "Consumable"
+    }
+  ],
+  "settings": {
+    "_askToBuyEnabled": false,
+    "_billingGracePeriodEnabled": false,
+    "_billingIssuesEnabled": false,
+    "_disableDialogs": false,
+    "_failTransactionsEnabled": false,
+    "_locale": "tr_TR",
+    "_storefront": "TUR"
+  },
+  "subscriptionGroups": [],
+  "version": {
+    "major": 5,
+    "minor": 0
+  }
+}

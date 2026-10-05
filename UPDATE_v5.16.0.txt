@@ -1,0 +1,20 @@
+NeonBreak iOS v5.16.0 (Backend v1.17.0 gerektirir) — APP STORE İNCELEMESİ İÇİN
+
+- Oyuncu kartında "Şikayet et" ve "Engelle" (hem üstteki ⋯ menüsünde hem kartın içinde düğme olarak).
+  Şikayet formu: neden (ad / fotoğraf / hile / diğer), isteğe bağlı not, "ayrıca engelle" anahtarı.
+- Engellenen oyuncu sıralamada, lig grubunda ve şampiyon kartında görünmez. Ayarlar > Gizlilik >
+  Engellenen oyuncular bölümünden engel kaldırılır.
+- NeonBreak.storekit (yerel test dosyası) gerçek coin paketleriyle eşlendi: coins.1000 / 3000 / 7500 / 18000.
+  Fiyatlar örnek değerlerdir; gerçek fiyat App Store Connect'te belirlenir.
+
+YAPILMADI: oturum belirtecinin Keychain'e taşınması (inceleme engeli değil; derlenmeden yapmak riskli).
+Derlenerek denenmedi.
+
+v5.16.1
+- Bildirim izni eski haline döndü: ilk açılışta, reklam rızası ve izleme izninden hemen sonra sorulur.
+
+v5.16.2
+- PrivacyInfo.xcprivacy: ITMS-91064 için düzeltildi. NSPrivacyTracking true, NSPrivacyTrackingDomains boş dizi olarak açıkça yazıldı; uygulamanın topladığı veri türleri (e-posta, kullanıcı ve cihaz kimliği, fotoğraf, satın alma, oyun içeriği, destek, tanılama) eklendi.
+
+v5.16.3
+- PrivacyInfo.xcprivacy: NSPrivacyTracking false yapıldı (NSPrivacyTrackingDomains boş). true + boş alan adı listesi Apple kuralına göre geçersiz olabildiği için ITMS-91064 riskini tamamen kaldırır. Reklam takibi AdMob SDK'sının kendi manifestinde beyan edilir; App Store Connect'teki Tracking = YES beyanı aynen kalır.

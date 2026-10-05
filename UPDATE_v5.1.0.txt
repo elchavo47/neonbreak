@@ -1,0 +1,43 @@
+NeonBreak iOS v5.1.0 — COIN'E VURARAK KAZANMA, GÖREVLER, DEVAM ETME, REKLAM, İNGİLİZCE
+
+Backend v1.5.0 gerektirir (önce backend yüklenmeli).
+
+EKONOMİ
+- Coin artık oyun sonunda otomatik verilmiyor: sahada beliren coin'lere topla vurarak kazanılır.
+  HUD'da o oyunda toplanan coin görünür. Mağaza fiyatları ve ödüller bu ölçeğe göre yeniden ayarlandı.
+
+OYUN
+- Kaldığın yerden devam: her tur sonunda oyun kaydedilir. Uygulama kapansa da ana ekrandan "DEVAM ET".
+  Duraklatma menüsünde "KAYDET VE ÇIK". Yeni oyun açılırsa yarım kalan oyunun skoru ve coin'i gönderilir.
+- Tahta sunucunun verdiği tohumdan üretilir (BoardGenerator = backend app/board.php). Sunucu bir oyunda
+  en fazla kaç blok, top, coin ve skor olabileceğini kendisi hesaplar.
+- Oyun çevrimdışı açılırsa "çevrimdışı deneme" olur: oynanır ama coin ve sıralama sayılmaz.
+- Satır başına en fazla 5 blok (coin ve +1 top için her satırda yer kalır).
+
+GÜNLÜK GÖREVLER / SIRALAMA
+- Ana ekranda günün 3 görevi, ilerleme çubuğu ve ödül alma.
+- Haftalık ödül ilk 10'a dağıtılır; ana ekranda ve sıralama ekranında "sıran: #N" ve ödül tablosu.
+
+REKLAM (ÖDÜLLÜ)
+- Oyun bitince "reklam izle, devam et" (oyun başına bir kez) ve "reklam izle, coin'i 2'ye katla".
+- Google Mobile Ads SDK projeye EKLENMEDİ (derleme riskine girmemek için). Kod hazır ve SDK eklenince
+  kendiliğinden etkinleşir; SDK yokken reklam düğmeleri hiç görünmez (DEBUG derlemede sahte reklamla denenir).
+  Etkinleştirmek için:
+    1. Xcode > File > Add Package Dependencies:
+       https://github.com/googleads/swift-package-manager-google-mobile-ads
+    2. Info.plist'e GADApplicationIdentifier (AdMob uygulama kimliğin) ve SKAdNetworkItems ekle.
+    3. AppState.swift içindeki RewardedAds.adUnitID değerini kendi ödüllü reklam birimi kimliğinle değiştir
+       (şu an Google'ın test kimliği duruyor).
+  SDK bağlantı kodu (AppState.swift, #if canImport(GoogleMobileAds)) derlenerek denenmedi.
+
+BİLDİRİMLER (YEREL)
+- Günlük ödül, yarım kalan oyun, 3 gün oynamayınca hatırlatma, pazar 18:00 sıralama hatırlatması.
+- İzin, oyuncu ilk ödülünü aldığında istenir. Ayarlar'da açma/kapama.
+- "Sıralamada geçildin" bildirimi sunucudan push gerektirir; bu sürümde yok.
+
+İNGİLİZCE
+- en.lproj/Localizable.strings (352 metin) + tr.lproj. Kaynak dil Türkçe; cihaz dili İngilizce ise
+  uygulama İngilizce açılır. Sunucu hata mesajları da Accept-Language'e göre İngilizce döner.
+- Sunucudan gelen duyuru, destek yanıtı ve ödül bildirimi metinleri çevrilmez (panelden yazıldığı gibi gelir).
+
+NOT: Bu paket Xcode ile derlenerek doğrulanmadı; yalnızca sözdizimi denetiminden geçti.

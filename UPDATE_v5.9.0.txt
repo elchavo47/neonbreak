@@ -1,0 +1,21 @@
+NeonBreak iOS v5.9.0 — REKLAMLA COIN / GÜÇ KAZANMA VE 5 YENİ DİL
+
+Backend v1.11.0 gerektirir (önce backend yüklenmeli).
+
+REKLAMLA KAZANMA
+- Ana ekranda "Reklam izle, +50 coin kazan" satırı (günde 5 hak; reklam hazırsa görünür).
+- Oyunda bir güç bitince, o güce basınca "Reklam izle, 1 tane kazan" teklifi çıkar (günde 3 hak).
+  Lazer reklamla verilmez. Güç envantere eklenir, oyuncu rafından kendisi kullanır.
+- Coin miktarı ve günlük haklar panelden değişir (Oyun ayarları). Bir ödülden sonra 20 saniye beklenir.
+- Sunucu reklamın gerçekten izlendiğini doğrulayamaz; bu yüzden günlük sınır vardır.
+- TestFlight ve Xcode'da test reklamı, App Store sürümünde gerçek reklam gösterilir.
+
+DİLLER
+- Almanca, İspanyolca, Fransızca, Portekizce (Brezilya) ve Rusça eklendi (toplam 7 dil, her dilde 495 metin).
+- Ayarlar > Dil listesinde kendiliğinden görünürler. "Otomatik" telefonun dilini izler.
+- Çeviriler yapay zekâ ile yapıldı, anadili konuşan biri kontrol etmedi.
+- Sunucudan gelen hata mesajları ve bildirimler yalnızca Türkçe ve İngilizce; diğer dillerde İngilizce gelir.
+- DÜZELTME: Uygulamanın varsayılan dili Türkçe ayarlıydı; listede olmayan bir dildeki telefon Türkçe açılıyordu.
+  Artık listede olmayan dillerde İngilizce açılır.
+
+NOT: Bu paket Xcode ile derlenerek doğrulanmadı; yalnızca sözdizimi ve proje dosyası yapısı denetlendi.

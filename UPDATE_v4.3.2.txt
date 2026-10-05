@@ -1,0 +1,5 @@
+NeonBreak v4.3.2
+- Oyun içi takviye paneli belirgin ve sürekli görünür hale getirildi.
+- Hız, Kalkan ve Kredi takviyeleri adet/aktif durumuyla gösteriliyor.
+- Kırmızı ince çizgi yerine açıklamalı KAYBETME SINIRI + tehlike bandı eklendi.
+- Ana ekrandaki REKOR / SKOR / RUN kartları yeniden tasarlandı; premium rozet ve glow görünümü eklendi.

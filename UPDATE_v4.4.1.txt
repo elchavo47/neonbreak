@@ -1,0 +1,4 @@
+NEON BREAK v4.4.1
+- Ana sayfadaki hero kartının sol görseli artık GameLogo değil, oyuncunun o anda seçili olan top skinidir.
+- Seçili top değiştiğinde Home ekranındaki görsel de otomatik değişir.
+- AppIcon/GameLogo dosyalarına dokunulmadı; bu güncelleme yalnızca hero kartını düzeltir.

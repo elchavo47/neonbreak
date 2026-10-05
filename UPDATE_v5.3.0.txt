@@ -1,0 +1,28 @@
+NeonBreak iOS v5.3.0 — BLOK DÜZELTMESİ, KOLAY 10-24, BİLDİRİMLER, YENİ DESTEK MERKEZİ
+
+Backend v1.7.0 gerektirir (önce backend yüklenmeli).
+
+BLOKLAR (üst üste binme)
+- Asıl sebep bulundu: blok sahneye ölçek animasyonuyla girerken ekran boyutu netleşirse görsel
+  şişmiş kalıyordu (vuruş alanı doğru, görüntü ~%30 büyük). En çok ilk satırda oluyordu.
+  Artık boyut atanmadan önce animasyon durdurulup ölçek sıfırlanıyor, giriş animasyonu yalnızca
+  solma, ve sahne gerçek boyutu almadan hiçbir şey yerleştirilmiyor.
+
+ZORLUK (10-24 arası)
+- Blok canı artık seviyenin gerisinden geliyor: ≈ seviye x 0,75 (15. seviyede ~11-12).
+- Sert bloklar seviye 15'te başlıyor ve 1,5 kat (eskiden seviye 8'de, 2 kat). 2 katlık bloklar 30'dan sonra.
+- Satırda 5 blok seviye 20'de başlıyor (eskiden 15).
+- +1 top seviye 20'ye kadar her satırda geliyor.
+
+BİLDİRİMLER
+- Bildirime dokununca ilgili ekran açılır: sıralama bildirimi sıralamayı, destek yanıtı destek
+  merkezinin Taleplerim sekmesini, ödül/duyuru gelen kutusunu.
+- Ayarlar'da türler ayrı ayrı kapatılabilir: sıralama, ödüller, hatırlatmalar.
+- Hesap askıya alınır ya da yasaklanırsa uygulama gerekçesiyle birlikte bir ekran gösterir.
+
+DESTEK MERKEZİ
+- Yeniden tasarlandı: "Yardım" ve "Taleplerim" sekmeleri, açılır konu kartları, konu içinden
+  mesaj yazma, durum rozetli talep listesi, okunmamış işareti.
+- Talepler sohbet görünümünde; açıkken 15 saniyede bir kendiliğinden yenilenir.
+
+NOT: Bu paket Xcode ile derlenerek doğrulanmadı; yalnızca sözdizimi denetiminden geçti.

@@ -1,0 +1,26 @@
+NeonBreak iOS v5.8.0 — REKLAM (ADMOB) VE UYGULAMA İÇİ DİL SEÇİMİ
+
+v5.7.0'ın üstüne. Backend v1.10.0 ile çalışır; backend'de değişiklik yok.
+
+REKLAM
+- Google Mobile Ads SDK projeye Swift Package olarak eklendi (12.x; GitHub Actions derlerken kendisi indirir).
+- Info.plist: GADApplicationIdentifier (ca-app-pub-1788814559424915~4758688377) ve Google'ın SKAdNetwork kimliği.
+- Ödüllü reklam birimi: ca-app-pub-1788814559424915/4978180226
+- Reklamın çıktığı yerler: oyun bitince "REKLAM İZLE • DEVAM ET" (oyun başına bir kez) ve
+  "REKLAM İZLE • COİNİ 2'YE KATLA".
+- Xcode ve TestFlight derlemelerinde Google'ın TEST reklamı gösterilir; gerçek reklam yalnızca App Store
+  sürümünde çıkar. Kendi gerçek reklamını izlemek/tıklamak AdMob kurallarına aykırıdır.
+- Reklam hazır değilse (yüklenemediyse) düğmeler görünmez.
+- Yapılmayanlar: izleme izni (ATT) penceresi ve Avrupa için rıza (UMP) ekranı yok. Bunlar olmadan reklam
+  çalışır ama gelir daha düşük olur; Avrupa'da yayınlamadan önce rıza ekranı eklenmelidir.
+
+DİL SEÇİMİ
+- Ayarlar > Dil: "Otomatik" (telefonun dili) ya da listeden bir dil. Seçilince uygulama hemen o dile geçer.
+- Liste, uygulamadaki dil klasörlerinden kendiliğinden oluşur. Şu an Türkçe ve İngilizce var; yeni diller
+  eklendikçe listede görünür.
+- Dil değişince mağaza ürün adları gibi bazı metinler uygulama yeniden açılınca güncellenir.
+
+RİSK: Proje dosyasına (project.pbxproj) paket bağımlılığı elle eklendi ve reklam kodu ilk kez gerçek SDK ile
+derlenecek. Derleme hatası çıkarsa hata satırlarını gönderin.
+
+NOT: Bu paket Xcode ile derlenerek doğrulanmadı; yalnızca sözdizimi ve proje dosyası yapısı denetlendi.

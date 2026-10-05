@@ -1,0 +1,16 @@
+Neon Break v4.1.0 - Performance Refactor
+
+- BallNode SKShapeNode -> SKSpriteNode
+- Ball texture is cached once per scene
+- Removed per-ball core/halo shape nodes for Pulse
+- Precise collision disabled for normal arcade ball physics
+- Removed didSimulatePhysics per-frame velocity rewrite
+- Velocity maintenance now runs only ~4x/sec and after block hits when needed
+- Aim line reuses one SKShapeNode; only its path changes
+- CoreHaptics per-hit pattern/player creation removed; UIKit feedback generators reused
+- Hit sound playback is throttled and AVAudioPlayer pools reduced
+- No bounce/trajectory prediction; only one straight dashed direction indicator
+- Difficulty no longer reads server tuning
+- Local curve: 2 blocks through lvl 12, 3 through lvl 39, 4 through lvl 89, 5 after lvl 90
+- Local HP: ~1 + level/4 with small late-game jitter
+- Balls/backgrounds are temporarily directly usable without purchase

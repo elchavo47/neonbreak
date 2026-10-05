@@ -1,0 +1,10 @@
+NeonBreak v4.5.1
+- Avatar crop now renders exactly the visible pan/zoom transform before upload.
+- Profile/player card redesigned; removed confusing "AYD ID doğrulandı" copy.
+- Cached player/store/inventory/leaderboard state enables offline gameplay and owned content access.
+- Offline power-up use supported with deferred inventory reconciliation when the connection returns.
+- Store purchase success no longer becomes a false failure when the follow-up sync times out; one reconnect/retry is performed.
+- Speed Core is +30% and applies to one volley only. UI shows armed state, used count and remaining inventory.
+- Game UI uses a dedicated top HUD + unobstructed play field + dedicated bottom power dock; no boost controls cover the play field.
+- Removed in-play aim hint overlay to preserve touch/visual space.
+- Fixed duplicate FPS declarations introduced during v4.5 work.

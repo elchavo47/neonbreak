@@ -1,0 +1,1 @@
+v4.4.0: weekly countdown; support closed state/read-only; support timestamps + verified badge; only AppIcon restored to old version; GameLogo preserved from v4.3.3; haptics default off; aim/effects settings; paid store economy; admin reward + reward popup + coin packs wiring.

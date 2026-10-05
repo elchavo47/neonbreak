@@ -1,0 +1,7 @@
+Neon Break v4.3.1
+- custom avatar crop editor before upload
+- username 7-day countdown visible in profile
+- live support promoted to home + profile
+- aim line reaches first actual screen/playfield boundary
+- haptic slider previews current intensity on every change
+- silent background sync; no online/offline/server status noise in UI

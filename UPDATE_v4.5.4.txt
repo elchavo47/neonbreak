@@ -1,0 +1,10 @@
+NeonBreak v4.5.4 GAME SCREEN LAYOUT FIX
+
+- Fixed GameHUD expanding vertically and stealing roughly half the screen.
+- Root cause: an unconstrained RoundedRectangle stroke in the exit button could take the parent proposal.
+- HUD now has a strict 58pt band.
+- Power shelf now has a strict 72pt band below gameplay.
+- SpriteKit viewport explicitly fills all remaining screen height.
+- Power buttons no longer overlap or block gameplay gestures.
+- Feedback toast floats above the power shelf without changing layout height.
+- Source marker bumped to 4.5.4 for Actions verification.

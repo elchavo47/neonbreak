@@ -1,0 +1,10 @@
+NeonBreak v4.3.3
+- Takviyeler artık kapalı başlayan, sağ kenarda küçük yıldırım düğmesiyle açılan kompakt dock.
+- Takviye paneli nişan/atış alanını kaplamaz.
+- Profil kullanıcı adı bekleme süresinde Kaydet butonu kilitli.
+- Profil kırpma Kullan düğmesi her durumda geri bildirim verir ve güvenli fallback kullanır.
+- Canlı destek baştan tasarlandı: konu seçimi > hızlı çözümler > çözülmediyse ticket.
+- Destek yanıt süresi: genellikle gün içerisinde.
+- Alt kırmızı yazılı çizgi kaldırıldı, neon bariyer/ızgara sınır yapıldı.
+- Oyun HUD seviye/top/skor kartları premium neon tasarıma geçirildi.
+- Ana ekranda mevcut GameLogo varlığı yeniden kullanılmaya başlandı.

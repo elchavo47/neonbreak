@@ -1,0 +1,38 @@
+NeonBreak iOS v5.0.0 — OYUN EKRANI YENİDEN YAZILDI + PREMIUM MAĞAZA
+
+Backend v1.4.0 ile birlikte yayınlanmalıdır (önce backend).
+
+OYUN EKRANI
+- HUD ve güç rafı güvenli alanın içinde; Dynamic Island / home çizgisiyle çakışma yok.
+- Sahne gerçek boyut geldikten sonra kurulur; bloklar, çit ve launcher her boyut değişiminde yeniden yerleşir.
+- Her cihazda aynı 7 sütun x 9 satır ızgara; hücre, top ve hız ekrana göre ölçeklenir (adil sıralama).
+- Okunur yazı boyutları (en küçük 10pt).
+- Duraklatma menüsü (devam / yeniden başla / oyunu bitir); uygulama arka plana geçince otomatik duraklar.
+
+OYNANIŞ
+- Nişan çizgisi ilk çarpma noktasını ve ilk sekmeyi gösterir.
+- Parmak launcher hizasına/altına çekilirse atış iptal olur (yanlışlıkla atış yok).
+- Uzayan turda "HIZLANDIR x2" (5 sn) ve "TOPLARI ÇAĞIR" (14 sn).
+- Blok rengi kalan cana göre değişir.
+- Bomba yalnızca çevresindeki 3x3 hücreyi etkiler.
+- Zorluk: blok canı seviyeyle büyür, seviye 8'den sonra çift canlı bloklar.
+- Temaslar fizik adımından sonra işlenir; alan dışına çıkan top için güvenlik ağı.
+- Seviye artık 1'den başlar. XP formülü sunucuyla aynı (blok x3 + seviye x5).
+
+GÜÇLER
+- Yeni: Lazer Süpürgesi, Güç Çekirdeği (2x hasar), Çoğaltıcı (+%50 top).
+- Güç, sunucu onayından sonra uygulanır ve atış sürerken basılsa da kaybolmaz.
+- Çevrimdışı başlayan oyun, bağlantı gelince yine de gönderilir.
+
+MAĞAZA
+- 4 sekme: Toplar (15), Dünyalar (12), Güçler (6), Paketler (5).
+- 8 yeni top ve 6 yeni dünya görseli.
+- Eksik coin uyarısı, koleksiyon sayacı, otomatik kapanan bildirim.
+- Ana ekranda günlük ödül kartı.
+
+HESAP / ÖDEME
+- Cihaz kimliği Keychain'de: uygulama silinip kurulsa da hesap geri gelir.
+- Coin satın alımı Apple imzalı işlemle sunucuda doğrulanır.
+- Yarım kalan satın almalar açılışta ve Transaction.updates ile tamamlanır.
+
+NOT: Bu paket Xcode ile derlenerek doğrulanmadı; yalnızca sözdizimi denetiminden geçti.

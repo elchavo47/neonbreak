@@ -1,0 +1,420 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 60;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		7E80ECB52890434CF074B07A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 44CEF992C8E65B612D921E81 /* PrivacyInfo.xcprivacy */; };
+		2C3D51BA001EFA78B9F18FF8 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FD8BCA296823373E3F69AFE /* AppState.swift */; };
+		82FDB5029E6F8623BBAF7240 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49933B2A32D31EFCFB077CA /* ContentView.swift */; };
+		1FFB803EBCD369764C3D74B7 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E2283D1E39D52C19F77F919 /* GameScene.swift */; };
+		A4D35B2BE6709BFA88994B1A /* GameSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C7A4F3B46E4D5ACDA3B61E /* GameSession.swift */; };
+		CFFBDE00FAFBFAD0C411B834 /* Catalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 618FE77A9C8EF5D15574CCC6 /* Catalog.swift */; };
+		C61C790E6E0AACB9FAD4271F /* NeonBreakApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E3732D3BF6FF217F72D51C4 /* NeonBreakApp.swift */; };
+		96C73F5D3F695D76AFB477B8 /* HapticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38415A20537A96834711DF2D /* HapticsManager.swift */; };
+		9E09F4A2704D210949D31524 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90321EC29AFADB09A00A048 /* Persistence.swift */; };
+		ACFB677474DEE4BF1B94DC2D /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1666235B723BB1E400D1FDB6 /* SoundManager.swift */; };
+		1F0A511ABE77F8C8BC307453 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DD0790B7D6BD996525DE20 /* StoreManager.swift */; };
+		5CD7C247F1F7EFE440D61B26 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C8B9740BD0C46249B15E765 /* GameView.swift */; };
+		F561F4AC40E7AB1B191ABC79 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9F2150E39AD8D17AA4BA72C /* HomeView.swift */; };
+		9B2A5BB7BA82EC27691D192A /* NeonComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C8A44774FA7395D7CBE4EE /* NeonComponents.swift */; };
+		0366047E1EAD5CC5EA2D8838 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F744F6D6EBF1B44CEF76CC1 /* SettingsView.swift */; };
+		636A01074EA92D941BDF8200 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAB7E3CDB00C0080D5A8027 /* ShopView.swift */; };
+		04A7814E4EEC70DE7D6C41B1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8D562B3E40B6C9EC53F38F07 /* Assets.xcassets */; };
+		A2FC15F2CD654679D1A3A9EB /* SpriteKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10371DA8C30AE8E69983E71 /* SpriteKit.framework */; };
+		A5A505F00ABF9F100C854105 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BE1CA36D61B4916D1FDBE97 /* StoreKit.framework */; };
+		7F19A6F848475EECBA7D1DF4 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B58392B0683CF37E493DE0B2 /* AVFoundation.framework */; };
+		35FA7A4E4A11E2B67D32FFE8 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8EDEB4FF001792FB5D99A2B /* UIKit.framework */; };
+		CC4834A14B9303245F2DFDD1 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5DB72C76EEEEBADD145EFBE /* SwiftUI.framework */; };
+		C0FFEE0000000000000A0001 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C0FFEE0000000000000A0002 /* Localizable.strings */; };
+		C0FFEE0000000000000B0001 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = C0FFEE0000000000000B0002 /* GoogleMobileAds */; };
+		C0FFEE0000000000000D0011 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C0FFEE0000000000000D0010 /* InfoPlist.strings */; };
+		C0FFEE0000000000000E0001 /* GoogleUserMessagingPlatform in Frameworks */ = {isa = PBXBuildFile; productRef = C0FFEE0000000000000E0002 /* GoogleUserMessagingPlatform */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		44CEF992C8E65B612D921E81 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		7EDC8BA910E847B9C896E933 /* NeonBreak.storekit */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = NeonBreak.storekit; sourceTree = "<group>"; };
+		2FD8BCA296823373E3F69AFE /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppState.swift"; sourceTree = "<group>"; };
+		F49933B2A32D31EFCFB077CA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView.swift"; sourceTree = "<group>"; };
+		2E2283D1E39D52C19F77F919 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Game/GameScene.swift"; sourceTree = "<group>"; };
+		F0C7A4F3B46E4D5ACDA3B61E /* GameSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Game/GameSession.swift"; sourceTree = "<group>"; };
+		618FE77A9C8EF5D15574CCC6 /* Catalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Catalog.swift"; sourceTree = "<group>"; };
+		5E3732D3BF6FF217F72D51C4 /* NeonBreakApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NeonBreakApp.swift"; sourceTree = "<group>"; };
+		38415A20537A96834711DF2D /* HapticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/HapticsManager.swift"; sourceTree = "<group>"; };
+		C90321EC29AFADB09A00A048 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/Persistence.swift"; sourceTree = "<group>"; };
+		1666235B723BB1E400D1FDB6 /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/SoundManager.swift"; sourceTree = "<group>"; };
+		59DD0790B7D6BD996525DE20 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/StoreManager.swift"; sourceTree = "<group>"; };
+		9C8B9740BD0C46249B15E765 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/GameView.swift"; sourceTree = "<group>"; };
+		E9F2150E39AD8D17AA4BA72C /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/HomeView.swift"; sourceTree = "<group>"; };
+		48C8A44774FA7395D7CBE4EE /* NeonComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/NeonComponents.swift"; sourceTree = "<group>"; };
+		4F744F6D6EBF1B44CEF76CC1 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/SettingsView.swift"; sourceTree = "<group>"; };
+		BBAB7E3CDB00C0080D5A8027 /* ShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/ShopView.swift"; sourceTree = "<group>"; };
+		8D562B3E40B6C9EC53F38F07 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1D38637870287646A60BB987 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F5BF48AA40CAD7891EB709FC /* NeonBreak.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NeonBreak.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10371DA8C30AE8E69983E71 /* SpriteKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpriteKit.framework; path = System/Library/Frameworks/SpriteKit.framework; sourceTree = SDKROOT; };
+		4BE1CA36D61B4916D1FDBE97 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		B58392B0683CF37E493DE0B2 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		A8EDEB4FF001792FB5D99A2B /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		F5DB72C76EEEEBADD145EFBE /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		C0FFEE0000000000000A0003 /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C0FFEE0000000000000A0004 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C0FFEE0000000000000C0005 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C0FFEE0000000000000C0006 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C0FFEE0000000000000C0007 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C0FFEE0000000000000C0008 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = pt-BR.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C0FFEE0000000000000C0009 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C0FFEE0000000000000D0001 /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C0FFEE0000000000000D0002 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C0FFEE0000000000000D0003 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C0FFEE0000000000000D0004 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C0FFEE0000000000000D0005 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C0FFEE0000000000000D0006 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = pt-BR.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C0FFEE0000000000000D0007 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		29B2D46AA747A59804D46E1F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A2FC15F2CD654679D1A3A9EB /* SpriteKit.framework in Frameworks */,
+				C0FFEE0000000000000B0001 /* GoogleMobileAds in Frameworks */,
+				C0FFEE0000000000000E0001 /* GoogleUserMessagingPlatform in Frameworks */,
+				A5A505F00ABF9F100C854105 /* StoreKit.framework in Frameworks */,
+				7F19A6F848475EECBA7D1DF4 /* AVFoundation.framework in Frameworks */,
+				35FA7A4E4A11E2B67D32FFE8 /* UIKit.framework in Frameworks */,
+				CC4834A14B9303245F2DFDD1 /* SwiftUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		7882D14E196057770B59E53D = {
+			isa = PBXGroup;
+			children = (
+				095FEE2E633C50D24407F2D6 /* NeonBreak */,
+				175C932161BEBF3B8BB1F58C /* Frameworks */,
+				BF7A2D27A78D590BDEF15AF2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		095FEE2E633C50D24407F2D6 /* NeonBreak */ = {
+			isa = PBXGroup;
+			children = (
+				2FD8BCA296823373E3F69AFE /* AppState.swift */,
+				C0FFEE0000000000000A0002 /* Localizable.strings */,
+				C0FFEE0000000000000D0010 /* InfoPlist.strings */,
+				F49933B2A32D31EFCFB077CA /* ContentView.swift */,
+				2E2283D1E39D52C19F77F919 /* GameScene.swift */,
+				F0C7A4F3B46E4D5ACDA3B61E /* GameSession.swift */,
+				618FE77A9C8EF5D15574CCC6 /* Catalog.swift */,
+				5E3732D3BF6FF217F72D51C4 /* NeonBreakApp.swift */,
+				38415A20537A96834711DF2D /* HapticsManager.swift */,
+				C90321EC29AFADB09A00A048 /* Persistence.swift */,
+				1666235B723BB1E400D1FDB6 /* SoundManager.swift */,
+				59DD0790B7D6BD996525DE20 /* StoreManager.swift */,
+				9C8B9740BD0C46249B15E765 /* GameView.swift */,
+				E9F2150E39AD8D17AA4BA72C /* HomeView.swift */,
+				48C8A44774FA7395D7CBE4EE /* NeonComponents.swift */,
+				4F744F6D6EBF1B44CEF76CC1 /* SettingsView.swift */,
+				BBAB7E3CDB00C0080D5A8027 /* ShopView.swift */,
+				44CEF992C8E65B612D921E81 /* PrivacyInfo.xcprivacy */,
+				7EDC8BA910E847B9C896E933 /* NeonBreak.storekit */,
+				8D562B3E40B6C9EC53F38F07 /* Assets.xcassets */,
+				1D38637870287646A60BB987 /* Info.plist */,
+			);
+			path = NeonBreak;
+			sourceTree = "<group>";
+		};
+		175C932161BEBF3B8BB1F58C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A10371DA8C30AE8E69983E71 /* SpriteKit.framework */,
+				4BE1CA36D61B4916D1FDBE97 /* StoreKit.framework */,
+				B58392B0683CF37E493DE0B2 /* AVFoundation.framework */,
+				A8EDEB4FF001792FB5D99A2B /* UIKit.framework */,
+				F5DB72C76EEEEBADD145EFBE /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		BF7A2D27A78D590BDEF15AF2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F5BF48AA40CAD7891EB709FC /* NeonBreak.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		42AEFBAE01D2DFD981F7DA7D /* NeonBreak */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DDC96F7C1D62EA89141E06E0 /* Build configuration list for PBXNativeTarget "NeonBreak" */;
+			buildPhases = (
+				E7209FB05162B7572F88D05E /* Sources */,
+				29B2D46AA747A59804D46E1F /* Frameworks */,
+				66F8606E9F0A136E2228EBCB /* Resources */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = NeonBreak;
+			packageProductDependencies = (
+				C0FFEE0000000000000B0002 /* GoogleMobileAds */,
+				C0FFEE0000000000000E0002 /* GoogleUserMessagingPlatform */,
+			);
+			productName = NeonBreak;
+			productReference = F5BF48AA40CAD7891EB709FC /* NeonBreak.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		46F86FAA6BBF9AC94A7E4595 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					42AEFBAE01D2DFD981F7DA7D = { CreatedOnToolsVersion = 16.0; };
+				};
+			};
+			buildConfigurationList = 4623F89214148A3820E2F59A /* Build configuration list for PBXProject "NeonBreak" */;
+			compatibilityVersion = "Xcode 15.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (tr, en, de, es, fr, "pt-BR", ru, Base);
+			mainGroup = 7882D14E196057770B59E53D;
+			packageReferences = (
+				C0FFEE0000000000000B0003 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+				C0FFEE0000000000000E0003 /* XCRemoteSwiftPackageReference "swift-package-manager-google-user-messaging-platform" */,
+			);
+			productRefGroup = BF7A2D27A78D590BDEF15AF2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				42AEFBAE01D2DFD981F7DA7D /* NeonBreak */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		66F8606E9F0A136E2228EBCB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7E80ECB52890434CF074B07A /* PrivacyInfo.xcprivacy in Resources */,
+				04A7814E4EEC70DE7D6C41B1 /* Assets.xcassets in Resources */,
+				C0FFEE0000000000000A0001 /* Localizable.strings in Resources */,
+				C0FFEE0000000000000D0011 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E7209FB05162B7572F88D05E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2C3D51BA001EFA78B9F18FF8 /* AppState.swift in Sources */,
+				82FDB5029E6F8623BBAF7240 /* ContentView.swift in Sources */,
+				1FFB803EBCD369764C3D74B7 /* GameScene.swift in Sources */,
+				A4D35B2BE6709BFA88994B1A /* GameSession.swift in Sources */,
+				CFFBDE00FAFBFAD0C411B834 /* Catalog.swift in Sources */,
+				C61C790E6E0AACB9FAD4271F /* NeonBreakApp.swift in Sources */,
+				96C73F5D3F695D76AFB477B8 /* HapticsManager.swift in Sources */,
+				9E09F4A2704D210949D31524 /* Persistence.swift in Sources */,
+				ACFB677474DEE4BF1B94DC2D /* SoundManager.swift in Sources */,
+				1F0A511ABE77F8C8BC307453 /* StoreManager.swift in Sources */,
+				5CD7C247F1F7EFE440D61B26 /* GameView.swift in Sources */,
+				F561F4AC40E7AB1B191ABC79 /* HomeView.swift in Sources */,
+				9B2A5BB7BA82EC27691D192A /* NeonComponents.swift in Sources */,
+				0366047E1EAD5CC5EA2D8838 /* SettingsView.swift in Sources */,
+				636A01074EA92D941BDF8200 /* ShopView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		C0FFEE0000000000000A0002 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C0FFEE0000000000000A0003 /* tr */,
+				C0FFEE0000000000000A0004 /* en */,
+				C0FFEE0000000000000C0005 /* de */,
+				C0FFEE0000000000000C0006 /* es */,
+				C0FFEE0000000000000C0007 /* fr */,
+				C0FFEE0000000000000C0008 /* pt-BR */,
+				C0FFEE0000000000000C0009 /* ru */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		C0FFEE0000000000000D0010 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C0FFEE0000000000000D0001 /* tr */,
+				C0FFEE0000000000000D0002 /* en */,
+				C0FFEE0000000000000D0003 /* de */,
+				C0FFEE0000000000000D0004 /* es */,
+				C0FFEE0000000000000D0005 /* fr */,
+				C0FFEE0000000000000D0006 /* pt-BR */,
+				C0FFEE0000000000000D0007 /* ru */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C0FFEE0000000000000B0003 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.14.0;
+			};
+		};
+		C0FFEE0000000000000E0003 /* XCRemoteSwiftPackageReference "swift-package-manager-google-user-messaging-platform" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-user-messaging-platform.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C0FFEE0000000000000B0002 /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0FFEE0000000000000B0003 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
+		C0FFEE0000000000000E0002 /* GoogleUserMessagingPlatform */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0FFEE0000000000000E0003 /* XCRemoteSwiftPackageReference "swift-package-manager-google-user-messaging-platform" */;
+			productName = GoogleUserMessagingPlatform;
+		};
+/* End XCSwiftPackageProductDependency section */
+
+/* Begin XCBuildConfiguration section */
+		EC86DC4F4B4C60C3EC031655 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		7BF40F069D95C38DE60AA602 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_OPTIMIZATION_LEVEL = s;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				SDKROOT = iphoneos;
+			};
+			name = Release;
+		};
+		339F2120A275E8028CC42767 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = NeonBreak/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0.0;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_BUNDLE_IDENTIFIER = com.aydworks.neonbreak;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		17234DA728CB8FFFA593E13A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = NeonBreak/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0.0;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_BUNDLE_IDENTIFIER = com.aydworks.neonbreak;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4623F89214148A3820E2F59A /* Build configuration list for PBXProject "NeonBreak" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC86DC4F4B4C60C3EC031655 /* Debug */,
+				7BF40F069D95C38DE60AA602 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DDC96F7C1D62EA89141E06E0 /* Build configuration list for PBXNativeTarget "NeonBreak" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				339F2120A275E8028CC42767 /* Debug */,
+				17234DA728CB8FFFA593E13A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+}

@@ -1,0 +1,67 @@
+NeonBreak iOS v5.10.0 — HIZ TOPLARI, REKLAM DOĞRULAMASI, RIZA/İZİN, DAVET, HESAP SİLME, AYARLAR SAYFALARI
+
+Backend v1.12.0 gerektirir (önce backend yüklenmeli).
+
+TOPLAR
+- 6 yeni top: Comet, Bolt (hız), Turbo, Photon, Warp, Mach (hız + hasar). Mağaza kartında "HASAR" yanında "HIZ" da yazar.
+- Top hızı çarpanı oyuna uygulanır; hız güçlendiricisiyle birlikte toplam çarpan 1,5'i geçmez.
+
+REKLAM
+- Reklam, sunucudan alınan tek kullanımlık bilet (nonce) ile gösterilir; AdMob bunu doğrulama çağrısıyla bildirir.
+  Sunucuda doğrulama kapalıysa bilet yine alınır ama ödül hemen verilir (varsayılan: kapalı).
+- Reklam rızası (UMP) → izleme izni (ATT) → bildirim izni → reklam SDK'sı sırasıyla açılışta çalışır.
+  Rıza formu, AdMob > Gizlilik ve mesajlaşma bölümünde bir mesaj oluşturulmadıkça görünmez.
+- Info.plist: izleme izni metni 7 dilde (InfoPlist.strings). PrivacyInfo: izleme "evet" olarak işaretlendi.
+- Proje: UMP (GoogleUserMessagingPlatform) paketi açıkça eklendi.
+
+AYARLAR (yedi sayfa)
+Hesap · Bildirimler · Oyun · Dil · Arkadaşını davet et · Gizlilik · Hakkında ve destek
+- Hesap: oyuncu bilgisi ve "Hesabımı sil" (onay penceresiyle; sunucudaki kişisel veriyi siler, cihazdaki kimliği
+  temizler ve yeni bir hesap açar). Askıya alınmış/yasaklı hesap silinemez.
+- Gizlilik: gizlilik politikası bağlantısı (sunucudaki /privacy sayfası), reklam gizlilik seçenekleri, izin durumu.
+- Dil: liste, işaretle seçilir.
+
+ARKADAŞ DAVETİ
+- Kendi davet kodun, kopyala/paylaş. Kodu giren yeni oyuncu hemen 100 coin, davet eden arkadaş 8. seviyeye
+  ulaşınca 150 coin alır (panelden değişir).
+
+SKOR KARTI
+- Oyun sonu paylaşım düğmesi artık dikey bir görsel kart paylaşır (seviye, skor, top, lig, davet kodu).
+
+DİĞER
+- Sunucudan gelen sabit ödül başlıkları, coin paketi yazıları ve "Bitti" düğmesi 7 dilde çevrildi (eksikti).
+- Toplam 576 metin, 7 dil. Çeviriler yapay zekâ ile yapıldı.
+
+BİLİNEN SINIRLAR
+- Lig sonucu mesajı (sıra ve lig adı içeren) sunucudan Türkçe gelir.
+
+NOT: Bu paket Xcode ile derlenerek doğrulanmadı; yalnızca sözdizimi ve proje dosyası yapısı denetlendi.
+
+v5.10.1 — BEKLEYEN DÖRT MADDE
+- Rafta "▶" rozeti: elinde kalmayan bir güç için bugün reklam hakkın varsa ve reklam hazırsa adet yerine sarı ▶ görünür
+  (Lazer hariç).
+- Mağaza > Güçler sekmesinin en üstünde "Reklam izle, ücretsiz güç kazan" kartı; hangi gücü istediğini seçersin.
+- Reklam teklifinde "Vazgeç"e basınca ya da reklamdan sonra oyun kaldığı yerden devam eder (duraklatılmış kalmıyordu).
+- Tahta üreteci v4 (seviye 41 ve sonrası): satırda 6 blok; 3 hafif, 2 normal, 1 ağır. Toplam satır canı 30 seviyede
+  (41-70) 1,0x'ten 1,6x'e çıkar. Seviye 40 ve öncesi aynı. 6 blok yanında tek boş sütun kaldığı için bu seviyelerde
+  coin ve özel (rowClear/scatter/bomb) toplanabilirleri artık çıkmaz; +1 top çıkmaya devam eder.
+- Yarıda kalmış kayıtlı oyun, başladığı üreteç sürümüyle devam eder (sunucu doğrulaması tutarlı kalsın diye).
+- 1,6 katsayısı bir tahmindir, cihazda denenmedi; sabit olduğu için ayar bir uygulama güncellemesi ister.
+
+v5.10.2 — REKLAM DÜĞMESİ DÜZELTMESİ
+- Ana ekrandaki "Reklam izle, +50 coin" ve mağaza/rafta reklam teklifleri çalışmıyordu: reklamı gösteren sarmalayıcı
+  arka plan iş parçacığında çalıştığı için iOS reklamı açamıyordu (düğme kayboluyor, hata sessizce yutuluyordu).
+  Reklam gösterimi artık ana iş parçacığında ve en üstteki pencerenin üstünden yapılır.
+- Her sonuçta mesaj: kazanılan coin, reklam yarıda kapatıldıysa uyarı, gösterilemediyse nedeni.
+- 55 dakikadan eski yüklenmiş reklam gösterilmez, yenisi istenir.
+
+v5.11.0 — ÇARK, E-POSTA HESABI, ÇERÇEVELER
+Backend v1.13.0 gerektirir (önce backend).
+- Günlük çark (ana sayfa): günde 1 ücretsiz + 1 reklamla çevirme. Ödülü sunucu seçer; ödül tablosu panelden değişir.
+- E-posta ile hesap koruma ve geri yükleme (Ayarlar > Hesap ve Profil): 6 haneli kod, şifre yok. Yeni telefonda
+  "Hesabımı geri yükle"; eski cihazın oturumu kapanır. Kod gelmezse spam/gereksiz uyarısı gösterilir.
+- Lig çerçeveleri: grup 1.si "Alev" (canlı alevli), 2.si "Elektrik" (canlı), 3.sü "Kor". Haftalık sonuçta kazanılır,
+  çerçevesi yoksa otomatik takılır; lig listesinde ilk üç her zaman sıra çerçevesiyle görünür.
+- Çoğaltıcı: sıradaki atışa %50 fazla top, en az +3, en fazla +20 (uçurumsuz).
+- Mağazada her sekmenin üstünde "Reklam izle, +50 coin kazan" kartı.
+- Yeni metinler 7 dilde.

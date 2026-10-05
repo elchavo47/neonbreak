@@ -1,0 +1,41 @@
+NeonBreak iOS v5.2.0 — PERFORMANS, KÜÇÜK BLOKLAR, ESKİ COİN SİSTEMİ, PUSH
+
+Backend v1.6.0 gerektirir (önce backend yüklenmeli).
+
+PERFORMANS (çok topta kasma)
+- Blok üstündeki sayılar artık SKLabelNode değil, bir kez çizilip saklanan texture. Her vuruşta
+  yazının yeniden çizilmesi en pahalı işti.
+- Bir karedeki bütün vuruşlar tek geçişte işlenir: skor bir kez eklenir, ses/titreşim bir kez
+  tetiklenir, her blok bir kez güncellenir, kare başına en fazla 3 görsel efekt üretilir.
+- Ses çalma ana iş parçacığından alındı (ayrı kuyruk); vuruş sesi saniyede en fazla 20 kez.
+- Skor değişince oyun ekranının tamamı değil yalnızca skor kutusu yeniden çizilir.
+- Top görseli 512 pikselden bir kez küçültülür; top kuyrukları tek çizim çağrısında toplanır.
+- Bu değişiklikler cihazda ölçülmedi (burada Xcode/Instruments yok); kod üzerinden yapıldı.
+
+BLOKLAR
+- Bloklar küçüldü ve aralarındaki boşluk iki katına çıktı; parlama payı azaltıldı. Yan yana duran
+  blokların ışıması artık birbirinin üstüne taşmıyor.
+
+OYUN
+- Coin yine oyun sonunda verilir: taban + seviye + kırılan blok. Sahadaki coin'ler kaldırıldı.
+- Seviye 24'ten sonra biraz kolay: blok canı daha yavaş artar (seviye başına 0,85 yerine 0,65),
+  +1 top %75 yerine %90 ihtimalle gelir. 24 ve öncesi aynı.
+- İlk oyunlarda "sürükle, nişan al, bırak" ipucu.
+
+PROFİL
+- Profil fotoğrafı haftada bir değişir (kullanıcı adı limitinden ayrı). İlk fotoğraf serbest.
+
+BİLDİRİMLER (PUSH)
+- Sıralamada geçilme, haftalık ödül, destek yanıtı ve yönetici ödülü için push bildirimi.
+- Açmak için (Mac/Xcode gerekmez, GitHub Actions ile):
+    1. developer.apple.com > Identifiers > com.aydworks.neonbreak > Push Notifications'ı işaretle, kaydet.
+    2. Profiles > App Store dağıtım profilini düzenle/yeniden oluştur, indir, base64'e çevirip
+       APPLE_PROVISIONING_PROFILE_BASE64 secret'ını güncelle.
+    3. Keys > yeni anahtar > Apple Push Notifications service (APNs) > .p8 dosyasını indir.
+    4. Backend paneli > Oyun ayarları > Push bildirimleri: Key ID, Team ID, .p8 içeriği, kutuyu işaretle.
+  Workflow profile bakar: push yetkisi varsa NeonBreak/NeonBreak.entitlements ile imzalar, yoksa
+  push'suz imzalar; iki durumda da derleme bozulmaz.
+- Push gönderimi gerçek Apple sunucusuyla denenmedi; yalnızca imza üretimi ve hata durumları test edildi.
+- Yerel hatırlatmalar (günlük ödül, yarım kalan oyun, pazar sıralama) aynen duruyor.
+
+NOT: Bu paket Xcode ile derlenerek doğrulanmadı; yalnızca sözdizimi denetiminden geçti.

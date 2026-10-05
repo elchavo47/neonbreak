@@ -1,0 +1,13 @@
+NeonBreak iOS v4.3.0
+- Avatar selection now uses a real editable crop screen.
+- Avatar URL fallback/display fixed.
+- Username changes limited to once every 7 days by backend.
+- Server status/manual sync UI removed; sync runs automatically.
+- Haptic intensity now uses Core Haptics dynamic intensity control.
+- Block rows are denser (3/4/5) while HP grows slower (level/6).
+- Expired +1/special pickups are removed below danger line.
+- Bomb pickup uses a bomb icon.
+- In-game inventory power tray: speed, shield, coin boost.
+- Shield state visible in HUD.
+- Live support/tickets in profile.
+- Weekly previous champion/reward display.

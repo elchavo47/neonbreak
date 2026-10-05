@@ -1,0 +1,11 @@
+NEON BREAK iOS v4.5.0
+
+- Bildirim merkezi eklendi.
+- Ana ekranda okunmamış sayılı zil rozeti.
+- Admin ödülü, haftalık ödül, duyuru ve destek yanıtları tek merkezde.
+- Bildirimleri tek tek veya topluca okundu işaretleme.
+- Destek bildirimi dokununca Yardım Merkezi'ne gider.
+- FPS ayarı: 45 / 60 / 90 / 120.
+- FPS seçimi doğrudan SKView.preferredFramesPerSecond değerine uygulanır.
+- ProMotion için CADisableMinimumFrameDurationOnPhone aktif.
+- 90/120 seçimi yalnızca cihaz ekranı desteklediği kadar fiziksel olarak görüntülenebilir.

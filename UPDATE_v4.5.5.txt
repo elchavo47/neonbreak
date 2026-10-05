@@ -1,0 +1,10 @@
+NeonBreak iOS v4.5.5 — Avatar Crop Reliability Fix
+
+- Crop source is normalized/downsampled once before editing (max 2048px).
+- Drag/zoom no longer re-renders the original huge camera photo on every gesture frame.
+- Added native pinch zoom + slider zoom + reset.
+- KULLAN renders the exact current pan/zoom crop to 512x512.
+- Avatar is saved locally immediately before any network request.
+- Pending avatar upload retries automatically when connection returns.
+- Cached avatar is used on Profile and Home screens, so avatar does not depend on internet.
+- Source marker updated to 4.5.5.

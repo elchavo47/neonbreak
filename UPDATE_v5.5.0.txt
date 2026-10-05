@@ -1,0 +1,25 @@
+NeonBreak iOS v5.5.0 — LİG, KARİYER HEDEFLERİ, ÇERÇEVE/UNVAN, İZİN HATIRLATMASI
+
+Backend v1.9.0 gerektirir (önce backend yüklenmeli).
+
+- Bildirim izni artık uygulama ilk açıldığında, açılış ekranından hemen sonra sorulur. İzin verilmemişse ana
+  ekranda hatırlatma kartı çıkar: hiç sorulmadıysa sistem penceresini açar, reddedildiyse Ayarlar'a götürür.
+  Kart kapatılırsa 7 gün sonra tekrar çıkar, en fazla 3 kez.
+- Lig sistemi: sıralama ekranında "Ligim" kartı (grup listesi, yükselme/düşme hattı, ödüller).
+- Kariyer hedefleri: ana ekranda ödülü alınabilecek ve en yakın 3 hedef.
+- Çerçeve ve unvan: sıralama ekranındaki "Çerçeve" düğmesinden seçilir; lig listesinde avatarın çevresinde görünür.
+- Oyun içinde rekora 10 seviyeden az kaldığında seviye kutusu "REKORA N" gösterir.
+- Oyun sonu ekranında skor paylaşma düğmesi.
+- Rekor kırıldığında (seviye 12+) Apple'ın puanlama penceresi istenir; en fazla 45 günde bir. Pencerenin
+  gerçekten çıkıp çıkmayacağına iOS karar verir. Puan karşılığında ödül verilmez (Apple kuralı).
+- Güncellemeden sonraki ilk açılışta "Yenilikler" sayfası.
+- Geri dönüş hediyesi sunucudan ödül penceresi olarak gelir.
+
+Bilinen eksikler: çerçeve genel sıralama satırlarında ve profil ekranında çizilmiyor (yalnızca lig listesinde);
+skor paylaşımı düz metin, görsel kart değil; paylaşım için coin ödülü yok.
+
+NOT: Bu paket Xcode ile derlenerek doğrulanmadı; yalnızca sözdizimi denetiminden geçti.
+
+v5.5.1
+- Ana ekranda Mağaza, Sıralama, Profil ve Destek kartları oyna butonunun hemen altına taşındı; renkli,
+  daha büyük ve bilgi gösteriyor (coin bakiyesi, lig ve sıra, oyuncu adı, okunmamış destek yanıtı).

@@ -1,0 +1,16 @@
+NeonBreak iOS v5.13.0 (Backend v1.15.0 gerektirir)
+
+- Oyuncu kartı: genel sıralamada ya da lig grubunda bir oyuncuya dokununca açılır. Çerçeve, unvan, lig, haftalık sıra,
+  rekorlar, seri, çerçeve sayısı ve taktığı top. Eski backend'de kart "bilgi alınamadı" gösterir.
+- Canlı çerçeveler: Şampiyon (altın ışık süpürmesi, parıltılar, taç taşı), Efsane (dönen gökkuşağı, yörüngede
+  ışıklar), Elmas Lig (dönen kristal taşlar, parıltılar), sezon çerçeveleri (dönen ay renkleri, köşe taşları).
+- Çerçeve kutlaması: yeni çerçeve kazanınca tam ekran kutlama (ışık huzmeleri, konfeti, çerçeve dönerek gelir),
+  "HEMEN TAK" düğmesi. Güncellemeden önce kazanılmış çerçeveler için kutlama çıkmaz.
+- Sezonluk çerçeve: her ayın kendi renkleri. "Çerçeve ve unvan" sayfasında en üstte, ilerlemesiyle görünür.
+  Kazanılmış eski sezon çerçeveleri listede kalır.
+
+Derlenerek denenmedi (bu ortamda Xcode yok).
+
+v5.13.1 (Backend v1.15.1 gerektirir)
+- E-posta değiştirme iki adımlı: önce hesaba bağlı mevcut adrese kod gider, doğrulanınca yeni adres sorulur ve
+  ona da kod gider. İlk kez bağlama ve geri yükleme değişmedi.

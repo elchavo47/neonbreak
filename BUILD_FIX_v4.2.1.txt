@@ -1,0 +1,7 @@
+NeonBreak v4.2.1 BUILD FIX
+
+Fixed Xcode 26.6 compile errors from v4.2.0:
+1) BlockNode.normalTexture renamed to baseTexture because SKSpriteNode now exposes normalTexture, causing stored-property override/ambiguity errors.
+2) ErrorBody moved out of generic send<T>() into StoreManager type scope because Swift rejects nested types in generic functions.
+
+No gameplay/balance logic changed in this build-fix package.

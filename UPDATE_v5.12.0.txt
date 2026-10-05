@@ -1,0 +1,28 @@
+NeonBreak iOS v5.12.0
+
+Backend v1.14.0 ile birlikte çıkar. Önce backend'i güncelleyin; eski backend'de uygulama çalışır ama yeni
+özellikler (büyük ödül, davet basamakları, e-posta teklifi) görünmez.
+
+- API adresi: neonbreak.aydworks.com.tr.
+- Seviye 41+: satırların yaklaşık %30'unda bir bloğun içine satır silici, dağıtıcı ya da bomba gömülür (köşesinde
+  rozet). Blok atış sırasında kırılınca güç tetiklenir. Tahta üreteci 5; blok sayısı ve canlar üreteç 4 ile aynı.
+  Yarıda kalmış eski oyunlar kendi üreteçleriyle (gömülü güç olmadan) devam eder.
+- Günlük çark: altın çerçeve, yanıp sönen ışıklar, renk geçişli dilimler, altın "büyük ödül" dilimi.
+  Çarkın durduğu yer rastgeledir; büyük ödülün yanında durması için hiçbir ayar yoktur.
+- Davet sayfası: Elçi çerçevesi ve Halo topu basamakları, ilerleme çubuğuyla. Halo mağazada satılmaz.
+- E-posta teklifi: eşik seviye (varsayılan 10) geçilince ana ekranda bir kez çıkar; ilk bağlamada coin verilir.
+- Haftalık lig sonucu mesajı 7 dilde gösterilir (eski mesajlar dahil).
+- Yenilikler ekranı güncellendi.
+
+NOT: v5.11.1 paketinde sürüm dosyası 5.11.1 yapılmış ama derleme iş akışındaki sürüm denetimi 5.11.0'da
+kalmıştı; o paket GitHub'da "Kaynak kontrol" adımında hata verir. Bu pakette ikisi de 5.12.0.
+
+Bu paket derlenerek denenmedi (bu ortamda Xcode yok).
+
+v5.12.1
+- Alev çerçevesi yeniden çizildi: alev dilleri yukarı doğru yalar, üstte uzun altta kısa, kıvılcımlı (eskisi güneşe benziyordu).
+- Çerçeveler artık her yerde: genel sıralama satırları, lig grubu (profil fotoğrafıyla), profil sayfası.
+- Sıralama ekranı: geçen haftanın şampiyonu sayacın altında; lig kartı tek satır (dokununca açılır);
+  "Bu haftaki sıran" kartı kaldırıldı, haftalık ödüller başlık satırına taşındı.
+- E-posta doğrulama ekranı: adım göstergesi, altı kutulu kod girişi, 6. rakamda otomatik doğrulama.
+- Backend v1.14.1 önerilir (ana ekrandan gelen ilk 10 listesinde çerçeveler için).

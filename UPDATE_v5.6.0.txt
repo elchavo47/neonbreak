@@ -1,0 +1,30 @@
+NeonBreak iOS v5.6.0 — ANA EKRAN YENİLENDİ, ALT MENÜ, CANLI SIRALAMA
+
+Backend v1.10.0 gerektirir (önce backend yüklenmeli).
+
+ANA EKRAN
+- Üst çubuk: solda avatar (kazanılan çerçeveyle) ve isim (unvan ya da lig), sağda coin bakiyesi (dokununca
+  mağaza; yanındaki + coin satın alma), bildirim zili, ayarlar çarkı.
+- Ortada büyük top: sağa/sola kaydırarak ya da oklarla sahip olunan toplar arasında geçiş.
+- Oyna / Devam et, altında lig şeridi (lig, sıra, haftanın bitimine kalan süre).
+- Günlük görevler ve kariyer hedefleri kapalı gelir; dokununca açılır. Alınabilecek ödül varsa "Ödül hazır" işareti.
+- Dörtlü kart ızgarası ve rekor kutuları kaldırıldı (profilde duruyor). Yazılar inceltildi.
+
+ALT MENÜ
+- Ana sayfa, Mağaza, Sıralama, Profil. Oyun, destek, bildirim ve coin ekranlarında görünmez.
+- Mağaza sekmesinde, bakiyenin yettiği yeni bir top/dünya varsa sarı nokta; Profil'de okunmamış destek yanıtı varsa nokta.
+- Destek: Profil ekranından açılır.
+
+MAĞAZA
+- Her sekmede ucuzdan pahalıya; sahip olunanlar en altta ayrı başlıkla.
+- Bakiye yetmeyen üründe "şu kadar coin kaldı" çubuğu.
+
+SIRALAMA
+- Oyun sürerken skor her 5 seviyede, "kaydet ve çık"ta ve uygulama arka plana geçince sunucuya bildirilir;
+  oyuncu oyun bitmeden sıralamada ve lig grubunda görünür. Coin yine oyun bitince verilir.
+
+NOT: Bu paket Xcode ile derlenerek doğrulanmadı; yalnızca sözdizimi denetiminden geçti.
+
+v5.6.1
+- Top görsellerinde ışıma resmin kenarında birden kesiliyor ve çevresinde kare bir iz bırakıyordu
+  (12 topta). Işıma artık kenara varmadan yumuşakça sönüyor. Yalnızca görsel dosyaları değişti.

@@ -1,0 +1,34 @@
+name: iOS Build Check
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'NeonBreak/**'
+      - 'NeonBreak.xcodeproj/**'
+      - '.github/workflows/ios-build.yml'
+  pull_request:
+    paths:
+      - 'NeonBreak/**'
+      - 'NeonBreak.xcodeproj/**'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build for iOS Simulator
+        run: |
+          xcodebuild \
+            -project NeonBreak.xcodeproj \
+            -scheme NeonBreak \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build

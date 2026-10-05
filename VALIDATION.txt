@@ -1,0 +1,3 @@
+NeonBreak v3.2.0 PREMIUM FIX
+Swift sources parsed with Swift 6.2.1 on Linux. Xcode-only typecheck/build must run in GitHub Actions macOS runner.
+Fixed all enum switch exhaustiveness for BallEffectStyle and BackgroundStyle.

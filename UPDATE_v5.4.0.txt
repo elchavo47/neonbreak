@@ -1,0 +1,19 @@
+NeonBreak iOS v5.4.0 — İTİRAZ, TRAFİK İZLEME KORUMASI
+
+Backend v1.8.0 gerektirir (önce backend yüklenmeli).
+
+ENGELLİ HESAP
+- Askıya alma / yasak ekranında "DESTEKLE İLETİŞİME GEÇ" butonu.
+- Engelli oyuncu tek bir itiraz talebi açabilir; talep sohbet olarak sürer, yanıtlar 20 saniyede bir yenilenir.
+
+TRAFİK İZLEME KORUMASI (HTTP Catcher, Charles, Proxyman vb.)
+- Uygulama yalnızca herkese açık, tanınmış bir kök sertifikaya zincirlenen sunucu sertifikasını kabul eder
+  (150 kök parmak izi, StoreManager.swift > TrustAnchors). Cihaza elle yüklenen kökle araya giren araçlar reddedilir.
+- Cihazda HTTP/HTTPS proxy açıksa bağlanmaz; ayrıca uygulamanın ağ oturumu sistem proxy'sini kullanmaz.
+- Algılanırsa "Güvenli bağlantı kurulamadı" ekranı çıkar ve giriş yapılamaz.
+- ÖNEMLİ: İlk TestFlight derlemesinde uygulamanın normal bağlandığını mutlaka kontrol edin. Sunucu sertifikası
+  listede olmayan bir köke çıkıyorsa herkes bu ekranı görür. Öyle olursa StoreManager.swift içinde
+  NetworkGuard.pinningEnabled = false yapıp yeniden derleyin ve haber verin.
+- Sınır: jailbreak'li cihazda bu denetimler aşılabilir. VPN engeli bu sürümde yok (istenmedi).
+
+NOT: Bu paket Xcode ile derlenerek doğrulanmadı; yalnızca sözdizimi denetiminden geçti.

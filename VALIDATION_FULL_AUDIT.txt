@@ -1,0 +1,22 @@
+NeonBreak v3.2.2 FULL AUDIT FIX
+
+Fixes applied:
+- GameScene.swift BackgroundStyle switch now handles all 6 cases:
+  midnight, cyberGrid, sunsetDrive, emeraldStorm, magmaTemple, voidRift.
+- magmaTemple and voidRift have dedicated SpriteKit background decoration effects.
+- SoundManager uses direct BallEffectStyle -> sound asset mapping; no SoundKind/isBreakLike private-extension issue.
+
+Static audit performed:
+- All 15 Swift source files parsed with Swift 6.2.1 frontend: PASS
+- All BackgroundStyle switches checked against enum cases: PASS
+- All BallEffectStyle switches checked against enum cases: PASS
+- All WorkshopUpgrade switches checked against enum cases: PASS
+- CareerMilestone.Kind switch checked against enum cases: PASS
+- Info.plist lint: PASS
+- PrivacyInfo.xcprivacy lint: PASS
+- 33 JSON/StoreKit/asset-catalog metadata files parsed: PASS
+- Duplicate SKColor/UIColor hex initializer conflict search: no duplicate conflicting declaration found
+- Legacy SoundKind/isBreakLike references: none
+
+Note:
+This environment does not include Apple's iOS SDK/Xcode, so a full xcodebuild archive cannot be executed locally here. GitHub Actions/Xcode remains the final compiler validation.

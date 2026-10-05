@@ -1,0 +1,8 @@
+NeonBreak iOS v5.14.0 (Backend v1.15.2 ile)
+
+- Zorunlu güncelleme ekranı: paneldeki "Minimum uygulama sürümü", uygulamanın App Store sürüm numarasından
+  (CFBundleShortVersionString) büyükse oyun kilitlenir ve "Güncelleme gerekli" ekranı çıkar. "GÜNCELLE" düğmesi
+  paneldeki App Store bağlantısını açar (boşsa App Store uygulamasını). Son bilinen değer cihazda saklanır.
+- Karşılaştırılan numara kaynak sürümü (5.14.0) DEĞİL, App Store sürüm numarasıdır (şu an projede 1.0.0).
+
+Derlenerek denenmedi.

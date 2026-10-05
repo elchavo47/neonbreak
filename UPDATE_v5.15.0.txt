@@ -1,0 +1,8 @@
+NeonBreak iOS v5.15.0 (Backend v1.16.0 ile)
+
+- Her istekte cihaz modeli, iOS sürümü ve uygulama sürümü başlık olarak gönderilir (X-NB-Device, X-NB-OS, X-NB-App).
+  Paneldeki oyuncu dosyasında "hangi cihazdan girildi" bilgisi bundan gelir. Görünen bir değişiklik yok.
+- GİZLİLİK: App Store Connect > Uygulama Gizliliği bölümünde "Cihaz Kimliği" gerekmez (model adı kimlik değildir),
+  ancak "Tanılama / Diğer veriler" altında cihaz modeli ve IP'nin güvenlik amacıyla toplandığını beyan edin.
+
+Derlenerek denenmedi.

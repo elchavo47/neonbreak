@@ -1,0 +1,202 @@
+name: NeonBreak - TestFlight
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: neonbreak-testflight
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  PROJECT_PATH: NeonBreak.xcodeproj
+  SCHEME: NeonBreak
+  CONFIGURATION: Release
+  BUNDLE_ID: com.aydworks.neonbreak
+
+jobs:
+  build-testflight:
+    name: Build & Upload TestFlight
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show Xcode information
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          test -d "$PROJECT_PATH"
+          xcodebuild -project "$PROJECT_PATH" -list
+
+      - name: Verify checked out source
+        run: |
+          set -euo pipefail
+          echo "===== SOURCE MARKER ====="
+          if [ ! -f BUILD_SOURCE_VERSION.txt ]; then
+            echo "HATA: BUILD_SOURCE_VERSION.txt depo kokunde yok. Kokte bulunanlar:"
+            ls -la
+            exit 1
+          fi
+          cat BUILD_SOURCE_VERSION.txt
+          grep -q "NEONBREAK SOURCE VERSION: 5.16.3" BUILD_SOURCE_VERSION.txt
+          grep -q "struct NotificationItem" NeonBreak/Services/StoreManager.swift
+          grep -q "static let columns = 7" NeonBreak/Game/GameScene.swift
+          grep -q "signedTransaction" NeonBreak/Services/StoreManager.swift
+          grep -q "enum BoardGenerator" NeonBreak/Game/GameSession.swift
+          test -f NeonBreak/en.lproj/Localizable.strings
+          for l in de es fr pt-BR ru; do test -f NeonBreak/$l.lproj/Localizable.strings; done
+          grep -q "var unreadNotificationCount" NeonBreak/Services/StoreManager.swift
+          grep -q "func loadNotifications" NeonBreak/Services/StoreManager.swift
+          FPS_COUNT=$(grep -c "private struct FPSCard" NeonBreak/Views/SettingsView.swift || true)
+          echo "FPSCard count: $FPS_COUNT"
+          test "$FPS_COUNT" -eq 1
+          echo "Git commit: $(git rev-parse HEAD)"
+          echo "Source verification OK"
+
+
+      - name: Install Apple Distribution certificate
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          CERTIFICATE_PATH="$RUNNER_TEMP/distribution.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/neonbreak.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -hex 24)"
+          echo "$CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" -k "$KEYCHAIN_PATH" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH" "$HOME/Library/Keychains/login.keychain-db"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
+          echo "KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> "$GITHUB_ENV"
+
+      - name: Install provisioning profile
+        env:
+          PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          RAW_PROFILE="$RUNNER_TEMP/NeonBreak.mobileprovision"
+          PROFILE_PLIST="$RUNNER_TEMP/profile.plist"
+          echo "$PROFILE_BASE64" | base64 --decode > "$RAW_PROFILE"
+          security cms -D -i "$RAW_PROFILE" > "$PROFILE_PLIST"
+          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" "$PROFILE_PLIST")
+          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" "$PROFILE_PLIST")
+          PROFILE_TEAM=$(/usr/libexec/PlistBuddy -c "Print :TeamIdentifier:0" "$PROFILE_PLIST")
+          PROFILE_APP_ID=$(/usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" "$PROFILE_PLIST")
+          test "$PROFILE_TEAM" = "$APPLE_TEAM_ID"
+          test "$PROFILE_APP_ID" = "${APPLE_TEAM_ID}.${BUNDLE_ID}"
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$RAW_PROFILE" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+          echo "PROFILE_UUID=$PROFILE_UUID" >> "$GITHUB_ENV"
+          echo "PROFILE_NAME=$PROFILE_NAME" >> "$GITHUB_ENV"
+          # Push: profil Push Notifications yetkisini iceriyorsa uygulama push yetkisiyle imzalanir.
+          # Icermiyorsa derleme bozulmaz; uygulama push'suz imzalanir (yerel bildirimler calisir).
+          if /usr/libexec/PlistBuddy -c "Print :Entitlements:aps-environment" "$PROFILE_PLIST" >/dev/null 2>&1; then
+            echo "PUSH_ENTITLEMENTS=NeonBreak/NeonBreak.entitlements" >> "$GITHUB_ENV"
+            echo "Push Notifications: ACIK (profil push yetkisi iceriyor)"
+          else
+            echo "PUSH_ENTITLEMENTS=" >> "$GITHUB_ENV"
+            echo "Push Notifications: KAPALI (profilde aps-environment yok)"
+          fi
+
+      - name: Install App Store Connect API key
+        env:
+          PRIVATE_KEY_BASE64: ${{ secrets.APPSTORE_PRIVATE_KEY_BASE64 }}
+          KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          echo "$PRIVATE_KEY_BASE64" | base64 --decode > "$HOME/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8"
+          chmod 600 "$HOME/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8"
+
+      - name: Archive NeonBreak
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/build"
+          xcodebuild \
+            -project "$PROJECT_PATH" \
+            -scheme "$SCHEME" \
+            -configuration "$CONFIGURATION" \
+            -destination "generic/platform=iOS" \
+            -archivePath "$GITHUB_WORKSPACE/build/NeonBreak.xcarchive" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            PRODUCT_BUNDLE_IDENTIFIER="$BUNDLE_ID" \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+            CODE_SIGN_ENTITLEMENTS="$PUSH_ENTITLEMENTS" \
+            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH" \
+            clean archive
+
+      - name: Create ExportOptions.plist
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>export</string>
+            <key>teamID</key><string>${APPLE_TEAM_ID}</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict><key>${BUNDLE_ID}</key><string>${PROFILE_NAME}</string></dict>
+            <key>stripSwiftSymbols</key><true/>
+            <key>uploadSymbols</key><true/>
+          </dict>
+          </plist>
+          PLIST
+
+      - name: Export IPA
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/build/export"
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$GITHUB_WORKSPACE/build/NeonBreak.xcarchive" \
+            -exportPath "$GITHUB_WORKSPACE/build/export" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
+          IPA_PATH=$(find "$GITHUB_WORKSPACE/build/export" -maxdepth 1 -name "*.ipa" | head -1)
+          test -n "$IPA_PATH"
+          echo "IPA_PATH=$IPA_PATH" >> "$GITHUB_ENV"
+          ls -lh "$IPA_PATH"
+
+      - name: Validate IPA with Apple
+        run: |
+          xcrun altool --validate-app --type ios --file "$IPA_PATH" --apiKey "${{ secrets.APPSTORE_KEY_ID }}" --apiIssuer "${{ secrets.APPSTORE_ISSUER_ID }}"
+
+      - name: Upload to TestFlight
+        run: |
+          xcrun altool --upload-app --type ios --file "$IPA_PATH" --apiKey "${{ secrets.APPSTORE_KEY_ID }}" --apiIssuer "${{ secrets.APPSTORE_ISSUER_ID }}"
+
+      - name: Upload IPA artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NeonBreak-build-${{ github.run_number }}
+          path: ${{ env.IPA_PATH }}
+          retention-days: 14
+
+      - name: Cleanup sensitive files
+        if: always()
+        run: |
+          security delete-keychain "$KEYCHAIN_PATH" 2>/dev/null || true
+          rm -rf "$HOME/.appstoreconnect/private_keys"
+          if [ -n "${PROFILE_UUID:-}" ]; then rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"; fi

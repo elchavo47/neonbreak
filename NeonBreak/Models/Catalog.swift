@@ -40,7 +40,7 @@ struct BallSkin: Identifiable, Hashable {
 
     var isFree: Bool { productID == nil }
 
-    static let all: [BallSkin] = [
+    static var all: [BallSkin] { LocalizedCatalog.cached("balls") { [
         .init(
             id: "classic",
             name: "Pulse",
@@ -357,7 +357,7 @@ struct BallSkin: Identifiable, Hashable {
             speedMultiplier: 1.15,
             rewardOnly: true
         )
-    ]
+    ] as [BallSkin] } }
 }
 
 struct BackgroundTheme: Identifiable, Hashable {
@@ -374,7 +374,7 @@ struct BackgroundTheme: Identifiable, Hashable {
 
     var isFree: Bool { productID == nil }
 
-    static let all: [BackgroundTheme] = [
+    static var all: [BackgroundTheme] { LocalizedCatalog.cached("backgrounds") { [
         .init(
             id: "midnight",
             name: "Midnight Nebula",
@@ -519,12 +519,32 @@ struct BackgroundTheme: Identifiable, Hashable {
             style: .cyberGrid,
             textureName: "WorldMatrix"
         )
-    ]
+    ] as [BackgroundTheme] } }
 }
 
 /// Kod içindeki Türkçe metni uygulama diline çevirir (en.lproj/Localizable.strings).
 func L(_ key: String) -> String {
     NSLocalizedString(key, comment: "")
+}
+
+/// Çevrilmiş metin içeren sabit listeler (toplar, dünyalar, güçler...) dil başına bir kez kurulur.
+/// Eskiden `static let` idi ve uygulama ilk açıldığındaki dilde donup kalıyordu: oyun içinden dil
+/// değiştirilince bu metinler Türkçe kalıyordu. Dil değişince önbellek kendiliğinden yenilenir.
+enum LocalizedCatalog {
+    private static let lock = NSLock()
+    private static var language = ""
+    private static var storage: [String: Any] = [:]
+
+    static func cached<T>(_ id: String, _ build: () -> T) -> T {
+        let code = AppLanguage.effectiveCode
+        lock.lock()
+        if code != language { storage = [:]; language = code }
+        if let value = storage[id] as? T { lock.unlock(); return value }
+        lock.unlock()
+        let value = build()
+        lock.lock(); storage[id] = value; lock.unlock()
+        return value
+    }
 }
 
 /// Sunucudan gelen ödül / bildirim mesajını uygulama diline çevirir. Sabit mesajlar doğrudan anahtar olarak
@@ -906,14 +926,14 @@ struct PowerUpKind: Identifiable, Hashable {
     var localizedTitle: String { NSLocalizedString(title, comment: "") }
     var localizedDetail: String { NSLocalizedString(detail, comment: "") }
 
-    static let all: [PowerUpKind] = [
+    static var all: [PowerUpKind] { LocalizedCatalog.cached("powerups") { [
         .init(key: "powerup.speed", title: L("Hız Çekirdeği"), shortTitle: L("HIZ"), detail: L("Sıradaki atışta toplar %30 hızlı"), icon: "hare.fill", colorHex: 0xFB923C, appliesToNextVolley: true),
         .init(key: "powerup.damage", title: L("Güç Çekirdeği"), shortTitle: L("GÜÇ"), detail: L("Sıradaki atışta 2 kat hasar"), icon: "flame.fill", colorHex: 0xFB4D6D, appliesToNextVolley: true),
         .init(key: "powerup.multiball", title: L("Çoğaltıcı"), shortTitle: L("ÇOĞALT"), detail: L("Sıradaki atışa %50 fazla top (en fazla +20)"), icon: "circle.grid.cross.fill", colorHex: 0xC65BFF, appliesToNextVolley: true),
         .init(key: "powerup.laser", title: L("Lazer Süpürgesi"), shortTitle: L("LAZER"), detail: L("En alttaki sırayı yok eder"), icon: "bolt.horizontal.fill", colorHex: 0x22E6FF, appliesToNextVolley: false),
         .init(key: "powerup.shield", title: L("Son Şans Kalkanı"), shortTitle: L("KALKAN"), detail: L("Oyunu bir kez kurtarır"), icon: "shield.fill", colorHex: 0x38F2C2, appliesToNextVolley: false),
         .init(key: "powerup.coinboost", title: L("Kredi Takviyesi"), shortTitle: L("KREDİ"), detail: L("Oyun sonu coin ödülü +%25"), icon: "hexagon.fill", colorHex: 0xFACC15, appliesToNextVolley: false)
-    ]
+    ] as [PowerUpKind] } }
 
     static func find(_ key: String) -> PowerUpKind? {
         all.first(where: { $0.key == key })

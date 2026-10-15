@@ -726,3 +726,17 @@
 "COIN AL" = "ACHETER";
 "Coin satın al" = "Acheter des pièces";
 "Coin paketleri şu an yüklenemedi. İnternet bağlantını kontrol edip tekrar dene." = "Impossible de charger les packs de pièces pour le moment. Vérifie ta connexion Internet et réessaie.";
+
+/* v5.17.0 profil ve dil düzeltmeleri */
+"Rütbe %lld" = "Rang %lld";
+"HESAP" = "COMPTE";
+"Kaydet" = "Enregistrer";
+"Bağla" = "Lier";
+"Değiştir" = "Modifier";
+"Profil fotoğrafını değiştir" = "Changer la photo de profil";
+"Geri" = "Retour";
+"COIN" = "PIÈCES";
+"HAFTALIK ÖDÜL" = "RÉCOMPENSE HEBDO";
+"Oturum bulunamadı." = "Session introuvable.";
+"Bağlı değil • hesabın korunmuyor" = "Non lié • ton compte n'est pas protégé";
+"Başka cihazdaki hesabını e-postanla buraya taşı" = "Transfère ton compte depuis un autre appareil avec ton e-mail";

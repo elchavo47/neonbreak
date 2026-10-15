@@ -9,3 +9,17 @@
 "COIN AL" = "COIN AL";
 "Coin satın al" = "Coin satın al";
 "Coin paketleri şu an yüklenemedi. İnternet bağlantını kontrol edip tekrar dene." = "Coin paketleri şu an yüklenemedi. İnternet bağlantını kontrol edip tekrar dene.";
+
+/* v5.17.0 profil ve dil düzeltmeleri */
+"Rütbe %lld" = "Rütbe %lld";
+"HESAP" = "HESAP";
+"Kaydet" = "Kaydet";
+"Bağla" = "Bağla";
+"Değiştir" = "Değiştir";
+"Profil fotoğrafını değiştir" = "Profil fotoğrafını değiştir";
+"Geri" = "Geri";
+"COIN" = "COIN";
+"HAFTALIK ÖDÜL" = "HAFTALIK ÖDÜL";
+"Oturum bulunamadı." = "Oturum bulunamadı.";
+"Bağlı değil • hesabın korunmuyor" = "Bağlı değil • hesabın korunmuyor";
+"Başka cihazdaki hesabını e-postanla buraya taşı" = "Başka cihazdaki hesabını e-postanla buraya taşı";

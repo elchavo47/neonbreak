@@ -726,3 +726,17 @@
 "COIN AL" = "BUY COINS";
 "Coin satın al" = "Buy coins";
 "Coin paketleri şu an yüklenemedi. İnternet bağlantını kontrol edip tekrar dene." = "Coin packs couldn't be loaded right now. Check your internet connection and try again.";
+
+/* v5.17.0 profil ve dil düzeltmeleri */
+"Rütbe %lld" = "Rank %lld";
+"HESAP" = "ACCOUNT";
+"Kaydet" = "Save";
+"Bağla" = "Link";
+"Değiştir" = "Change";
+"Profil fotoğrafını değiştir" = "Change profile photo";
+"Geri" = "Back";
+"COIN" = "COINS";
+"HAFTALIK ÖDÜL" = "WEEKLY REWARD";
+"Oturum bulunamadı." = "Session not found.";
+"Bağlı değil • hesabın korunmuyor" = "Not linked • your account isn't protected";
+"Başka cihazdaki hesabını e-postanla buraya taşı" = "Move your account from another device using your email";

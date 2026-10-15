@@ -726,3 +726,17 @@
 "COIN AL" = "COINS KAUFEN";
 "Coin satın al" = "Coins kaufen";
 "Coin paketleri şu an yüklenemedi. İnternet bağlantını kontrol edip tekrar dene." = "Die Coin-Pakete konnten gerade nicht geladen werden. Prüfe deine Internetverbindung und versuche es erneut.";
+
+/* v5.17.0 profil ve dil düzeltmeleri */
+"Rütbe %lld" = "Rang %lld";
+"HESAP" = "KONTO";
+"Kaydet" = "Speichern";
+"Bağla" = "Verknüpfen";
+"Değiştir" = "Ändern";
+"Profil fotoğrafını değiştir" = "Profilbild ändern";
+"Geri" = "Zurück";
+"COIN" = "COINS";
+"HAFTALIK ÖDÜL" = "WOCHENBELOHNUNG";
+"Oturum bulunamadı." = "Sitzung nicht gefunden.";
+"Bağlı değil • hesabın korunmuyor" = "Nicht verknüpft • dein Konto ist nicht geschützt";
+"Başka cihazdaki hesabını e-postanla buraya taşı" = "Übertrage dein Konto per E-Mail von einem anderen Gerät";

@@ -726,3 +726,17 @@
 "COIN AL" = "КУПИТЬ";
 "Coin satın al" = "Купить монеты";
 "Coin paketleri şu an yüklenemedi. İnternet bağlantını kontrol edip tekrar dene." = "Не удалось загрузить наборы монет. Проверь подключение к интернету и попробуй снова.";
+
+/* v5.17.0 profil ve dil düzeltmeleri */
+"Rütbe %lld" = "Ранг %lld";
+"HESAP" = "АККАУНТ";
+"Kaydet" = "Сохранить";
+"Bağla" = "Привязать";
+"Değiştir" = "Изменить";
+"Profil fotoğrafını değiştir" = "Изменить фото профиля";
+"Geri" = "Назад";
+"COIN" = "МОНЕТЫ";
+"HAFTALIK ÖDÜL" = "НЕДЕЛЬНАЯ НАГРАДА";
+"Oturum bulunamadı." = "Сессия не найдена.";
+"Bağlı değil • hesabın korunmuyor" = "Не привязан • аккаунт не защищён";
+"Başka cihazdaki hesabını e-postanla buraya taşı" = "Перенеси аккаунт с другого устройства по эл. почте";

@@ -1,0 +1,24 @@
+NeonBreak iOS v5.17.0 (Backend değişmedi: v1.17.0)
+
+Profil sayfası yeniden tasarlandı (premium / kurumsal görünüm):
+- Kimlik kartı: ortada avatar + çerçeve, isim, rütbe rozeti, katılım tarihi, rütbe ilerleme çubuğu (XP),
+  altta tek parça COIN / REKOR / SEVİYE şeridi (ayrı kutular yerine ince ayraçlar).
+- NEON ID sağ üstte küçük etiket.
+- Kariyer kartı: Oyun / Kırılan blok / XP + "Bu hafta #N" rozeti.
+- Oyuncu adı ve e-posta kartları TEK "Hesap" kartında birleşti: ad alanı satır içi, değişince "Kaydet"
+  butonu çıkar (klavyeden "Bitti" de kaydeder); altında E-posta (Bağla/Değiştir) ve Hesabımı geri yükle satırları.
+- Canlı destek tek satır. Yazı ağırlıkları hafifletildi, tek vurgu rengi.
+
+Dil (seçilen dil yerine Türkçe çıkan yerler):
+- Toplar, dünyalar, güçler, coin paketleri ve destek konuları uygulama açılışındaki dilde donup kalıyordu
+  (static let). Artık dil değişince yeniden çevriliyor (LocalizedCatalog önbelleği).
+- Text/Label içindeki "koşul ? \"a\" : \"b\"" kalıpları çevrilmiyordu (Bağlı/Çevrimdışı, Kopyala, E-posta
+  ekranı metinleri, çark durumu, çerçeve kutlama butonları vb.) -> düzeltildi.
+- Bildirim etiketleri (DESTEK / DUYURU / HAFTALIK ÖDÜL) çevrilmiyordu -> düzeltildi.
+- Tarihler her dilde Türkçe ay adıyla çıkıyordu (tr_TR sabitti) -> seçili dile göre.
+- Sunucudan gelen hata mesajları, çevirisi varsa uygulama dilinde gösteriliyor.
+
+Diğer:
+- Info.plist: ITSAppUsesNonExemptEncryption = false (TestFlight'ta her build'de şifreleme sorusu çıkmaz).
+
+Derlenerek denenmedi (GitHub Actions'ta derlenecek).

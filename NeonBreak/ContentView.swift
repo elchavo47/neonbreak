@@ -491,7 +491,7 @@ private struct FrameUnlockView: View {
                         HStack(spacing: 8) {
                             if equipping { ProgressView().tint(.black) }
                             else { Image(systemName: equipped ? "checkmark" : "sparkles") }
-                            Text(equipped ? "TAKILDI" : "HEMEN TAK")
+                            Text(equipped ? L("TAKILDI") : L("HEMEN TAK"))
                         }
                         .font(.system(size: 17, weight: .black, design: .rounded)).tracking(1)
                         .foregroundStyle(.black)
@@ -501,7 +501,7 @@ private struct FrameUnlockView: View {
                     }
                     .buttonStyle(.plain).disabled(equipping || equipped)
                     Button { onClose() } label: {
-                        Text(equipped ? "Kapat" : "Sonra")
+                        Text(equipped ? L("Kapat") : L("Sonra"))
                             .font(.system(size: 15, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.6))
                             .frame(maxWidth: .infinity).frame(height: 44)
                     }
@@ -712,7 +712,7 @@ private struct PlayerCardSheet: View {
                             }
                             .buttonStyle(.plain)
                             Button { if isBlocked { toggleBlock(false) } else { confirmBlock = true } } label: {
-                                Label(isBlocked ? "Engeli kaldır" : "Engelle", systemImage: isBlocked ? "person.crop.circle.badge.checkmark" : "hand.raised.fill")
+                                Label(isBlocked ? L("Engeli kaldır") : L("Engelle"), systemImage: isBlocked ? "person.crop.circle.badge.checkmark" : "hand.raised.fill")
                                     .font(.system(size: 13, weight: .bold, design: .rounded))
                                     .foregroundStyle(isBlocked ? Color.white : Color(hex: 0xFF6B81))
                                     .frame(maxWidth: .infinity).frame(height: 42)
@@ -1618,169 +1618,38 @@ private struct ProfileView: View {
     @State private var profileSaved = false
     @State private var isUploadingAvatar = false
     @State private var localAvatarPreview: UIImage?
+    @State private var emailSheet: EmailAccountSheet.Mode?
+    @FocusState private var nameFocused: Bool
+
+    // Tek tip, sakin bir görünüm: tek vurgu rengi, ince çizgiler, ölçülü yazı ağırlıkları.
+    private let accent = Color.cyan
+    private let hairline = Color.white.opacity(0.08)
+    private let muted = Color.white.opacity(0.5)
+    private let faint = Color.white.opacity(0.34)
+
+    private var progression: PlayerProgression { PlayerProgression(xp: store.profile?.lifetimeXp ?? 0) }
+    private var trimmedName: String { username.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var nameChanged: Bool { !trimmedName.isEmpty && trimmedName != store.playerName }
 
     var body: some View {
         ZStack {
             NeonBackground(theme: appState.selectedBackground)
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 18) {
-                    HStack {
-                        Button(action: onClose) {
-                            Image(systemName: "chevron.left").font(.system(size: 16, weight: .bold)).frame(width: 42, height: 42).background(.ultraThinMaterial, in: Circle())
-                        }
-                        Text("OYUNCU PROFİLİ").font(.system(size: 17, weight: .bold, design: .rounded))
-                        Spacer()
+                VStack(spacing: 14) {
+                    header
+                    identityCard
+                    careerCard
+                    accountCard
+                    supportRow
+                    if let error = store.errorMessage, !error.localizedCaseInsensitiveContains("bağlant"), !error.localizedCaseInsensitiveContains("connect") {
+                        Text(error).font(.system(size: 12, weight: .medium, design: .rounded)).foregroundStyle(.orange).multilineTextAlignment(.center)
                     }
-
-                    GlassCard {
-                        VStack(spacing: 16) {
-                            HStack(spacing: 15) {
-                                Button {
-                                    if let remaining = store.avatarChangeRemaining() {
-                                        profileSaved = false
-                                        profileMessage = String(localized: "Profil fotoğrafını haftada bir kez değiştirebilirsin. Kalan süre: \(formatRemaining(remaining))")
-                                    } else {
-                                        showAvatarPicker = true
-                                    }
-                                } label: {
-                                    ZStack(alignment: .bottomTrailing) {
-                                        profileAvatar
-                                            .overlay(AvatarFrameRing(frame: store.cosmetics?.frame ?? store.profile?.frame, lineWidth: 5).frame(width: 112, height: 112))
-                                        Group {
-                                            if isUploadingAvatar { ProgressView().tint(.black) }
-                                            else { Image(systemName: "camera.fill").font(.system(size: 13, weight: .bold)) }
-                                        }
-                                        .foregroundStyle(.black)
-                                        .frame(width: 32, height: 32)
-                                        .background(.cyan, in: Circle())
-                                        .overlay(Circle().stroke(Color.black.opacity(0.55), lineWidth: 2))
-                                    }
-                                }.buttonStyle(.plain)
-
-                                VStack(alignment: .leading, spacing: 6) {
-                                    Text(store.playerName)
-                                        .font(.system(size: 23, weight: .bold, design: .rounded))
-                                        .lineLimit(1)
-                                    HStack(spacing: 7) {
-                                        Label(profileRankTitle, systemImage: "bolt.shield.fill")
-                                            .font(.system(size: 10, weight: .bold, design: .rounded))
-                                            .foregroundStyle(.cyan)
-                                        Text("•") .foregroundStyle(.white.opacity(0.22))
-                                        Text("NEON ID #\(store.profile?.id ?? 0)")
-                                            .font(.system(size: 10, weight: .bold, design: .monospaced))
-                                            .foregroundStyle(.white.opacity(0.42))
-                                    }
-                                    HStack(spacing: 6) {
-                                        Image(systemName: "calendar")
-                                        Text("Katılım \(profileDateText)")
-                                    }
-                                    .font(.caption2)
-                                    .foregroundStyle(.white.opacity(0.38))
-                                }
-                                Spacer(minLength: 0)
-                            }
-
-                            HStack(spacing: 8) {
-                                profileStatIcon("COIN", store.balance.formatted(), "hexagon.fill", .yellow)
-                                profileStatIcon(L("REKOR"), (store.profile?.bestScore ?? 0).formatted(), "trophy.fill", .pink)
-                                profileStatIcon(L("SEVİYE"), "\(store.profile?.bestLevel ?? 0)", "chevron.up.2", .cyan)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-
-                    AccountSecurityCard()
-                    GlassCard {
-                        VStack(alignment: .leading, spacing: 13) {
-                            HStack {
-                                Label("KARİYER ÖZETİ", systemImage: "chart.bar.fill")
-                                    .font(.system(size: 10, weight: .bold, design: .rounded))
-                                    .tracking(1.0)
-                                    .foregroundStyle(.cyan)
-                                Spacer()
-                                if let rank = weeklyRank {
-                                    Label("HAFTALIK #\(rank)", systemImage: "crown.fill")
-                                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                                        .foregroundStyle(rank <= 3 ? .yellow : .white.opacity(0.45))
-                                }
-                            }
-                            HStack(spacing: 10) {
-                                profileInfo(L("RUN"), "\(store.profile?.gamesPlayed ?? 0)", "flag.checkered", .purple)
-                                profileInfo(L("BLOK"), "\(store.profile?.lifetimeBlocks ?? 0)", "square.grid.3x3.fill", .orange)
-                                profileInfo("XP", "\(store.profile?.lifetimeXp ?? 0)", "sparkles", .cyan)
-                            }
-                        }
-                    }
-
-                    GlassCard {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("OYUNCU ADI")
-                                .font(.system(size: 9, weight: .bold, design: .rounded)).tracking(1.4).foregroundStyle(.white.opacity(0.4))
-                            TimelineView(.periodic(from: .now, by: 1)) { context in
-                                if let remaining = store.usernameChangeRemaining(at: context.date), remaining > 0 {
-                                    HStack(spacing: 6) {
-                                        Image(systemName: "clock.fill")
-                                        Text("Tekrar değiştirebilirsin: \(formatRemaining(remaining))")
-                                    }
-                                    .font(.caption2.weight(.bold))
-                                    .foregroundStyle(.orange)
-                                } else {
-                                    HStack(spacing: 6) {
-                                        Image(systemName: "checkmark.circle.fill")
-                                        Text("Oyuncu adını değiştirebilirsin.")
-                                    }
-                                    .font(.caption2.weight(.bold))
-                                    .foregroundStyle(.green)
-                                }
-                            }
-                            TextField("Oyuncu adı", text: $username)
-                                .textInputAutocapitalization(.never)
-                                .autocorrectionDisabled()
-                                .padding(12)
-                                .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
-                            NeonButton(title: isSaving ? L("KAYDEDİLİYOR") : L("PROFİLİ KAYDET"), systemImage: "checkmark.circle.fill", accent: .cyan) {
-                                guard !isSaving, store.canChangeUsername else { return }
-                                let clean = username.trimmingCharacters(in: .whitespacesAndNewlines)
-                                isSaving = true
-                                Task {
-                                    let ok = await store.updateUsername(clean)
-                                    profileSaved = ok
-                                    profileMessage = ok ? L("Profil güncellendi.") : (store.errorMessage ?? L("Profil güncellenemedi."))
-                                    isSaving = false
-                                }
-                            }
-                            .disabled(isSaving || !store.canChangeUsername)
-                            .opacity(store.canChangeUsername ? 1 : 0.38)
-                            if let profileMessage {
-                                Text(profileMessage).font(.caption2).foregroundStyle(profileSaved ? Color.green : Color.orange)
-                            }
-                        }
-                    }
-
-                    Button { showSupport = true } label: {
-                        HStack(spacing: 12) {
-                            Image(systemName: "message.fill")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundStyle(.black)
-                                .frame(width: 44, height: 44)
-                                .background(.cyan, in: RoundedRectangle(cornerRadius: 14))
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text("CANLI DESTEK").font(.system(size: 14, weight: .bold, design: .rounded))
-                                Text(store.supportTickets.isEmpty ? L("Yeni destek talebi oluştur") : String(localized: "\(store.supportTickets.count) talebin var • mesajlarını takip et"))
-                                    .font(.caption2).foregroundStyle(.white.opacity(0.50))
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right").foregroundStyle(.cyan)
-                        }
-                        .padding(14)
-                        .background(Color.cyan.opacity(0.09), in: RoundedRectangle(cornerRadius: 20))
-                        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.cyan.opacity(0.24)))
-                    }.buttonStyle(.plain)
-                    if let error = store.errorMessage, !error.localizedCaseInsensitiveContains("bağlant"), !error.localizedCaseInsensitiveContains("connect") { Text(error).font(.caption).foregroundStyle(.orange).multilineTextAlignment(.center) }
                 }
-                .padding(18)
-                .padding(.bottom, 30)
+                .padding(.horizontal, 16)
+                .padding(.top, 6)
+                .padding(.bottom, 34)
             }
+            .scrollDismissesKeyboard(.interactively)
         }
         .preferredColorScheme(.dark)
         .onAppear {
@@ -1788,6 +1657,9 @@ private struct ProfileView: View {
             if let data = Persistence.shared.cachedAvatarJPEG, let image = UIImage(data: data) {
                 localAvatarPreview = image
             }
+        }
+        .onChange(of: store.playerName) { newValue in
+            if !nameFocused { username = newValue }
         }
         .sheet(isPresented: $showAvatarPicker) {
             AvatarImagePicker { image in
@@ -1827,20 +1699,380 @@ private struct ProfileView: View {
                 }
             }
         }
+        .sheet(item: $emailSheet) { mode in EmailAccountSheet(mode: mode) }
         .sheet(isPresented: $showSupport) { SupportCenterView().environmentObject(store).environmentObject(appState) }
         .task { await store.loadSupportTickets() }
+    }
+
+    // MARK: Üst bar
+
+    private var header: some View {
+        HStack(spacing: 12) {
+            Button(action: onClose) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 15, weight: .semibold))
+                    .frame(width: 40, height: 40)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .overlay(Circle().stroke(hairline, lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Geri")
+            Text("Profil")
+                .font(.system(size: 20, weight: .semibold, design: .rounded))
+            Spacer()
+            Text("NEON ID #\(store.profile?.id ?? 0)")
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                .foregroundStyle(faint)
+                .padding(.horizontal, 10).frame(height: 28)
+                .background(Color.white.opacity(0.05), in: Capsule())
+                .overlay(Capsule().stroke(hairline, lineWidth: 1))
+        }
+        .padding(.vertical, 4)
+    }
+
+    // MARK: Kimlik kartı
+
+    private var identityCard: some View {
+        VStack(spacing: 0) {
+            VStack(spacing: 14) {
+                avatarButton
+                VStack(spacing: 6) {
+                    Text(store.playerName)
+                        .font(.system(size: 24, weight: .semibold, design: .rounded))
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                    HStack(spacing: 8) {
+                        HStack(spacing: 5) {
+                            Image(systemName: "bolt.shield.fill").font(.system(size: 10, weight: .semibold))
+                            Text(profileRankTitle).font(.system(size: 11, weight: .semibold, design: .rounded)).tracking(0.6)
+                        }
+                        .foregroundStyle(accent)
+                        .padding(.horizontal, 10).frame(height: 24)
+                        .background(accent.opacity(0.12), in: Capsule())
+                        Text("Katılım \(profileDateText)")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundStyle(faint)
+                    }
+                }
+                rankProgress
+            }
+            .padding(.horizontal, 18).padding(.top, 22).padding(.bottom, 18)
+
+            Rectangle().fill(hairline).frame(height: 1)
+
+            HStack(spacing: 0) {
+                metric(value: store.balance.formatted(), label: L("COIN"), icon: "hexagon.fill", tint: .yellow)
+                Rectangle().fill(hairline).frame(width: 1, height: 34)
+                metric(value: (store.profile?.bestScore ?? 0).formatted(), label: L("REKOR"), icon: "trophy.fill", tint: .pink)
+                Rectangle().fill(hairline).frame(width: 1, height: 34)
+                metric(value: "\(store.profile?.bestLevel ?? 0)", label: L("SEVİYE"), icon: "chevron.up.2", tint: accent)
+            }
+            .padding(.vertical, 14)
+        }
+        .frame(maxWidth: .infinity)
+        .background(cardBackground(glow: true))
+    }
+
+    private var avatarButton: some View {
+        Button {
+            if let remaining = store.avatarChangeRemaining() {
+                profileSaved = false
+                profileMessage = String(localized: "Profil fotoğrafını haftada bir kez değiştirebilirsin. Kalan süre: \(formatRemaining(remaining))")
+            } else {
+                showAvatarPicker = true
+            }
+        } label: {
+            ZStack(alignment: .bottomTrailing) {
+                profileAvatar
+                    .overlay(AvatarFrameRing(frame: store.cosmetics?.frame ?? store.profile?.frame, lineWidth: 4).frame(width: 104, height: 104))
+                Group {
+                    if isUploadingAvatar { ProgressView().controlSize(.small).tint(.black) }
+                    else { Image(systemName: "camera.fill").font(.system(size: 11, weight: .semibold)) }
+                }
+                .foregroundStyle(.black)
+                .frame(width: 30, height: 30)
+                .background(Color.white, in: Circle())
+                .overlay(Circle().stroke(Color.black.opacity(0.6), lineWidth: 2))
+                .offset(x: 2, y: 2)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Profil fotoğrafını değiştir")
+    }
+
+    private var rankProgress: some View {
+        VStack(spacing: 6) {
+            GeometryReader { proxy in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.white.opacity(0.07))
+                    Capsule()
+                        .fill(LinearGradient(colors: [accent, Color.purple.opacity(0.9)], startPoint: .leading, endPoint: .trailing))
+                        .frame(width: max(6, proxy.size.width * progression.progress))
+                }
+            }
+            .frame(height: 6)
+            HStack {
+                Text("Rütbe \(progression.rank)")
+                Spacer()
+                Text("\(progression.xpIntoRank.formatted()) / \(progression.xpNeededForRank.formatted()) XP")
+                    .monospacedDigit()
+            }
+            .font(.system(size: 11, weight: .medium, design: .rounded))
+            .foregroundStyle(faint)
+        }
+        .padding(.top, 2)
+    }
+
+    private func metric(value: String, label: String, icon: String, tint: Color) -> some View {
+        VStack(spacing: 5) {
+            HStack(spacing: 5) {
+                Image(systemName: icon).font(.system(size: 11, weight: .semibold)).foregroundStyle(tint)
+                Text(value)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
+            }
+            Text(label)
+                .font(.system(size: 10, weight: .medium, design: .rounded)).tracking(1.2)
+                .foregroundStyle(faint)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 6)
+    }
+
+    // MARK: Kariyer
+
+    private var careerCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                sectionLabel(L("KARİYER"))
+                Spacer()
+                if let rank = weeklyRank {
+                    HStack(spacing: 5) {
+                        Image(systemName: "crown.fill").font(.system(size: 10, weight: .semibold))
+                        Text("Bu hafta #\(rank)").font(.system(size: 11, weight: .semibold, design: .rounded))
+                    }
+                    .foregroundStyle(rank <= 3 ? Color.yellow : muted)
+                    .padding(.horizontal, 10).frame(height: 24)
+                    .background((rank <= 3 ? Color.yellow : Color.white).opacity(0.10), in: Capsule())
+                }
+            }
+            HStack(spacing: 10) {
+                careerTile(value: (store.profile?.gamesPlayed ?? 0).formatted(), label: L("Oyun"), icon: "flag.checkered", tint: .purple)
+                careerTile(value: (store.profile?.lifetimeBlocks ?? 0).formatted(), label: L("Kırılan blok"), icon: "square.grid.3x3.fill", tint: .orange)
+                careerTile(value: (store.profile?.lifetimeXp ?? 0).formatted(), label: "XP", icon: "sparkles", tint: accent)
+            }
+        }
+        .padding(18)
+        .background(cardBackground())
+    }
+
+    private func careerTile(value: String, label: String, icon: String, tint: Color) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 12, weight: .semibold)).foregroundStyle(tint)
+                .frame(width: 28, height: 28)
+                .background(tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(value)
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
+                Text(label)
+                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                    .foregroundStyle(faint).lineLimit(1).minimumScaleFactor(0.8)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(Color.white.opacity(0.035), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(hairline, lineWidth: 1))
+    }
+
+    // MARK: Hesap (oyuncu adı + e-posta tek kartta)
+
+    private var accountCard: some View {
+        let masked = store.profile?.emailMasked
+        return VStack(alignment: .leading, spacing: 0) {
+            sectionLabel(L("HESAP"))
+                .padding(.horizontal, 18).padding(.top, 18).padding(.bottom, 12)
+
+            // Oyuncu adı
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Oyuncu adı")
+                    .font(.system(size: 12, weight: .medium, design: .rounded)).foregroundStyle(muted)
+                HStack(spacing: 8) {
+                    TextField("Oyuncu adı", text: $username)
+                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .submitLabel(.done)
+                        .focused($nameFocused)
+                        .onSubmit { saveName() }
+                        .disabled(!store.canChangeUsername)
+                    if nameChanged && store.canChangeUsername {
+                        Button(action: saveName) {
+                            Group {
+                                if isSaving { ProgressView().controlSize(.small).tint(.black) }
+                                else { Text("Kaydet").font(.system(size: 13, weight: .semibold, design: .rounded)) }
+                            }
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 14).frame(height: 32)
+                            .background(accent, in: Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(isSaving)
+                        .transition(.scale.combined(with: .opacity))
+                    }
+                }
+                .padding(.horizontal, 14).frame(height: 48)
+                .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).stroke(nameFocused ? accent.opacity(0.6) : hairline, lineWidth: 1))
+                .animation(.easeOut(duration: 0.18), value: nameChanged)
+
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    HStack(spacing: 5) {
+                        if let remaining = store.usernameChangeRemaining(at: context.date), remaining > 0 {
+                            Image(systemName: "clock")
+                            Text("Tekrar değiştirebilirsin: \(formatRemaining(remaining))")
+                        } else {
+                            Image(systemName: "checkmark.circle")
+                            Text("Oyuncu adını değiştirebilirsin.")
+                        }
+                    }
+                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                    .foregroundStyle(store.canChangeUsername ? Color.green.opacity(0.85) : Color.orange.opacity(0.9))
+                }
+                if let profileMessage {
+                    Text(profileMessage)
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .foregroundStyle(profileSaved ? Color.green : Color.orange)
+                }
+            }
+            .padding(.horizontal, 18).padding(.bottom, 16)
+
+            Rectangle().fill(hairline).frame(height: 1).padding(.leading, 18)
+
+            // E-posta
+            accountRow(
+                icon: masked == nil ? "envelope" : "checkmark.shield.fill",
+                tint: masked == nil ? Color.orange : Color.mint,
+                title: L("E-posta"),
+                detail: masked ?? L("Bağlı değil • hesabın korunmuyor"),
+                action: masked == nil ? L("Bağla") : L("Değiştir")
+            ) { emailSheet = .link }
+
+            Rectangle().fill(hairline).frame(height: 1).padding(.leading, 64)
+
+            // Hesabı geri yükle
+            accountRow(
+                icon: "arrow.triangle.2.circlepath",
+                tint: muted,
+                title: L("Hesabımı geri yükle"),
+                detail: L("Başka cihazdaki hesabını e-postanla buraya taşı"),
+                action: nil
+            ) { emailSheet = .restore }
+
+            if masked == nil {
+                Text("E-postanı bağla; telefonunu değiştirsen de hesabını geri yükleyebilirsin.")
+                    .font(.system(size: 11, weight: .regular, design: .rounded))
+                    .foregroundStyle(faint)
+                    .padding(.horizontal, 18).padding(.bottom, 14)
+            }
+        }
+        .background(cardBackground())
+    }
+
+    private func accountRow(icon: String, tint: Color, title: String, detail: String, action: String?, onTap: @escaping () -> Void) -> some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .semibold)).foregroundStyle(tint)
+                    .frame(width: 34, height: 34)
+                    .background(tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(.system(size: 14, weight: .medium, design: .rounded)).foregroundStyle(.white)
+                    Text(detail).font(.system(size: 12, weight: .regular, design: .rounded)).foregroundStyle(muted)
+                        .lineLimit(1).minimumScaleFactor(0.8)
+                }
+                Spacer(minLength: 6)
+                if let action {
+                    Text(action).font(.system(size: 13, weight: .semibold, design: .rounded)).foregroundStyle(accent)
+                }
+                Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(faint)
+            }
+            .padding(.horizontal, 18).padding(.vertical, 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: Destek
+
+    private var supportRow: some View {
+        Button { showSupport = true } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "bubble.left.and.bubble.right.fill")
+                    .font(.system(size: 14, weight: .semibold)).foregroundStyle(accent)
+                    .frame(width: 34, height: 34)
+                    .background(accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Canlı destek").font(.system(size: 14, weight: .medium, design: .rounded)).foregroundStyle(.white)
+                    Text(store.supportTickets.isEmpty ? L("Yeni destek talebi oluştur") : String(localized: "\(store.supportTickets.count) talebin var • mesajlarını takip et"))
+                        .font(.system(size: 12, weight: .regular, design: .rounded)).foregroundStyle(muted)
+                        .lineLimit(1).minimumScaleFactor(0.8)
+                }
+                Spacer(minLength: 6)
+                Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(faint)
+            }
+            .padding(.horizontal, 18).padding(.vertical, 14)
+            .background(cardBackground())
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: Ortak parçalar
+
+    private func sectionLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 11, weight: .semibold, design: .rounded)).tracking(1.6)
+            .foregroundStyle(faint)
+    }
+
+    private func cardBackground(glow: Bool = false) -> some View {
+        RoundedRectangle(cornerRadius: 22, style: .continuous)
+            .fill(Color.white.opacity(0.045))
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .stroke(
+                        LinearGradient(colors: [Color.white.opacity(glow ? 0.16 : 0.10), Color.white.opacity(0.04)], startPoint: .top, endPoint: .bottom),
+                        lineWidth: 1
+                    )
+            )
+            .shadow(color: .black.opacity(0.25), radius: 18, y: 8)
+    }
+
+    private func saveName() {
+        nameFocused = false
+        guard !isSaving, store.canChangeUsername, nameChanged else { return }
+        let clean = trimmedName
+        isSaving = true
+        Task {
+            let ok = await store.updateUsername(clean)
+            profileSaved = ok
+            profileMessage = ok ? L("Profil güncellendi.") : (store.errorMessage ?? L("Profil güncellenemedi."))
+            if !ok { username = store.playerName }
+            isSaving = false
+        }
     }
 
     @ViewBuilder private var profileAvatar: some View {
         if let localAvatarPreview {
             Image(uiImage: localAvatarPreview)
                 .resizable().scaledToFill()
-                .frame(width: 112, height: 112).clipShape(Circle())
-                .overlay(Circle().stroke(Color.cyan.opacity(0.35), lineWidth: 2))
+                .frame(width: 104, height: 104).clipShape(Circle())
         } else if let url = store.avatarURL {
             AsyncImage(url: url) { image in image.resizable().scaledToFill() } placeholder: { fallbackAvatar }
-                .frame(width: 112, height: 112).clipShape(Circle())
-                .overlay(Circle().stroke(Color.cyan.opacity(0.35), lineWidth: 2))
+                .frame(width: 104, height: 104).clipShape(Circle())
         } else { fallbackAvatar }
     }
 
@@ -1883,7 +2115,7 @@ private struct ProfileView: View {
     }
 
     private var profileRankTitle: String {
-        PlayerProgression(xp: store.profile?.lifetimeXp ?? 0).title
+        progression.title
     }
 
     private var weeklyRank: Int? {
@@ -1891,52 +2123,31 @@ private struct ProfileView: View {
         return store.leaderboard.first(where: { $0.userId == id })?.rank
     }
 
-    private func profileStatIcon(_ title: String, _ value: String, _ icon: String, _ color: Color) -> some View {
-        HStack(spacing: 8) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 10).fill(color.opacity(0.13)).frame(width: 32, height: 32)
-                Image(systemName: icon).font(.system(size: 12, weight: .bold)).foregroundStyle(color)
-            }
-            VStack(alignment: .leading, spacing: 1) {
-                Text(value).font(.system(size: 13, weight: .bold, design: .rounded)).lineLimit(1).minimumScaleFactor(0.65)
-                Text(title).font(.system(size: 9, weight: .bold, design: .rounded)).tracking(0.8).foregroundStyle(.white.opacity(0.34))
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 8).frame(maxWidth: .infinity).frame(height: 48)
-        .background(Color.white.opacity(0.035), in: RoundedRectangle(cornerRadius: 13))
-        .overlay(RoundedRectangle(cornerRadius: 13).stroke(color.opacity(0.14), lineWidth: 1))
-    }
-
+    /// Katılım tarihi uygulamanın seçili dilinde (ör. "3 Eki 2026" / "Oct 3, 2026").
     private var profileDateText: String {
         guard let raw = store.profile?.createdAt else { return "—" }
-        let f = ISO8601DateFormatter()
-        guard let d = f.date(from: raw) else { return String(raw.prefix(10)) }
-        return d.formatted(date: .abbreviated, time: .omitted)
-    }
-
-    private func profileInfo(_ title: String, _ value: String, _ icon: String, _ color: Color) -> some View {
-        VStack(spacing: 6) {
-            ZStack { RoundedRectangle(cornerRadius: 12).fill(color.opacity(0.13)).frame(width: 38,height:38); Image(systemName: icon).foregroundStyle(color).font(.system(size:14,weight:.black)) }
-            Text(value).font(.system(size: 13, weight: .bold, design: .rounded)).lineLimit(1).minimumScaleFactor(0.65)
-            Text(title).font(.system(size: 9, weight: .bold, design: .rounded)).tracking(0.8).foregroundStyle(.white.opacity(0.35))
-        }.frame(maxWidth:.infinity)
+        var date = ISO8601DateFormatter().date(from: raw)
+        if date == nil {
+            let plain = DateFormatter()
+            plain.locale = Locale(identifier: "en_US_POSIX")
+            plain.timeZone = TimeZone(identifier: "Europe/Istanbul")
+            for format in ["yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd"] where date == nil {
+                plain.dateFormat = format
+                date = plain.date(from: raw) ?? plain.date(from: String(raw.prefix(10)))
+            }
+        }
+        guard let date else { return String(raw.prefix(10)) }
+        let out = DateFormatter()
+        out.locale = Locale(identifier: AppLanguage.effectiveCode)
+        out.setLocalizedDateFormatFromTemplate("d MMM yyyy")
+        return out.string(from: date)
     }
 
     private var fallbackAvatar: some View {
         Circle()
             .fill(LinearGradient(colors: [.cyan.opacity(0.35), .purple.opacity(0.35)], startPoint: .topLeading, endPoint: .bottomTrailing))
-            .overlay(Text(String(store.playerName.prefix(1)).uppercased()).font(.system(size: 38, weight: .bold, design: .rounded)))
-            .frame(width: 112, height: 112)
-    }
-
-    private func profileStat(_ title: String, _ value: String, _ color: Color) -> some View {
-        VStack(spacing: 4) {
-            Text(value).font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(color)
-            Text(title).font(.system(size: 9, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.36))
-        }
-        .frame(maxWidth: .infinity).padding(.vertical, 10)
-        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 12))
+            .overlay(Text(String(store.playerName.prefix(1)).uppercased()).font(.system(size: 36, weight: .semibold, design: .rounded)))
+            .frame(width: 104, height: 104)
     }
 }
 
@@ -2239,7 +2450,7 @@ private struct SupportTopic: Identifiable, Hashable {
     let tint: Color
     let tips: [String]
 
-    static let all: [SupportTopic] = [
+    static var all: [SupportTopic] { LocalizedCatalog.cached("supportTopics") { [
         .init(id: "account", title: "Hesap ve Profil", icon: "person.crop.circle", tint: .cyan, tips: [
             L("Profil fotoğrafını yeniden seçip kırpma ekranında Kullan'a dokun."),
             L("Oyuncu adı haftada yalnızca bir kez değiştirilebilir; kalan süre profil ekranında görünür."),
@@ -2264,7 +2475,7 @@ private struct SupportTopic: Identifiable, Hashable {
             L("Önce aşağıdaki hızlı çözümleri kontrol et."),
             L("Çözülmezse destek ekibine doğrudan kayıt açabilirsin.")
         ])
-    ]
+    ] as [SupportTopic] } }
 }
 
 private func supportTimeText(_ raw: String?) -> String? {
@@ -2275,7 +2486,7 @@ private func supportTimeText(_ raw: String?) -> String? {
     plain.dateFormat = "yyyy-MM-dd HH:mm:ss"
     guard let date = ISO8601DateFormatter().date(from: raw) ?? plain.date(from: raw) else { return raw }
     let output = DateFormatter()
-    output.locale = .current
+    output.locale = Locale(identifier: AppLanguage.effectiveCode)
     output.dateFormat = Calendar.current.isDateInToday(date) ? "HH:mm" : "d MMM • HH:mm"
     return output.string(from: date)
 }
@@ -2962,9 +3173,9 @@ private struct InboxView: View {
 
     private func notificationPresentation(_ type: String) -> (icon: String, color: Color, label: String) {
         switch type {
-        case "support": return ("checkmark.seal.fill", .green, "DESTEK")
-        case "announcement": return ("megaphone.fill", .cyan, "DUYURU")
-        case "weekly_reward": return ("crown.fill", .yellow, "HAFTALIK ÖDÜL")
+        case "support": return ("checkmark.seal.fill", .green, L("DESTEK"))
+        case "announcement": return ("megaphone.fill", .cyan, L("DUYURU"))
+        case "weekly_reward": return ("crown.fill", .yellow, L("HAFTALIK ÖDÜL"))
         default: return ("gift.fill", .pink, L("ÖDÜL"))
         }
     }
@@ -2978,7 +3189,7 @@ private struct InboxView: View {
             date = parser.date(from: raw)
         }
         guard let date else { return nil }
-        let out = DateFormatter(); out.locale = Locale(identifier: "tr_TR"); out.dateFormat = Calendar.current.isDateInToday(date) ? "HH:mm" : "dd MMM • HH:mm"
+        let out = DateFormatter(); out.locale = Locale(identifier: AppLanguage.effectiveCode); out.dateFormat = Calendar.current.isDateInToday(date) ? "HH:mm" : "dd MMM • HH:mm"
         return out.string(from: date)
     }
 }

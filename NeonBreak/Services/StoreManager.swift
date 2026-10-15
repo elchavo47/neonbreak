@@ -629,12 +629,12 @@ final class StoreManager: ObservableObject {
         BallSkin.all.filter { !$0.rewardOnly }.compactMap(\.productID) + BackgroundTheme.all.compactMap(\.productID)
     )
 
-    let coinPacks: [CoinPack] = [
+    var coinPacks: [CoinPack] { LocalizedCatalog.cached("coinPacks") { [
         .init(id: "com.aydworks.neonbreak.coins.1000", coins: 1_000, badge: L("BAŞLANGIÇ"), subtitle: L("Hızlı bir takviye")),
         .init(id: "com.aydworks.neonbreak.coins.3000", coins: 3_000, badge: L("+%10 BONUS"), subtitle: L("Mağaza için dengeli paket")),
         .init(id: "com.aydworks.neonbreak.coins.7500", coins: 7_500, badge: L("+%25 BONUS"), subtitle: L("Uzun süreli kullanım")),
         .init(id: "com.aydworks.neonbreak.coins.18000", coins: 18_000, badge: L("EN İYİ DEĞER"), subtitle: L("Koleksiyon ve güçler için")),
-    ]
+    ] as [CoinPack] } }
 
     private let baseURL = URL(string: "https://neonbreak.aydworks.com.tr/api/v1")!
     private let decoder: JSONDecoder = {
@@ -2150,7 +2150,7 @@ final class StoreManager: ObservableObject {
     }
 
     private func authorizedRequest(path: String, method: String, treatPathAsRelativeURL: Bool = false) throws -> URLRequest {
-        guard let token = defaults.string(forKey: tokenKey) else { throw APIError.message("Oturum bulunamadı.") }
+        guard let token = defaults.string(forKey: tokenKey) else { throw APIError.message(L("Oturum bulunamadı.")) }
         let url: URL
         if treatPathAsRelativeURL, let built = URL(string: baseURL.absoluteString + path) { url = built }
         else { url = baseURL.appendingPathComponent(path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))) }
@@ -2221,8 +2221,8 @@ final class StoreManager: ObservableObject {
         case status(Int, String)
         var description: String {
             switch self {
-            case .message(let text): return text
-            case .status(_, let text): return text
+            case .message(let text): return LM(text)
+            case .status(_, let text): return LM(text)
             }
         }
     }

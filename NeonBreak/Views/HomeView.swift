@@ -453,7 +453,7 @@ struct HomeView: View {
                         .background(LinearGradient(colors: [Color(hex: 0xFFE066), Color(hex: 0xFF8A00)], startPoint: .top, endPoint: .bottom), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Günlük çark").font(.system(size: 14, weight: .semibold, design: .rounded)).foregroundStyle(.white)
-                        Text(wheel.freeLeft > 0 ? "Bugünkü ücretsiz hakkın hazır" : (wheel.adLeft > 0 ? "Reklam izleyip bir kez daha çevir" : "Yarın yeni haklar"))
+                        Text(wheel.freeLeft > 0 ? L("Bugünkü ücretsiz hakkın hazır") : (wheel.adLeft > 0 ? L("Reklam izleyip bir kez daha çevir") : L("Yarın yeni haklar")))
                             .font(.system(size: 12, weight: .regular, design: .rounded)).foregroundStyle(.white.opacity(0.55))
                     }
                     Spacer(minLength: 4)

@@ -446,7 +446,7 @@ private struct InvitePage: View {
                                 copied = true
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { copied = false }
                             } label: {
-                                Label(copied ? "Kopyalandı" : "Kopyala", systemImage: copied ? "checkmark" : "doc.on.doc")
+                                Label(copied ? L("Kopyalandı") : L("Kopyala"), systemImage: copied ? "checkmark" : "doc.on.doc")
                                     .font(.system(size: 13, weight: .bold, design: .rounded))
                                     .frame(maxWidth: .infinity).frame(height: 42)
                                     .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -738,7 +738,7 @@ private struct AboutPage: View {
                 HStack {
                     Text("Sunucu bağlantısı").font(.system(size: 14, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.6))
                     Spacer()
-                    Label(store.isOnline ? "Bağlı" : "Çevrimdışı", systemImage: store.isOnline ? "checkmark.circle.fill" : "wifi.slash")
+                    Label(store.isOnline ? L("Bağlı") : L("Çevrimdışı"), systemImage: store.isOnline ? "checkmark.circle.fill" : "wifi.slash")
                         .font(.system(size: 13, weight: .bold, design: .rounded))
                         .foregroundStyle(store.isOnline ? Color.mint : Color.orange)
                 }
@@ -777,7 +777,7 @@ struct AccountSecurityCard: View {
                 }
                 HStack(spacing: 10) {
                     Button { sheet = .link } label: {
-                        Text(masked == nil ? "E-postayı bağla" : "E-postayı değiştir")
+                        Text(masked == nil ? L("E-postayı bağla") : L("E-postayı değiştir"))
                             .font(.system(size: 13, weight: .bold, design: .rounded)).foregroundStyle(.black)
                             .frame(maxWidth: .infinity).frame(height: 40)
                             .background(Color.cyan, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -836,7 +836,7 @@ struct EmailAccountSheet: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 16) {
                     HStack {
-                        Text(mode == .link ? "E-postanı bağla" : "Hesabını geri yükle")
+                        Text(mode == .link ? L("E-postanı bağla") : L("Hesabını geri yükle"))
                             .font(.system(size: 20, weight: .heavy, design: .rounded))
                         Spacer()
                         Button { dismiss() } label: {
@@ -899,8 +899,8 @@ struct EmailAccountSheet: View {
             }
             .frame(maxWidth: .infinity).padding(.vertical, 4)
             Text(mode == .link
-                 ? "Sana 6 haneli bir kod göndereceğiz. Şifre gerekmez."
-                 : "Hesabını bağladığın e-postayı gir. Bu cihazdaki mevcut hesap silinir ve e-postana bağlı hesap buraya taşınır; eski cihazdaki oturum kapanır.")
+                 ? L("Sana 6 haneli bir kod göndereceğiz. Şifre gerekmez.")
+                 : L("Hesabını bağladığın e-postayı gir. Bu cihazdaki mevcut hesap silinir ve e-postana bağlı hesap buraya taşınır; eski cihazdaki oturum kapanır."))
                 .font(.system(size: 13, weight: .regular, design: .rounded)).foregroundStyle(.white.opacity(0.65))
             TextField("E-posta", text: $email)
                 .keyboardType(.emailAddress)
@@ -999,7 +999,7 @@ struct EmailAccountSheet: View {
             .padding(12).background(Color.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             HStack {
                 Button { sendCode() } label: {
-                    Text(cooldown > 0 ? "\(cooldown) sn sonra tekrar gönderebilirsin" : "Tekrar gönder")
+                    Text(cooldown > 0 ? String(localized: "\(cooldown) sn sonra tekrar gönderebilirsin") : L("Tekrar gönder"))
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                 }
                 .disabled(cooldown > 0 || working)
@@ -1016,7 +1016,7 @@ struct EmailAccountSheet: View {
     private var successView: some View {
         VStack(spacing: 16) {
             Image(systemName: "checkmark.seal.fill").font(.system(size: 54)).foregroundStyle(.mint)
-            Text(mode == .link ? "E-postan bağlandı." : "Hesabın bu cihaza taşındı.")
+            Text(mode == .link ? L("E-postan bağlandı.") : L("Hesabın bu cihaza taşındı."))
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
             if mode == .link, store.lastEmailBonus > 0 {
                 Label(String(localized: "+\(store.lastEmailBonus) coin kazandın"), systemImage: "hexagon.fill")

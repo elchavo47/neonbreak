@@ -719,3 +719,10 @@
 "Kullanıcı adın topluluk kurallarına uymadığı için sıfırlandı. Uygun bir ad seçebilirsin." = "Your username was reset because it didn't follow the community rules. You can choose an appropriate one.";
 "Profil fotoğrafın kaldırıldı" = "Your profile photo was removed";
 "Profil fotoğrafın topluluk kurallarına uymadığı için kaldırıldı." = "Your profile photo was removed because it didn't follow the community rules.";
+
+/* v5.16.4 coin satın alma girişleri */
+"COIN SATIN AL" = "BUY COINS";
+"Coin paketleri • App Store ile güvenli ödeme" = "Coin packs • Secure payment via the App Store";
+"COIN AL" = "BUY COINS";
+"Coin satın al" = "Buy coins";
+"Coin paketleri şu an yüklenemedi. İnternet bağlantını kontrol edip tekrar dene." = "Coin packs couldn't be loaded right now. Check your internet connection and try again.";

@@ -719,3 +719,10 @@
 "Kullanıcı adın topluluk kurallarına uymadığı için sıfırlandı. Uygun bir ad seçebilirsin." = "Dein Benutzername wurde zurückgesetzt, da er gegen die Community-Regeln verstieß. Du kannst einen passenden wählen.";
 "Profil fotoğrafın kaldırıldı" = "Dein Profilbild wurde entfernt";
 "Profil fotoğrafın topluluk kurallarına uymadığı için kaldırıldı." = "Dein Profilbild wurde entfernt, da es gegen die Community-Regeln verstieß.";
+
+/* v5.16.4 coin satın alma girişleri */
+"COIN SATIN AL" = "COINS KAUFEN";
+"Coin paketleri • App Store ile güvenli ödeme" = "Coin-Pakete • Sichere Zahlung über den App Store";
+"COIN AL" = "COINS KAUFEN";
+"Coin satın al" = "Coins kaufen";
+"Coin paketleri şu an yüklenemedi. İnternet bağlantını kontrol edip tekrar dene." = "Die Coin-Pakete konnten gerade nicht geladen werden. Prüfe deine Internetverbindung und versuche es erneut.";

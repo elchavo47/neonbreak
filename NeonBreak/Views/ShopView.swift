@@ -4,6 +4,8 @@ struct ShopView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var store: StoreManager
     let onClose: () -> Void
+    /// Coin Kasası'nı (gerçek parayla coin paketi) açar.
+    var onBuyCoins: () -> Void = {}
 
     @State private var tab: ShopTab = .balls
     @ObservedObject private var rewardedAds = RewardedAds.shared
@@ -23,6 +25,7 @@ struct ShopView: View {
     private struct ShopNotice: Equatable {
         let text: String
         let isSuccess: Bool
+        var offersCoins = false
     }
 
     private var powerupItems: [StoreManager.RemoteStoreItem] { store.items.filter { $0.category == "powerup" }.sorted { $0.priceCoins < $1.priceCoins } }
@@ -75,6 +78,7 @@ struct ShopView: View {
                 tabBar
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 12) {
+                        buyCoinsCard
                         adCoinCard
                         switch tab {
                         case .balls:
@@ -105,6 +109,20 @@ struct ShopView: View {
                     HStack(spacing: 8) {
                         Image(systemName: notice.isSuccess ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
                         Text(notice.text).multilineTextAlignment(.leading)
+                        if notice.offersCoins {
+                            Spacer(minLength: 4)
+                            Button {
+                                withAnimation(.easeIn(duration: 0.2)) { self.notice = nil }
+                                onBuyCoins()
+                            } label: {
+                                Text("COIN AL")
+                                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(.black)
+                                    .padding(.horizontal, 12).frame(height: 30)
+                                    .background(Color.yellow, in: Capsule())
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundStyle(notice.isSuccess ? Color.mint : Color.orange)
@@ -115,7 +133,7 @@ struct ShopView: View {
                     .padding(.bottom, 18)
                 }
                 .transition(.move(edge: .bottom).combined(with: .opacity))
-                .allowsHitTesting(false)
+                .allowsHitTesting(notice.offersCoins)
             }
         }
         .preferredColorScheme(.dark)
@@ -144,15 +162,20 @@ struct ShopView: View {
                     .minimumScaleFactor(0.8)
             }
             Spacer(minLength: 4)
-            HStack(spacing: 6) {
-                Image(systemName: "hexagon.fill").foregroundStyle(.yellow)
-                Text(store.balance.formatted())
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .monospacedDigit()
+            Button(action: onBuyCoins) {
+                HStack(spacing: 6) {
+                    Image(systemName: "hexagon.fill").foregroundStyle(.yellow)
+                    Text(store.balance.formatted())
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                    Image(systemName: "plus.circle.fill").foregroundStyle(.yellow)
+                }
+                .padding(.horizontal, 12).frame(height: 40)
+                .background(.ultraThinMaterial, in: Capsule())
+                .overlay(Capsule().stroke(Color.yellow.opacity(0.2), lineWidth: 1))
             }
-            .padding(.horizontal, 12).frame(height: 40)
-            .background(.ultraThinMaterial, in: Capsule())
-            .overlay(Capsule().stroke(Color.yellow.opacity(0.2), lineWidth: 1))
+            .buttonStyle(.plain)
+            .accessibilityLabel("Coin al")
         }
         .padding(.horizontal, 16).padding(.vertical, 10)
     }
@@ -293,6 +316,37 @@ struct ShopView: View {
         }
         .padding(14)
         .background(cardBackground(selected: selected, accent: accent))
+    }
+
+    /// Gerçek parayla coin paketi satın alma girişi (App Store uygulama içi satın alma).
+    private var buyCoinsCard: some View {
+        Button(action: onBuyCoins) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Image(systemName: "hexagon.fill").font(.system(size: 26, weight: .black)).foregroundStyle(.yellow)
+                    Image(systemName: "plus").font(.system(size: 11, weight: .black)).foregroundStyle(.black)
+                }
+                .frame(width: 46, height: 46)
+                .background(Color.yellow.opacity(0.14), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("COIN SATIN AL")
+                        .font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    Text("Coin paketleri • App Store ile güvenli ödeme")
+                        .font(.system(size: 12, weight: .regular, design: .rounded)).foregroundStyle(.white.opacity(0.55))
+                        .lineLimit(1).minimumScaleFactor(0.8)
+                }
+                Spacer(minLength: 4)
+                Image(systemName: "chevron.right").font(.system(size: 13, weight: .bold)).foregroundStyle(.yellow)
+            }
+            .padding(.horizontal, 14).frame(height: 70)
+            .background(
+                LinearGradient(colors: [Color.yellow.opacity(0.20), Color.orange.opacity(0.10)], startPoint: .leading, endPoint: .trailing),
+                in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+            )
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.yellow.opacity(0.45), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Coin satın al")
     }
 
     /// Reklam izleyerek coin: ana ekrandaki kartın mağazadaki karşılığı.
@@ -464,11 +518,11 @@ struct ShopView: View {
 
     // MARK: Eylemler
 
-    private func show(_ text: String, success: Bool) {
+    private func show(_ text: String, success: Bool, offersCoins: Bool = false) {
         let token = UUID()
         noticeToken = token
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { notice = ShopNotice(text: text, isSuccess: success) }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { notice = ShopNotice(text: text, isSuccess: success, offersCoins: offersCoins) }
+        DispatchQueue.main.asyncAfter(deadline: .now() + (offersCoins ? 5.0 : 3.0)) {
             guard noticeToken == token else { return }
             withAnimation(.easeIn(duration: 0.2)) { notice = nil }
         }
@@ -478,7 +532,7 @@ struct ShopView: View {
     private func canAfford(_ item: StoreManager.RemoteStoreItem) -> Bool {
         let missing = item.priceCoins - store.balance
         guard missing > 0 else { return true }
-        show(String(localized: "Yetersiz coin • \(missing.formatted()) coin daha gerekli"), success: false)
+        show(String(localized: "Yetersiz coin • \(missing.formatted()) coin daha gerekli"), success: false, offersCoins: true)
         return false
     }
 

@@ -719,3 +719,10 @@
 "Kullanıcı adın topluluk kurallarına uymadığı için sıfırlandı. Uygun bir ad seçebilirsin." = "Твоё имя сброшено, так как оно нарушало правила сообщества. Выбери подходящее.";
 "Profil fotoğrafın kaldırıldı" = "Твоё фото профиля удалено";
 "Profil fotoğrafın topluluk kurallarına uymadığı için kaldırıldı." = "Твоё фото профиля удалено, так как оно нарушало правила сообщества.";
+
+/* v5.16.4 coin satın alma girişleri */
+"COIN SATIN AL" = "КУПИТЬ МОНЕТЫ";
+"Coin paketleri • App Store ile güvenli ödeme" = "Наборы монет • Безопасная оплата через App Store";
+"COIN AL" = "КУПИТЬ";
+"Coin satın al" = "Купить монеты";
+"Coin paketleri şu an yüklenemedi. İnternet bağlantını kontrol edip tekrar dene." = "Не удалось загрузить наборы монет. Проверь подключение к интернету и попробуй снова.";

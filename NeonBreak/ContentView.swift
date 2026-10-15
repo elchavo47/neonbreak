@@ -10,6 +10,8 @@ struct ContentView: View {
     @State private var supportStartsOnTickets = false
     @State private var showWhatsNew = false
     @State private var route: Route = .home
+    /// Coin Kasası kapanınca dönülecek ekran (ana ekran ya da mağaza).
+    @State private var coinsReturnRoute: Route = .home
     @State private var showSettings = false
     @State private var showSplash = true
     @State private var activeAnnouncement: StoreManager.Announcement?
@@ -39,7 +41,10 @@ struct ContentView: View {
                             transition(to: .game)
                         },
                         onShop: { transition(to: .shop) },
-                        onCoins: { transition(to: .coins) },
+                        onCoins: {
+                            coinsReturnRoute = .home
+                            transition(to: .coins)
+                        },
                         onLeaderboard: { transition(to: .leaderboard) },
                         onProfile: { transition(to: .profile) },
                         onSupport: {
@@ -53,7 +58,10 @@ struct ContentView: View {
                 case .game:
                     GameView(resume: resumeSnapshot, onExit: { transition(to: .home) })
                 case .shop:
-                    ShopView(onClose: { transition(to: .home) })
+                    ShopView(onClose: { transition(to: .home) }, onBuyCoins: {
+                        coinsReturnRoute = .shop
+                        transition(to: .coins)
+                    })
                         .safeAreaInset(edge: .bottom, spacing: 0) { tabBar }
                 case .leaderboard:
                     LeaderboardView(onClose: { transition(to: .home) })
@@ -66,7 +74,7 @@ struct ContentView: View {
                 case .notifications:
                     InboxView(onClose: { transition(to: .home) }, onSupport: { transition(to: .support) })
                 case .coins:
-                    CoinStoreView(onClose: { transition(to: .home) })
+                    CoinStoreView(onClose: { transition(to: coinsReturnRoute) })
                 }
             }
             .opacity(showSplash ? 0 : 1)
@@ -3017,6 +3025,12 @@ private struct CoinStoreView: View {
     @State private var busy: String?
     @State private var message: String?
     @State private var messageIsSuccess = false
+    @State private var loadingProducts = true
+    private func reloadProducts() async {
+        loadingProducts = true
+        await store.loadCoinProducts()
+        loadingProducts = false
+    }
     var body: some View {
         ZStack {
             NeonBackground(theme: appState.selectedBackground)
@@ -3039,14 +3053,20 @@ private struct CoinStoreView: View {
                             HStack(spacing:14) {
                                 ZStack { RoundedRectangle(cornerRadius:16).fill(Color.yellow.opacity(0.12)).frame(width:58,height:58); Image(systemName:"hexagon.fill").font(.system(size:26,weight:.black)).foregroundStyle(.yellow); Text("+").font(.system(size:10,weight:.black)).foregroundStyle(.black) }
                                 VStack(alignment:.leading,spacing:3){Text("\(pack.coins.formatted()) COIN").font(.system(size:17,weight:.black,design:.rounded));Text(pack.subtitle).font(.caption2).foregroundStyle(.white.opacity(0.46));Text(pack.badge).font(.system(size:10,weight:.black,design:.rounded)).tracking(1).foregroundStyle(.yellow)}
-                                Spacer(); if busy==pack.id { ProgressView().tint(.yellow) } else { Text(product?.displayPrice ?? "—").font(.system(size:14,weight:.black,design:.rounded)).foregroundStyle(.white) }
+                                Spacer(); if busy==pack.id || (product == nil && loadingProducts) { ProgressView().tint(.yellow) } else { Text(product?.displayPrice ?? "—").font(.system(size:14,weight:.black,design:.rounded)).foregroundStyle(.white) }
                             }.padding(14).background(Color.black.opacity(0.28),in:RoundedRectangle(cornerRadius:22)).overlay(RoundedRectangle(cornerRadius:22).stroke(Color.yellow.opacity(0.14)))
                         }.buttonStyle(.plain).disabled(busy != nil)
+                    }
+                    if !loadingProducts && store.coinProducts.isEmpty {
+                        VStack(spacing:10) {
+                            Text("Coin paketleri şu an yüklenemedi. İnternet bağlantını kontrol edip tekrar dene.").font(.system(size:13,weight:.semibold,design:.rounded)).foregroundStyle(.white.opacity(0.7)).multilineTextAlignment(.center)
+                            Button("TEKRAR DENE") { Task { await reloadProducts() } }.font(.system(size:12,weight:.bold,design:.rounded)).buttonStyle(.bordered).tint(.yellow)
+                        }.frame(maxWidth:.infinity).padding(.vertical,12)
                     }
                     if let message { Text(message).font(.system(size:13,weight:.bold,design:.rounded)).foregroundStyle(messageIsSuccess ? Color.mint : Color.orange).multilineTextAlignment(.center).padding(.top,8) }
                     Text("Ödemeler App Store üzerinden güvenle alınır. Coinler hesabına bağlıdır ve satın alma yarıda kalırsa bir sonraki açılışta otomatik tamamlanır.").font(.system(size:11,weight:.medium,design:.rounded)).foregroundStyle(.white.opacity(0.4)).multilineTextAlignment(.center).padding(.vertical,18)
                 }.padding(18)
             }
-        }.preferredColorScheme(.dark).task { await store.loadCoinProducts() }
+        }.preferredColorScheme(.dark).task { await reloadProducts() }
     }
 }

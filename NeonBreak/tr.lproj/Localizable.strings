@@ -2,3 +2,10 @@
    uygulamanın Türkçe yerelleştirmesi olduğunu bildirir. */
 
 "NEON BREAK" = "NEON BREAK";
+
+/* v5.16.4 coin satın alma girişleri */
+"COIN SATIN AL" = "COIN SATIN AL";
+"Coin paketleri • App Store ile güvenli ödeme" = "Coin paketleri • App Store ile güvenli ödeme";
+"COIN AL" = "COIN AL";
+"Coin satın al" = "Coin satın al";
+"Coin paketleri şu an yüklenemedi. İnternet bağlantını kontrol edip tekrar dene." = "Coin paketleri şu an yüklenemedi. İnternet bağlantını kontrol edip tekrar dene.";

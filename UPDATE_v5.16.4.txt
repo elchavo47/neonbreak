@@ -1,0 +1,13 @@
+NeonBreak iOS v5.16.4 (Backend değişmedi: v1.17.0)
+
+App Review red sebebi (Guideline 2.1(b) - IAP binary'de bulunamadı) için:
+- Mağaza (NEON MARKET) ekranının en üstüne büyük "COIN SATIN AL" kartı eklendi; Coin Kasası'nı açar.
+- Mağaza başlığındaki bakiye artık dokunulabilir (+ ikonu), Coin Kasası'nı açar.
+- "Yetersiz coin" uyarısında "COIN AL" butonu çıkar, Coin Kasası'na götürür.
+- Coin Kasası mağazadan açıldıysa geri tuşu mağazaya döner, ana ekrandan açıldıysa ana ekrana.
+- Coin Kasası: ürünler App Store'dan yüklenirken fiyat yerine yükleniyor göstergesi; yüklenemezse
+  açıklama + "TEKRAR DENE" butonu (eskiden sadece "—" görünüyordu).
+- Yeni metinler 7 dile eklendi.
+
+StoreKit / satın alma / sunucuya coin ekleme mantığına dokunulmadı.
+Derlenerek denenmedi.

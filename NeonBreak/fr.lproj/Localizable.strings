@@ -719,3 +719,10 @@
 "Kullanıcı adın topluluk kurallarına uymadığı için sıfırlandı. Uygun bir ad seçebilirsin." = "Ton pseudo a été réinitialisé car il ne respectait pas les règles de la communauté. Tu peux en choisir un autre.";
 "Profil fotoğrafın kaldırıldı" = "Ta photo de profil a été retirée";
 "Profil fotoğrafın topluluk kurallarına uymadığı için kaldırıldı." = "Ta photo de profil a été retirée car elle ne respectait pas les règles de la communauté.";
+
+/* v5.16.4 coin satın alma girişleri */
+"COIN SATIN AL" = "ACHETER DES PIÈCES";
+"Coin paketleri • App Store ile güvenli ödeme" = "Packs de pièces • Paiement sécurisé via l'App Store";
+"COIN AL" = "ACHETER";
+"Coin satın al" = "Acheter des pièces";
+"Coin paketleri şu an yüklenemedi. İnternet bağlantını kontrol edip tekrar dene." = "Impossible de charger les packs de pièces pour le moment. Vérifie ta connexion Internet et réessaie.";

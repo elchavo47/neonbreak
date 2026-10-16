@@ -801,3 +801,5 @@
 "Oyun verilerinde dışarıdan değişiklik algılandı. Bu oyun sayılmadı ve kayda geçti." = "Outside changes to the game data were detected. This game didn't count and has been logged.";
 "Bugünlük bitti • yarın yenilenir" = "Done for today • resets tomorrow";
 "Reklam hazırlanıyor…" = "Loading ad…";
+"Reklam izni verilmedi (Ayarlar > Gizlilik)" = "Ad consent not given (Settings > Privacy)";
+"Reklam yüklenemedi: %@" = "Ad failed to load: %@";

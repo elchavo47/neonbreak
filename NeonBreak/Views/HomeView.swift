@@ -575,7 +575,11 @@ struct HomeView: View {
                         badge: nil,
                         busy: adBusy || loading
                     ) {
-                        if loading { rewardedAds.reloadIfNeeded() } else { watchAdForCoins() }
+                        if loading {
+                            rewardedAds.reloadIfNeeded()
+                            adMessageOK = false
+                            adMessage = rewardedAds.loadError.map { LS("Reklam yüklenemedi: \($0)") } ?? L("Reklam hazırlanıyor…")
+                        } else { watchAdForCoins() }
                     }
                     .disabled(adBusy || used)
                     .opacity(used ? 0.55 : 1)

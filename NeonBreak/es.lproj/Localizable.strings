@@ -801,3 +801,5 @@
 "Oyun verilerinde dışarıdan değişiklik algılandı. Bu oyun sayılmadı ve kayda geçti." = "Se detectaron cambios externos en los datos del juego. Esta partida no cuenta y quedó registrada.";
 "Bugünlük bitti • yarın yenilenir" = "Agotado por hoy • mañana se renueva";
 "Reklam hazırlanıyor…" = "Cargando anuncio…";
+"Reklam izni verilmedi (Ayarlar > Gizlilik)" = "Sin consentimiento de anuncios (Ajustes > Privacidad)";
+"Reklam yüklenemedi: %@" = "No se pudo cargar el anuncio: %@";

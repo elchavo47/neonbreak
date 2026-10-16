@@ -801,3 +801,5 @@
 "Oyun verilerinde dışarıdan değişiklik algılandı. Bu oyun sayılmadı ve kayda geçti." = "Обнаружено внешнее изменение данных игры. Эта игра не засчитана и записана.";
 "Bugünlük bitti • yarın yenilenir" = "На сегодня всё • завтра снова";
 "Reklam hazırlanıyor…" = "Загрузка рекламы…";
+"Reklam izni verilmedi (Ayarlar > Gizlilik)" = "Нет согласия на рекламу (Настройки > Конфиденциальность)";
+"Reklam yüklenemedi: %@" = "Не удалось загрузить рекламу: %@";

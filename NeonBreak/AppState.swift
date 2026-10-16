@@ -129,6 +129,8 @@ final class RewardedAds: NSObject, ObservableObject {
     }
 
     @Published private(set) var isReady = false
+    /// Son yükleme hatası (kart "hazırlanıyor" durumundayken dokununca gösterilir).
+    @Published private(set) var loadError: String?
     private var completion: ((Bool) -> Void)?
     private var didEarnReward = false
     /// Son başarısızlığın oyuncuya gösterilecek nedeni (okununca temizlenir).
@@ -167,9 +169,9 @@ final class RewardedAds: NSObject, ObservableObject {
     /// Uygulama açılışında bir kez çağrılır.
     func start() {
         #if canImport(GoogleMobileAds)
-        guard Bundle.main.object(forInfoDictionaryKey: "GADApplicationIdentifier") != nil else { return }
+        guard Bundle.main.object(forInfoDictionaryKey: "GADApplicationIdentifier") != nil else { loadError = "GADApplicationIdentifier yok"; return }
         // Rıza alınmadan (ya da reddedildiyse) reklam SDK'sı başlatılmaz.
-        guard AdConsent.shared.canRequestAds else { return }
+        guard AdConsent.shared.canRequestAds else { loadError = L("Reklam izni verilmedi (Ayarlar > Gizlilik)"); return }
         MobileAds.shared.start(completionHandler: nil)
         load()
         #elseif DEBUG
@@ -242,9 +244,11 @@ final class RewardedAds: NSObject, ObservableObject {
                 rewardedAd = ad
                 loadedAt = Date()
                 failedLoads = 0
+                loadError = nil
                 isReady = true
             } catch {
                 isReady = false
+                loadError = error.localizedDescription
                 // Doldurulamadı / bağlantı yok: bir süre sonra kendiliğinden tekrar dene.
                 failedLoads += 1
                 let delay = min(120.0, 15.0 * pow(2.0, Double(min(failedLoads - 1, 3))))

@@ -95,3 +95,5 @@
 "Oyun verilerinde dışarıdan değişiklik algılandı. Bu oyun sayılmadı ve kayda geçti." = "Oyun verilerinde dışarıdan değişiklik algılandı. Bu oyun sayılmadı ve kayda geçti.";
 "Bugünlük bitti • yarın yenilenir" = "Bugünlük bitti • yarın yenilenir";
 "Reklam hazırlanıyor…" = "Reklam hazırlanıyor…";
+"Reklam izni verilmedi (Ayarlar > Gizlilik)" = "Reklam izni verilmedi (Ayarlar > Gizlilik)";
+"Reklam yüklenemedi: %@" = "Reklam yüklenemedi: %@";

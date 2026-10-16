@@ -679,7 +679,7 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         for node in fenceTinted {
             node.removeAction(forKey: "tint")
-            node.run(.colorize(with: color, colorBlendFactor: 1, duration: 0.35), forKey: "tint")
+            node.run(.colorize(with: color, colorBlendFactor: 1, duration: 0.35), withKey: "tint")
         }
         fence.removeAction(forKey: "pulse")
         fence.alpha = 1

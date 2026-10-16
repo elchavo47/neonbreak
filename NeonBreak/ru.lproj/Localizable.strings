@@ -765,3 +765,5 @@
 "EPIC" = "ЭПИЧЕСКИЙ";
 "LEGENDARY" = "ЛЕГЕНДАРНЫЙ";
 "MYTHIC" = "МИФИЧЕСКИЙ";
+"Satın alma tamamlandı" = "Покупка завершена";
+"%lld coin hesabına eklendi." = "На твой счёт зачислено монет: %lld.";

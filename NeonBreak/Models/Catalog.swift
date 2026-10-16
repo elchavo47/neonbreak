@@ -557,6 +557,10 @@ enum LocalizedCatalog {
 /// çevrilir; haftalık lig sonucu (içinde lig adı ve sıra olduğu için) ayrıştırılıp yeniden kurulur.
 /// Sunucudaki kalıp (league.php): "Geçen hafta X liginde grubunu N. sırada bitirdin.[ Y ligine yükseldin!| Y ligine düştün.]"
 func LM(_ message: String) -> String {
+    // Satın alma kaydı (backend 2.0.5+): "1000 coin hesabına eklendi."
+    if let m = message.range(of: "^[0-9]+(?= coin hesabına eklendi\\.$)", options: .regularExpression), let amount = Int(message[m]) {
+        return LS("\(amount) coin hesabına eklendi.")
+    }
     let pattern = "^Geçen hafta (\\S+) liginde grubunu (\\d+)\\. sırada bitirdin\\.(?: (\\S+) ligine (yükseldin!|düştün\\.))?$"
     guard let regex = try? NSRegularExpression(pattern: pattern),
           let match = regex.firstMatch(in: message, range: NSRange(message.startIndex..., in: message)) else { return L(message) }

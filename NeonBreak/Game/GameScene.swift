@@ -581,31 +581,113 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
 
-    /// Kırmızı sınır çizgisi. Oyun sonu kontrolüyle aynı değerden (dangerY) çizilir.
+    /// Enerji bariyeri: oyun sonu kontrolüyle aynı değerden (dangerY) çizilir. Normalde temanın renginde,
+    /// bloklar yaklaşınca turuncu, son sırada kırmızı ve nabız gibi atar.
+    private var fenceTinted: [SKSpriteNode] = []
+    private var fenceLevel = -1
+
+    /// Beyaz doku: yatayda kenarlara doğru sönen, dikeyde isteğe göre aşağı sönen gradyan.
+    private static func fenceTexture(width: CGFloat, height: CGFloat, verticalFade: Bool) -> SKTexture {
+        let size = CGSize(width: max(2, width), height: max(1, height))
+        let image = UIGraphicsImageRenderer(size: size).image { ctx in
+            let cg = ctx.cgContext
+            let space = CGColorSpaceCreateDeviceRGB()
+            let hColors = [UIColor.white.withAlphaComponent(0).cgColor, UIColor.white.cgColor, UIColor.white.cgColor, UIColor.white.withAlphaComponent(0).cgColor] as CFArray
+            if let h = CGGradient(colorsSpace: space, colors: hColors, locations: [0, 0.22, 0.78, 1]) {
+                cg.drawLinearGradient(h, start: .zero, end: CGPoint(x: size.width, y: 0), options: [])
+            }
+            if verticalFade {
+                // Üstte tam, aşağı doğru sıfıra iner (UIKit'te y aşağı doğru artar).
+                cg.setBlendMode(.destinationIn)
+                let vColors = [UIColor.white.cgColor, UIColor.white.withAlphaComponent(0.35).cgColor, UIColor.white.withAlphaComponent(0).cgColor] as CFArray
+                if let v = CGGradient(colorsSpace: space, colors: vColors, locations: [0, 0.35, 1]) {
+                    cg.drawLinearGradient(v, start: .zero, end: CGPoint(x: 0, y: size.height), options: [])
+                }
+            }
+        }
+        return SKTexture(image: image)
+    }
+
     private func rebuildFence() {
         decorLayer.removeAllChildren()
-        let width = max(1, size.width - 16)
+        fenceTinted.removeAll()
+        fenceLevel = -1
+        let width = max(1, size.width - 12)
         let fence = SKNode()
         fence.name = "dangerFence"
+        fence.position = CGPoint(x: size.width / 2, y: dangerY)
 
-        let rail = SKSpriteNode(color: SKColor(hex: 0xFF4770, alpha: 0.85), size: CGSize(width: width, height: 2))
-        rail.position = CGPoint(x: size.width / 2, y: dangerY)
-        fence.addChild(rail)
-
-        let glow = SKSpriteNode(color: SKColor(hex: 0xFF4770, alpha: 0.10), size: CGSize(width: width, height: cellH * 0.9))
-        glow.anchorPoint = CGPoint(x: 0.5, y: 1)
-        glow.position = CGPoint(x: size.width / 2, y: dangerY)
-        fence.addChild(glow)
-
-        let dashCount = max(6, Int(width / 26))
-        for index in 0..<dashCount {
-            let t = (CGFloat(index) + 0.5) / CGFloat(dashCount)
-            let dash = SKSpriteNode(color: SKColor(hex: 0xFF5B77, alpha: 0.42), size: CGSize(width: 1.5, height: 9))
-            dash.position = CGPoint(x: 8 + width * t, y: dangerY - 6)
-            fence.addChild(dash)
+        func tinted(_ texture: SKTexture, size: CGSize, alpha: CGFloat, anchorTop: Bool = false) -> SKSpriteNode {
+            let node = SKSpriteNode(texture: texture, size: size)
+            node.color = SKColor(hex: theme.accentHex)
+            node.colorBlendFactor = 1
+            node.alpha = alpha
+            node.blendMode = .add
+            if anchorTop { node.anchorPoint = CGPoint(x: 0.5, y: 1) }
+            fence.addChild(node)
+            fenceTinted.append(node)
+            return node
         }
-        fence.run(.repeatForever(.sequence([.fadeAlpha(to: 0.6, duration: 0.95), .fadeAlpha(to: 1.0, duration: 0.95)])))
+
+        // Aşağı sönen ışık hüzmesi (aurora)
+        _ = tinted(Self.fenceTexture(width: 128, height: 64, verticalFade: true), size: CGSize(width: width, height: cellH * 0.85), alpha: 0.22, anchorTop: true)
+        // Geniş renkli parıltı + renkli çizgi
+        _ = tinted(Self.fenceTexture(width: 128, height: 8, verticalFade: false), size: CGSize(width: width, height: 9), alpha: 0.35)
+        _ = tinted(Self.fenceTexture(width: 128, height: 4, verticalFade: false), size: CGSize(width: width, height: 3), alpha: 0.95)
+        // Beyaza yakın çekirdek
+        let core = SKSpriteNode(texture: Self.fenceTexture(width: 128, height: 2, verticalFade: false), size: CGSize(width: width * 0.86, height: 1.2))
+        core.alpha = 0.85
+        core.blendMode = .add
+        fence.addChild(core)
+
+        // Çizgi boyunca akan enerji parçacıkları
+        let travel = width * 0.42
+        for index in 0..<4 {
+            let spark = SKSpriteNode(texture: Self.fenceTexture(width: 32, height: 4, verticalFade: false), size: CGSize(width: 34, height: 3))
+            spark.color = .white
+            spark.colorBlendFactor = 1
+            spark.blendMode = .add
+            spark.alpha = 0
+            spark.position = CGPoint(x: -travel, y: 0)
+            fence.addChild(spark)
+            let duration = 2.6 + Double(index) * 0.35
+            spark.run(.sequence([
+                .wait(forDuration: Double(index) * 0.9),
+                .repeatForever(.sequence([
+                    .moveTo(x: -travel, duration: 0),
+                    .group([
+                        .moveTo(x: travel, duration: duration),
+                        .sequence([.fadeAlpha(to: 0.8, duration: duration * 0.2), .wait(forDuration: duration * 0.6), .fadeAlpha(to: 0, duration: duration * 0.2)])
+                    ]),
+                    .wait(forDuration: 0.4)
+                ]))
+            ]))
+        }
         decorLayer.addChild(fence)
+        setFenceLevel(0)
+    }
+
+    /// 0: sakin (tema rengi), 1: yaklaşıyor (turuncu), 2: son sıra (kırmızı nabız).
+    private func setFenceLevel(_ level: Int) {
+        guard level != fenceLevel, let fence = decorLayer.childNode(withName: "dangerFence") else { return }
+        fenceLevel = level
+        let color: SKColor
+        switch level {
+        case 2: color = SKColor(hex: 0xFF2D55)
+        case 1: color = SKColor(hex: 0xFF9F1C)
+        default: color = SKColor(hex: theme.accentHex)
+        }
+        for node in fenceTinted {
+            node.removeAction(forKey: "tint")
+            node.run(.colorize(with: color, colorBlendFactor: 1, duration: 0.35), forKey: "tint")
+        }
+        fence.removeAction(forKey: "pulse")
+        fence.alpha = 1
+        if level == 2 {
+            fence.run(.repeatForever(.sequence([.fadeAlpha(to: 0.55, duration: 0.3), .fadeAlpha(to: 1.0, duration: 0.3)])), withKey: "pulse")
+        } else {
+            fence.run(.repeatForever(.sequence([.fadeAlpha(to: 0.82, duration: 1.6), .fadeAlpha(to: 1.0, duration: 1.6)])), withKey: "pulse")
+        }
     }
 
     private func layoutLauncher() {
@@ -1711,6 +1793,7 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
     /// Son güvenli sıradaki bloklar nabız gibi atar: bir tur sonra çizgiye inecekler.
     private func warnDangerRow() {
         var hasDanger = false
+        let near = liveBlocks.contains { $0.row == Self.rows - 2 }
         for block in liveBlocks {
             block.removeAction(forKey: "danger")
             guard block.row == Self.rows - 1 else { continue }
@@ -1721,6 +1804,7 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
             ])), withKey: "danger")
         }
         setDanger(hasDanger)
+        setFenceLevel(hasDanger ? 2 : (near ? 1 : 0))
     }
 
     private func performShieldRescue() {
@@ -1742,6 +1826,7 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         isBoardTransitioning = true
         clearAim()
         setDanger(false)
+        setFenceLevel(0)
         HapticsManager.shared.danger()
         SoundManager.shared.gameOver()
         world.run(.sequence([

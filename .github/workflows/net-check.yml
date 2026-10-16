@@ -6,8 +6,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Reach backend from a datacenter IP
+        shell: bash {0}
         run: |
+          for v in "" "--http1.1"; do
           for u in https://neonbreak.aydworks.com.tr/health https://neonbreak.aydworks.com.tr/api/v1/bootstrap https://neonbreak.aydworks.com.tr/robots.txt; do
-            code=$(curl -s -o body.txt -w "%{http_code} %{content_type}" -A "NeonBreak/1.0 CFNetwork" "$u")
-            echo "::notice::$u -> $code :: $(head -c 160 body.txt | tr '\n' ' ')"
+            code=$(curl -sS $v -m 20 -o body.txt -w "%{http_code} %{http_version} %{content_type}" -A "NeonBreak/1.0 CFNetwork" "$u" 2>err.txt); rc=$?
+            echo "::notice::[$v] $u -> rc=$rc $code :: $(head -c 200 err.txt | tr '\n' ' ') :: $(head -c 160 body.txt 2>/dev/null | tr '\n' ' ')"
+          done
           done

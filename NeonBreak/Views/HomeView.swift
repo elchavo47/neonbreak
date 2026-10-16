@@ -539,8 +539,10 @@ struct HomeView: View {
     // MARK: Reklamla coin
 
     private var wheelAvailable: Bool { store.wheel?.enabled == true }
+    /// Sunucu reklamla coin veriyorsa kart her zaman görünür; hak bitti ya da reklam yükleniyor
+    /// durumları kartın üstünde yazar (kart kaybolup oyuncuyu şaşırtmaz).
     private var adAvailable: Bool {
-        if let ads = store.adRewards, ads.enabled, ads.coinsLeft > 0, ads.coinAmount > 0, rewardedAds.isReady { return true }
+        if let ads = store.adRewards, ads.enabled, ads.coinAmount > 0 { return true }
         return false
     }
 
@@ -562,16 +564,21 @@ struct HomeView: View {
                     .sheet(isPresented: $showWheel) { WheelSheet() }
                 }
                 if let ads = store.adRewards, adAvailable {
+                    let used = ads.coinsLeft <= 0
+                    let loading = !used && !rewardedAds.isReady
                     rewardTile(
                         icon: "play.rectangle.fill",
                         iconFill: AnyShapeStyle(Color.yellow),
                         tint: .yellow,
                         title: LS("+\(ads.coinAmount) coin"),
-                        detail: LS("Reklam izle • \(ads.coinsLeft) hak"),
+                        detail: used ? L("Bugünlük bitti • yarın yenilenir") : (loading ? L("Reklam hazırlanıyor…") : LS("Reklam izle • \(ads.coinsLeft) hak")),
                         badge: nil,
-                        busy: adBusy
-                    ) { watchAdForCoins() }
-                    .disabled(adBusy)
+                        busy: adBusy || loading
+                    ) {
+                        if loading { rewardedAds.reloadIfNeeded() } else { watchAdForCoins() }
+                    }
+                    .disabled(adBusy || used)
+                    .opacity(used ? 0.55 : 1)
                 }
             }
         }

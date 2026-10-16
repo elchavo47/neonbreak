@@ -131,6 +131,7 @@ struct ContentView: View {
                 NotificationManager.reschedule(dailyAvailable: store.daily?.available ?? false, hasUnfinishedRun: RunSnapshot.load() != nil)
             }
             guard phase == .active else { return }
+            RewardedAds.shared.reloadIfNeeded()
             Task { await store.refreshEntitlements() }
         }
         .onAppear {

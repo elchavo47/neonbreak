@@ -799,3 +799,5 @@
 "APP STORE'DAN İNDİR" = "DOWNLOAD FROM APP STORE";
 "Oyun iptal edildi" = "Game cancelled";
 "Oyun verilerinde dışarıdan değişiklik algılandı. Bu oyun sayılmadı ve kayda geçti." = "Outside changes to the game data were detected. This game didn't count and has been logged.";
+"Bugünlük bitti • yarın yenilenir" = "Done for today • resets tomorrow";
+"Reklam hazırlanıyor…" = "Loading ad…";

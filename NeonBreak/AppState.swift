@@ -152,7 +152,17 @@ final class RewardedAds: NSObject, ObservableObject {
     #if canImport(GoogleMobileAds)
     private var rewardedAd: RewardedAd?
     private var isLoading = false
+    /// Art arda yükleme hatası; yeniden deneme aralığı buna göre uzar (15 sn → en fazla 2 dk).
+    private var failedLoads = 0
     #endif
+
+    /// Reklam hazır değilse yeniden yüklemeyi dener (uygulama öne gelince ve karta dokununca).
+    func reloadIfNeeded() {
+        #if canImport(GoogleMobileAds)
+        guard !isReady else { return }
+        load()
+        #endif
+    }
 
     /// Uygulama açılışında bir kez çağrılır.
     func start() {
@@ -231,9 +241,14 @@ final class RewardedAds: NSObject, ObservableObject {
                 ad.fullScreenContentDelegate = self
                 rewardedAd = ad
                 loadedAt = Date()
+                failedLoads = 0
                 isReady = true
             } catch {
                 isReady = false
+                // Doldurulamadı / bağlantı yok: bir süre sonra kendiliğinden tekrar dene.
+                failedLoads += 1
+                let delay = min(120.0, 15.0 * pow(2.0, Double(min(failedLoads - 1, 3))))
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in self?.load() }
             }
         }
     }

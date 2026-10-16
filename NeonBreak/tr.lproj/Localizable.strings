@@ -64,3 +64,25 @@
 "Çerçeve" = "Çerçeve";
 "Unvan" = "Unvan";
 "Takılı değil" = "Takılı değil";
+/* v5.20.0 */
+"Bitişe" = "Bitişe";
+"Günün Bölümü" = "Günün Bölümü";
+"Herkes aynı harita • ilk 3 ödül alır" = "Herkes aynı harita • ilk 3 ödül alır";
+"Henüz skor yok" = "Henüz skor yok";
+"%lld oyuncu içinde" = "%lld oyuncu içinde";
+"En iyi skorun" = "En iyi skorun";
+"1. ödülü" = "1. ödülü";
+"Hakkın bitti" = "Hakkın bitti";
+"Oyna • %lld hak" = "Oyna • %lld hak";
+"Oyna" = "Oyna";
+"Günün Bölümü sıralaması" = "Günün Bölümü sıralaması";
+"%lld oyuncu • 1. %lld, 2. %lld, 3. %lld coin" = "%lld oyuncu • 1. %lld, 2. %lld, 3. %lld coin";
+"Seviye %lld" = "Seviye %lld";
+"Bugün henüz kimse skor yapmadı. İlk sen ol!" = "Bugün henüz kimse skor yapmadı. İlk sen ol!";
+"Bütün mağazada indirim" = "Bütün mağazada indirim";
+"%lldg %lldsa" = "%lldg %lldsa";
+"SENDE" = "SENDE";
+"HEMEN AL" = "HEMEN AL";
+"%@ alındı" = "%@ alındı";
+"Günün Bölümü ödülü" = "Günün Bölümü ödülü";
+"Dünkü Günün Bölümü sıralamasında %lld. oldun." = "Dünkü Günün Bölümü sıralamasında %lld. oldun.";

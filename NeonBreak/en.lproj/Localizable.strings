@@ -771,3 +771,24 @@
 "GÖRÜNÜM" = "APPEARANCE";
 "Unvan" = "Title";
 "Takılı değil" = "None";
+/* v5.20.0 */
+"Bitişe" = "Ends in";
+"Günün Bölümü" = "Daily Challenge";
+"Herkes aynı harita • ilk 3 ödül alır" = "Same map for everyone • top 3 win";
+"Henüz skor yok" = "No score yet";
+"%lld oyuncu içinde" = "among %lld players";
+"En iyi skorun" = "Your best score";
+"1. ödülü" = "1st prize";
+"Hakkın bitti" = "No attempts left";
+"Oyna • %lld hak" = "Play • %lld left";
+"Oyna" = "Play";
+"Günün Bölümü sıralaması" = "Daily Challenge leaderboard";
+"%lld oyuncu • 1. %lld, 2. %lld, 3. %lld coin" = "%lld players • 1st %lld, 2nd %lld, 3rd %lld coins";
+"Bugün henüz kimse skor yapmadı. İlk sen ol!" = "No one has scored today yet. Be the first!";
+"Bütün mağazada indirim" = "Sale across the whole store";
+"%lldg %lldsa" = "%lldd %lldh";
+"SENDE" = "OWNED";
+"HEMEN AL" = "BUY NOW";
+"%@ alındı" = "%@ purchased";
+"Günün Bölümü ödülü" = "Daily Challenge reward";
+"Dünkü Günün Bölümü sıralamasında %lld. oldun." = "You finished #%lld in yesterday's Daily Challenge.";

@@ -78,6 +78,8 @@ struct ShopView: View {
                 tabBar
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 12) {
+                        saleBanner
+                        featuredCard
                         buyCoinsCard
                         adCoinCard
                         switch tab {
@@ -539,11 +541,128 @@ struct ShopView: View {
     private func priceLabel(_ item: StoreManager.RemoteStoreItem) -> some View {
         HStack(spacing: 4) {
             if item.priceCoins > 0 { Image(systemName: "hexagon.fill").font(.system(size: 10, weight: .bold)) }
+            if item.isDiscounted, let original = item.originalPrice {
+                // İndirimde eski fiyat üstü çizili görünür.
+                Text(original.formatted()).strikethrough().opacity(0.55).font(.system(size: 11, weight: .semibold, design: .rounded))
+            }
             Text(item.priceCoins == 0 ? L("ÜCRETSİZ") : item.priceCoins.formatted())
         }
         .font(.system(size: 13, weight: .bold, design: .rounded))
         .monospacedDigit()
         .frame(minWidth: 74, minHeight: 24)
+    }
+
+    // MARK: Etkinlik ve vitrin
+
+    /// Mağaza indirimi etkinliği açıkken üstte sayaçlı şerit.
+    @ViewBuilder
+    private var saleBanner: some View {
+        if let sale = store.events.first(where: { $0.kind == "sale" }) {
+            HStack(spacing: 10) {
+                Text("%\(sale.value)")
+                    .font(.system(size: 15, weight: .black, design: .rounded)).foregroundStyle(.black)
+                    .frame(width: 46, height: 46)
+                    .background(Color(hex: 0xF0559F), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(LM(sale.title)).font(.system(size: 14, weight: .bold, design: .rounded)).foregroundStyle(.white).lineLimit(1)
+                    Text("Bütün mağazada indirim").font(.system(size: 12, weight: .regular, design: .rounded)).foregroundStyle(.white.opacity(0.6))
+                }
+                Spacer(minLength: 4)
+                if let end = sale.endDate { countdownChip(end, tint: Color(hex: 0xF0559F)) }
+            }
+            .padding(12)
+            .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color(hex: 0xF0559F).opacity(0.12)))
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color(hex: 0xF0559F).opacity(0.45), lineWidth: 1))
+        }
+    }
+
+    /// Vitrin: süreli, indirimli tek ürün.
+    @ViewBuilder
+    private var featuredCard: some View {
+        if let offer = store.featured, (offer.endDate ?? .distantPast) > Date() {
+            let owned = offer.category != "powerup" && offer.category != "bundle" && store.isOwned(itemKey: offer.itemKey)
+            let accent = Color(hex: 0xFFB020)
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Label(LM(offer.title).uppercased(with: Locale(identifier: AppLanguage.effectiveCode)), systemImage: "sparkles")
+                        .font(.system(size: 11, weight: .heavy, design: .rounded)).tracking(1.2).foregroundStyle(accent)
+                    Spacer()
+                    if let end = offer.endDate { countdownChip(end, tint: accent) }
+                }
+                HStack(spacing: 14) {
+                    featuredPreview(offer)
+                        .frame(width: 68, height: 68)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(LM(offer.name)).font(.system(size: 19, weight: .bold, design: .rounded)).foregroundStyle(.white).lineLimit(1)
+                        HStack(spacing: 6) {
+                            Text(offer.originalPrice.formatted()).strikethrough().foregroundStyle(.white.opacity(0.45))
+                            Image(systemName: "arrow.right").font(.system(size: 10, weight: .bold)).foregroundStyle(.white.opacity(0.4))
+                            Image(systemName: "hexagon.fill").font(.system(size: 11)).foregroundStyle(.yellow)
+                            Text(offer.priceCoins.formatted()).foregroundStyle(.white)
+                        }
+                        .font(.system(size: 14, weight: .bold, design: .rounded)).monospacedDigit()
+                        if offer.discountPct > 0 {
+                            Text(verbatim: "-%\(offer.discountPct)").font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(.black)
+                                .padding(.horizontal, 8).frame(height: 20).background(accent, in: Capsule())
+                        }
+                    }
+                    Spacer(minLength: 0)
+                }
+                Button {
+                    guard !owned, busyKey == nil else { return }
+                    let missing = offer.priceCoins - store.balance
+                    if missing > 0 { show(LS("Yetersiz coin • \(missing.formatted()) coin daha gerekli"), success: false, offersCoins: true); return }
+                    busyKey = offer.itemKey
+                    Task { @MainActor in
+                        let ok = await store.purchase(itemKey: offer.itemKey)
+                        busyKey = nil
+                        if ok { show(LS("\(LM(offer.name)) alındı"), success: true) }
+                        else { show(store.errorMessage ?? L("Satın alma tamamlanamadı"), success: false) }
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        if busyKey == offer.itemKey { ProgressView().tint(.black) }
+                        else { Image(systemName: owned ? "checkmark.circle.fill" : "bag.fill"); Text(owned ? L("SENDE") : L("HEMEN AL")) }
+                    }
+                    .font(.system(size: 14, weight: .heavy, design: .rounded)).foregroundStyle(.black)
+                    .frame(maxWidth: .infinity).frame(height: 44)
+                    .background(LinearGradient(colors: [accent, Color(hex: 0xFF7A45)], startPoint: .leading, endPoint: .trailing), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .opacity(owned ? 0.5 : 1)
+                }
+                .buttonStyle(.plain)
+                .disabled(owned || busyKey != nil)
+            }
+            .padding(16)
+            .background(
+                LinearGradient(colors: [accent.opacity(0.20), Color(hex: 0xFF7A45).opacity(0.08), Color.black.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing),
+                in: RoundedRectangle(cornerRadius: 20, style: .continuous)
+            )
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(accent.opacity(0.5), lineWidth: 1))
+        }
+    }
+
+    @ViewBuilder
+    private func featuredPreview(_ offer: StoreManager.FeaturedOffer) -> some View {
+        if offer.category == "ball", let skin = BallSkin.all.first(where: { "ball.\($0.id)" == offer.itemKey }) {
+            Image(skin.textureName).resizable().scaledToFit().shadow(color: Color(hex: skin.glowHex).opacity(0.7), radius: 12)
+        } else if offer.category == "background", let theme = BackgroundTheme.all.first(where: { "background.\($0.id)" == offer.itemKey }) {
+            Image(theme.textureName).resizable().scaledToFill().clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        } else {
+            Image(systemName: offer.category == "bundle" ? "shippingbox.fill" : "bolt.fill")
+                .font(.system(size: 28, weight: .bold)).foregroundStyle(.yellow)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.yellow.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
+    }
+
+    private func countdownChip(_ end: Date, tint: Color) -> some View {
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            let s = max(0, Int(end.timeIntervalSince(context.date)))
+            Text(s >= 86_400 ? LS("\(s / 86_400)g \((s % 86_400) / 3600)sa") : String(format: "%02d:%02d:%02d", s / 3600, (s % 3600) / 60, s % 60))
+                .font(.system(size: 12, weight: .bold, design: .rounded)).monospacedDigit().foregroundStyle(tint)
+                .padding(.horizontal, 9).frame(height: 24)
+                .background(tint.opacity(0.14), in: Capsule())
+        }
     }
 
     private func buyButton(item: StoreManager.RemoteStoreItem, accent: Color, successText: @escaping () -> String) -> some View {

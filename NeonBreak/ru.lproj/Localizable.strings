@@ -771,3 +771,24 @@
 "GÖRÜNÜM" = "ВНЕШНИЙ ВИД";
 "Unvan" = "Титул";
 "Takılı değil" = "Нет";
+/* v5.20.0 */
+"Bitişe" = "До конца";
+"Günün Bölümü" = "Задание дня";
+"Herkes aynı harita • ilk 3 ödül alır" = "Одна карта для всех • награда топ-3";
+"Henüz skor yok" = "Пока нет очков";
+"%lld oyuncu içinde" = "среди %lld игроков";
+"En iyi skorun" = "Твой лучший счёт";
+"1. ödülü" = "1-я награда";
+"Hakkın bitti" = "Попытки закончились";
+"Oyna • %lld hak" = "Играть • осталось %lld";
+"Oyna" = "Играть";
+"Günün Bölümü sıralaması" = "Рейтинг задания дня";
+"%lld oyuncu • 1. %lld, 2. %lld, 3. %lld coin" = "%lld игроков • 1-е %lld, 2-е %lld, 3-е %lld монет";
+"Bugün henüz kimse skor yapmadı. İlk sen ol!" = "Сегодня ещё никто не набрал очков. Будь первым!";
+"Bütün mağazada indirim" = "Скидка на весь магазин";
+"%lldg %lldsa" = "%lldд %lldч";
+"SENDE" = "ЕСТЬ";
+"HEMEN AL" = "КУПИТЬ";
+"%@ alındı" = "%@ куплено";
+"Günün Bölümü ödülü" = "Награда за задание дня";
+"Dünkü Günün Bölümü sıralamasında %lld. oldun." = "Вчера ты занял %lld-е место в задании дня.";

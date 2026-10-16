@@ -125,8 +125,8 @@ private struct GameRoundView: View {
             holder = GameHolder(seed: resume.seed, ticket: ticket, snapshot: resume, ballSkin: ballSkin, theme: theme, config: config, aimGuideEnabled: aimGuideEnabled, premiumEffectsEnabled: premiumEffectsEnabled)
             return
         }
-        var ticket: StoreManager.RunTicket?
-        if store.isOnline { ticket = await store.startRun() }
+        var ticket: StoreManager.RunTicket? = store.takePendingDailyTicket()
+        if ticket == nil, store.isOnline { ticket = await store.startRun() }
         guard holder == nil else { return }
         holder = GameHolder(seed: ticket?.seed ?? BoardGenerator.randomSeed(), ticket: ticket, snapshot: nil, ballSkin: ballSkin, theme: theme, config: config, aimGuideEnabled: aimGuideEnabled, premiumEffectsEnabled: premiumEffectsEnabled)
     }

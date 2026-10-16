@@ -32,6 +32,9 @@ struct HomeView: View {
     @State private var claimingQuest: String?
     @State private var isClaimingDaily = false
     @State private var dailyNotice: String?
+    @State private var dailyStarting = false
+    @State private var dailyMessage: String?
+    @State private var showDailyBoard = false
 
     private var progression: PlayerProgression {
         PlayerProgression(xp: store.profile?.lifetimeXp ?? Persistence.shared.lifetimeXP)
@@ -55,11 +58,13 @@ struct HomeView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 16) {
                     header
+                    ForEach(store.events) { eventBanner($0) }
                     if let announcement = store.announcement { announcementCard(announcement) }
                     notificationReminderCard
                     hero
                     playCard
                     dailyCard
+                    dailyChallengeCard
                     rewardTiles
                     questsCard
                     achievementsCard
@@ -633,6 +638,131 @@ struct HomeView: View {
             try? await Task.sleep(nanoseconds: 4_000_000_000)
             adMessage = nil
         }
+    }
+
+    // MARK: Etkinlik ve Günün Bölümü
+
+    /// Süreli etkinlik bannerı: başlık, açıklama ve geri sayım.
+    private func eventBanner(_ event: StoreManager.LiveEvent) -> some View {
+        let isSale = event.kind == "sale"
+        let tint = isSale ? Color(hex: 0xF0559F) : Color(hex: 0xFFB020)
+        return Button(action: isSale ? onShop : onPlay) {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 13, style: .continuous)
+                        .fill(LinearGradient(colors: [tint, tint.opacity(0.65)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    Text(isSale ? "%\(event.value)" : "\(String(format: "%g", Double(event.value) / 100))x")
+                        .font(.system(size: 15, weight: .black, design: .rounded)).foregroundStyle(.black)
+                        .minimumScaleFactor(0.6).padding(4)
+                }
+                .frame(width: 48, height: 48)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(LM(event.title)).font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(.white).lineLimit(1)
+                    if !event.message.isEmpty {
+                        Text(LM(event.message)).font(.system(size: 12, weight: .regular, design: .rounded)).foregroundStyle(.white.opacity(0.65)).lineLimit(2)
+                    }
+                }
+                Spacer(minLength: 4)
+                if let end = event.endDate {
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        VStack(spacing: 1) {
+                            Text("Bitişe").font(.system(size: 9, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.5))
+                            Text(countdown(to: end, now: context.date))
+                                .font(.system(size: 13, weight: .bold, design: .rounded)).monospacedDigit().foregroundStyle(tint)
+                        }
+                    }
+                }
+            }
+            .padding(12)
+            .background(HomeCardBackground(tint: tint, strong: true))
+        }
+        .buttonStyle(PressScaleStyle())
+    }
+
+    private func countdown(to end: Date, now: Date) -> String {
+        let s = max(0, Int(end.timeIntervalSince(now)))
+        if s >= 86_400 { return LS("\(s / 86_400)g \((s % 86_400) / 3600)sa") }
+        return String(format: "%02d:%02d:%02d", s / 3600, (s % 3600) / 60, s % 60)
+    }
+
+    /// Günün Bölümü kartı: herkes aynı haritayı oynar, gün sonunda ilk 3 ödül alır.
+    @ViewBuilder
+    private var dailyChallengeCard: some View {
+        if let daily = store.dailyChallenge, daily.enabled, store.isOnline {
+            let tint = Color(hex: 0x8C82FF)
+            let noAttempts = daily.attemptsLeft == 0
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 12) {
+                    Image(systemName: "calendar.badge.clock")
+                        .font(.system(size: 19, weight: .bold)).foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .background(LinearGradient(colors: [tint, Color(hex: 0x3DDCF0)], startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Günün Bölümü").font(.system(size: 16, weight: .bold, design: .rounded)).foregroundStyle(.white)
+                        Text("Herkes aynı harita • ilk 3 ödül alır").font(.system(size: 12, weight: .regular, design: .rounded)).foregroundStyle(.white.opacity(0.6))
+                    }
+                    Spacer(minLength: 4)
+                    TimelineView(.periodic(from: .now, by: 30)) { context in
+                        let end = Calendar.current.startOfDay(for: context.date).addingTimeInterval(86_400)
+                        Text(countdown(to: end, now: context.date).prefix(5))
+                            .font(.system(size: 12, weight: .bold, design: .rounded)).monospacedDigit().foregroundStyle(tint)
+                            .padding(.horizontal, 8).frame(height: 24)
+                            .background(tint.opacity(0.14), in: Capsule())
+                    }
+                }
+                HStack(spacing: 8) {
+                    dailyStat(LS("#\(daily.rank ?? 0)"), daily.rank == nil ? L("Henüz skor yok") : LS("\(daily.players) oyuncu içinde"), show: daily.rank != nil)
+                    dailyStat(daily.bestScore.formatted(), L("En iyi skorun"), show: daily.bestScore > 0)
+                    dailyStat("+\(daily.prizes.first ?? 0)", L("1. ödülü"), show: true)
+                }
+                HStack(spacing: 8) {
+                    Button {
+                        guard !dailyStarting else { return }
+                        dailyStarting = true; dailyMessage = nil
+                        Task { @MainActor in
+                            let ok = await store.prepareDailyRun()
+                            dailyStarting = false
+                            if ok { onPlay() } else { dailyMessage = store.errorMessage }
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            if dailyStarting { ProgressView().tint(.black) } else { Image(systemName: "play.fill") }
+                            Text(noAttempts ? L("Hakkın bitti") : (daily.attemptsLeft.map { LS("Oyna • \($0) hak") } ?? L("Oyna")))
+                        }
+                        .font(.system(size: 14, weight: .bold, design: .rounded)).foregroundStyle(.black)
+                        .frame(maxWidth: .infinity).frame(height: 42)
+                        .background(LinearGradient(colors: [tint, Color(hex: 0x3DDCF0)], startPoint: .leading, endPoint: .trailing), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                        .opacity(noAttempts ? 0.45 : 1)
+                    }
+                    .buttonStyle(PressScaleStyle())
+                    .disabled(noAttempts || dailyStarting)
+                    Button { showDailyBoard = true } label: {
+                        Image(systemName: "list.number")
+                            .font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
+                            .frame(width: 48, height: 42)
+                            .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                    }
+                    .buttonStyle(PressScaleStyle())
+                    .accessibilityLabel("Günün Bölümü sıralaması")
+                }
+                if let dailyMessage {
+                    Text(dailyMessage).font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(.orange)
+                }
+            }
+            .padding(14)
+            .background(HomeCardBackground(tint: tint, strong: true))
+            .sheet(isPresented: $showDailyBoard) { DailyBoardSheet().environmentObject(store) }
+        }
+    }
+
+    private func dailyStat(_ value: String, _ label: String, show: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 1) {
+            Text(show ? value : "—").font(.system(size: 15, weight: .bold, design: .rounded)).monospacedDigit().foregroundStyle(.white).lineLimit(1).minimumScaleFactor(0.7)
+            Text(label).font(.system(size: 10.5, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.5)).lineLimit(1).minimumScaleFactor(0.8)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 10).padding(.vertical, 8)
+        .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
     }
 
     // MARK: Kariyer hedefleri
@@ -1320,5 +1450,73 @@ struct PlayButton: View {
             withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) { breathe = true }
             withAnimation(.easeInOut(duration: 2.6).delay(0.8).repeatForever(autoreverses: false)) { sweep = true }
         }
+    }
+}
+
+// MARK: - Günün Bölümü sıralaması
+
+struct DailyBoardSheet: View {
+    @EnvironmentObject private var store: StoreManager
+    @Environment(\.dismiss) private var dismiss
+    @State private var loading = true
+
+    var body: some View {
+        ZStack {
+            Color(red: 0.03, green: 0.04, blue: 0.09).ignoresSafeArea()
+            VStack(spacing: 0) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Günün Bölümü").font(.system(size: 20, weight: .bold, design: .rounded))
+                        if let d = store.dailyChallenge {
+                            Text(LS("\(d.players) oyuncu • 1. \(d.prizes.first ?? 0), 2. \(d.prizes.dropFirst().first ?? 0), 3. \(d.prizes.dropFirst(2).first ?? 0) coin"))
+                                .font(.system(size: 12, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.55))
+                        }
+                    }
+                    Spacer()
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark").font(.system(size: 14, weight: .bold))
+                            .frame(width: 40, height: 40).background(Color.white.opacity(0.08), in: Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Kapat")
+                }
+                .padding(16)
+                if loading && (store.dailyChallenge?.top.isEmpty ?? true) {
+                    Spacer(); ProgressView().tint(.white); Spacer()
+                } else if let d = store.dailyChallenge, !d.top.isEmpty {
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 8) {
+                            ForEach(d.top) { e in
+                                HStack(spacing: 12) {
+                                    Text("\(e.rank)").font(.system(size: 15, weight: .black, design: .rounded)).monospacedDigit()
+                                        .foregroundStyle(e.rank == 1 ? Color.yellow : (e.rank <= 3 ? Color(hex: 0x8C82FF) : Color.white.opacity(0.5)))
+                                        .frame(width: 30)
+                                    Text(e.username).font(.system(size: 15, weight: e.userId == store.profile?.id ? .bold : .medium, design: .rounded))
+                                        .foregroundStyle(e.userId == store.profile?.id ? Color.cyan : Color.white).lineLimit(1)
+                                    Spacer(minLength: 6)
+                                    VStack(alignment: .trailing, spacing: 1) {
+                                        Text(e.bestScore.formatted()).font(.system(size: 15, weight: .bold, design: .rounded)).monospacedDigit()
+                                        Text(LS("Seviye \(e.bestLevel)")).font(.system(size: 11, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.5))
+                                    }
+                                }
+                                .padding(.horizontal, 14).frame(height: 56)
+                                .background(HomeCardBackground(tint: e.rank <= 3 ? Color(hex: 0x8C82FF) : .white, strong: e.userId == store.profile?.id))
+                            }
+                        }
+                        .padding(.horizontal, 16).padding(.bottom, 28)
+                    }
+                } else {
+                    Spacer()
+                    VStack(spacing: 8) {
+                        Image(systemName: "calendar.badge.clock").font(.system(size: 34, weight: .bold)).foregroundStyle(.white.opacity(0.4))
+                        Text("Bugün henüz kimse skor yapmadı. İlk sen ol!").font(.system(size: 14, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.6)).multilineTextAlignment(.center)
+                    }
+                    .padding(24)
+                    Spacer()
+                }
+            }
+        }
+        .preferredColorScheme(.dark)
+        .task { await store.loadDailyChallenge(); loading = false }
     }
 }

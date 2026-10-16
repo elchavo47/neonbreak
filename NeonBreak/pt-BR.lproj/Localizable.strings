@@ -771,3 +771,24 @@
 "GÖRÜNÜM" = "APARÊNCIA";
 "Unvan" = "Título";
 "Takılı değil" = "Nenhum";
+/* v5.20.0 */
+"Bitişe" = "Termina em";
+"Günün Bölümü" = "Desafio do dia";
+"Herkes aynı harita • ilk 3 ödül alır" = "Mesmo mapa para todos • top 3 ganha";
+"Henüz skor yok" = "Ainda sem pontuação";
+"%lld oyuncu içinde" = "entre %lld jogadores";
+"En iyi skorun" = "Sua melhor pontuação";
+"1. ödülü" = "1º prêmio";
+"Hakkın bitti" = "Sem tentativas";
+"Oyna • %lld hak" = "Jogar • restam %lld";
+"Oyna" = "Jogar";
+"Günün Bölümü sıralaması" = "Ranking do desafio do dia";
+"%lld oyuncu • 1. %lld, 2. %lld, 3. %lld coin" = "%lld jogadores • 1º %lld, 2º %lld, 3º %lld moedas";
+"Bugün henüz kimse skor yapmadı. İlk sen ol!" = "Ninguém pontuou hoje ainda. Seja o primeiro!";
+"Bütün mağazada indirim" = "Desconto em toda a loja";
+"%lldg %lldsa" = "%lldd %lldh";
+"SENDE" = "SEU";
+"HEMEN AL" = "COMPRAR";
+"%@ alındı" = "%@ comprado";
+"Günün Bölümü ödülü" = "Prêmio do desafio do dia";
+"Dünkü Günün Bölümü sıralamasında %lld. oldun." = "Você ficou em #%lld no desafio de ontem.";

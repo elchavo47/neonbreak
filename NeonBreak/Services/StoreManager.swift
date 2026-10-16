@@ -349,6 +349,58 @@ final class StoreManager: ObservableObject {
         let assetRef: String?
         /// Yalnızca paketlerde dolu: paketin verdiği güçler.
         let grants: [BundleGrant]?
+        /// İndirim varsa indirimsiz fiyat (backend 2.1+).
+        var originalPrice: Int? = nil
+        var isDiscounted: Bool { (originalPrice ?? priceCoins) > priceCoins }
+    }
+
+    /// Süreli etkinlik: "coins" (oyun sonu coin çarpanı, value = yüzde) ya da "sale" (mağaza indirimi, value = yüzde).
+    struct LiveEvent: Codable, Identifiable, Equatable {
+        let id: Int
+        let kind: String
+        let title: String
+        let message: String
+        let value: Int
+        let endsAt: String
+        var endDate: Date? { ISO8601DateFormatter().date(from: endsAt) }
+    }
+
+    /// Mağaza vitrini: süreli, indirimli tek ürün.
+    struct FeaturedOffer: Codable, Equatable {
+        let itemKey: String
+        let category: String
+        let name: String
+        let title: String
+        let originalPrice: Int
+        let discountPct: Int
+        let priceCoins: Int
+        let endsAt: String
+        var endDate: Date? { ISO8601DateFormatter().date(from: endsAt) }
+    }
+
+    /// Günün Bölümü: herkes aynı haritayı oynar.
+    struct DailyChallenge: Codable, Equatable {
+        struct Entry: Codable, Equatable, Identifiable {
+            var id: Int { userId }
+            let rank: Int
+            let userId: Int
+            let username: String
+            let avatarUrl: String?
+            let bestScore: Int
+            let bestLevel: Int
+        }
+        let enabled: Bool
+        let day: String
+        let endsIn: Int
+        let bestScore: Int
+        let bestLevel: Int
+        let attempts: Int
+        var attemptsLimit: Int? = nil
+        let rank: Int?
+        let players: Int
+        let prizes: [Int]
+        let top: [Entry]
+        var attemptsLeft: Int? { attemptsLimit.flatMap { $0 > 0 ? max(0, $0 - attempts) : nil } }
     }
 
     struct BundleGrant: Codable, Equatable, Hashable {
@@ -484,6 +536,8 @@ final class StoreManager: ObservableObject {
         let shieldActive: Bool?
         /// Sunucunun verdiği tahta tohumu (v1.5+).
         var seed: Int? = nil
+        /// "daily": Günün Bölümü oyunu.
+        var mode: String? = nil
     }
 
     /// Günlük görev. `type`: blocks, level, runs, powerups, coins, score.
@@ -530,6 +584,8 @@ final class StoreManager: ObservableObject {
         var achievements: [Achievement]? = nil
         var cosmetics: Cosmetics? = nil
         var season: SeasonState? = nil
+        var eventMultiplier: Double? = nil
+        var dailyChallenge: DailyChallenge? = nil
     }
 
     /// Bu ayın sezon çerçevesi: ay içinde `target` oyun bitirince açılır, ay bitince bir daha kazanılamaz.
@@ -605,6 +661,11 @@ final class StoreManager: ObservableObject {
     @Published private(set) var emailReward: EmailReward?
     @Published private(set) var season: SeasonState?
     @Published private(set) var blocked: [BlockedPlayer] = []
+    @Published private(set) var events: [LiveEvent] = []
+    @Published private(set) var featured: FeaturedOffer?
+    @Published private(set) var dailyChallenge: DailyChallenge?
+    /// Günün Bölümü için ana ekranda önceden alınan oyun bileti; oyun ekranı açılınca kullanılır.
+    private var pendingDailyTicket: RunTicket?
     /// Sunucunun istediği en düşük App Store sürümü bu sürümden büyükse true: oyun kilitlenir, güncelleme ekranı çıkar.
     @Published private(set) var updateRequired = StoreManager.isOutdated(minimum: UserDefaults.standard.string(forKey: "app.minVersion"))
 
@@ -982,8 +1043,19 @@ final class StoreManager: ObservableObject {
             let season: SeasonState?
             let minAppVersion: String?
             let blocked: [BlockedPlayer]?
+            var events: [LiveEvent]? = nil
+            var featured: FeaturedOffer? = nil
+            var dailyChallenge: DailyChallenge? = nil
         }
         let payload: Payload = try await send(request)
+        events = payload.events ?? []
+        featured = payload.featured
+        if let fresh = payload.dailyChallenge {
+            // Özet yanıtta ilk 20 listesi yok; önceden yüklenen listeyi koru.
+            if fresh.top.isEmpty, let current = dailyChallenge, current.day == fresh.day {
+                dailyChallenge = DailyChallenge(enabled: fresh.enabled, day: fresh.day, endsIn: fresh.endsIn, bestScore: fresh.bestScore, bestLevel: fresh.bestLevel, attempts: fresh.attempts, attemptsLimit: fresh.attemptsLimit, rank: fresh.rank, players: fresh.players, prizes: fresh.prizes, top: current.top)
+            } else { dailyChallenge = fresh }
+        }
         apply(player: payload.player)
         inventory = payload.inventory
         items = payload.store
@@ -1958,10 +2030,33 @@ final class StoreManager: ObservableObject {
         } catch { errorMessage = friendly(error) }
     }
 
-    func startRun() async -> RunTicket? {
+    /// Günün Bölümü: bileti ana ekranda alır (deneme hakkı bittiyse oyun açılmadan hata gösterilir).
+    func prepareDailyRun() async -> Bool {
+        pendingDailyTicket = nil
+        guard let ticket = await startRun(mode: "daily") else { return false }
+        pendingDailyTicket = ticket
+        await loadDailyChallenge()
+        return true
+    }
+
+    /// Ana ekranda alınmış Günün Bölümü biletini bir kez verir.
+    func takePendingDailyTicket() -> RunTicket? {
+        defer { pendingDailyTicket = nil }
+        return pendingDailyTicket
+    }
+
+    func loadDailyChallenge() async {
         do {
-            struct Input: Encodable { let generator: Int }
-            var request = try authorizedJSONRequest(path: "/runs/start", method: "POST", body: Input(generator: BoardGenerator.version))
+            struct Output: Decodable { let dailyChallenge: DailyChallenge }
+            let out: Output = try await send(try authorizedRequest(path: "/daily/challenge", method: "GET"))
+            dailyChallenge = out.dailyChallenge
+        } catch { }
+    }
+
+    func startRun(mode: String = "normal") async -> RunTicket? {
+        do {
+            struct Input: Encodable { let generator: Int; let mode: String }
+            var request = try authorizedJSONRequest(path: "/runs/start", method: "POST", body: Input(generator: BoardGenerator.version, mode: mode))
             request.timeoutInterval = 8 // oyun açılışını uzun süre bekletme
             let ticket: RunTicket = try await send(request)
             return ticket
@@ -2059,6 +2154,9 @@ final class StoreManager: ObservableObject {
         if let updated = reward.cosmetics { cosmetics = updated }
         if let updated = reward.season { season = updated }
         if let standing = reward.standing { myWeeklyRank = standing.rank }
+        if let daily = reward.dailyChallenge {
+            dailyChallenge = DailyChallenge(enabled: daily.enabled, day: daily.day, endsIn: daily.endsIn, bestScore: daily.bestScore, bestLevel: daily.bestLevel, attempts: daily.attempts, attemptsLimit: daily.attemptsLimit, rank: daily.rank, players: daily.players, prizes: daily.prizes, top: dailyChallenge?.top ?? [])
+        }
         Task { [weak self] in
             await self?.loadLeague()
             await self?.loadLeaderboard()
@@ -2198,6 +2296,9 @@ final class StoreManager: ObservableObject {
             securityBlock = "proxy"
             throw APIError.message(L("Cihazında proxy açıkken oyuna bağlanılamaz."))
         }
+        // Sunucu mesajları uygulamanın seçili dilinde gelsin (Türkçe dışı diller İngilizce alır).
+        var request = request
+        request.setValue(AppLanguage.effectiveCode, forHTTPHeaderField: "Accept-Language")
         let result: (Data, URLResponse)
         do {
             result = try await NetworkGuard.session.data(for: request)

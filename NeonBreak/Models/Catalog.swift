@@ -557,6 +557,10 @@ enum LocalizedCatalog {
 /// çevrilir; haftalık lig sonucu (içinde lig adı ve sıra olduğu için) ayrıştırılıp yeniden kurulur.
 /// Sunucudaki kalıp (league.php): "Geçen hafta X liginde grubunu N. sırada bitirdin.[ Y ligine yükseldin!| Y ligine düştün.]"
 func LM(_ message: String) -> String {
+    // Günün Bölümü ödülü (backend 2.1+): "Dünkü Günün Bölümü sıralamasında 2. oldun."
+    if let m = message.range(of: "(?<=^Dünkü Günün Bölümü sıralamasında )[0-9]+(?=\\. oldun\\.$)", options: .regularExpression), let rank = Int(message[m]) {
+        return LS("Dünkü Günün Bölümü sıralamasında \(rank). oldun.")
+    }
     // Satın alma kaydı (backend 2.0.5+): "1000 coin hesabına eklendi."
     if let m = message.range(of: "^[0-9]+(?= coin hesabına eklendi\\.$)", options: .regularExpression), let amount = Int(message[m]) {
         return LS("\(amount) coin hesabına eklendi.")

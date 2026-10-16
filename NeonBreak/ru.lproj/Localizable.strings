@@ -803,3 +803,5 @@
 "Reklam hazırlanıyor…" = "Загрузка рекламы…";
 "Reklam izni verilmedi (Ayarlar > Gizlilik)" = "Нет согласия на рекламу (Настройки > Конфиденциальность)";
 "Reklam yüklenemedi: %@" = "Не удалось загрузить рекламу: %@";
+"rekora %lld" = "до рекорда %lld";
+"Top %lld" = "Шары %lld";

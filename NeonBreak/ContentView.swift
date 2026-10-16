@@ -143,6 +143,21 @@ struct ContentView: View {
         .onChange(of: showSplash) { visible in
             // Uygulama bildirime dokunularak açıldıysa açılış ekranı bitince ilgili ekrana git.
             guard !visible else { return }
+            #if DEBUG
+            // Yalnızca simülatör ekran görüntüsü testleri: -NBShot <ekran> ile açılır, izin pencereleri çıkmaz.
+            if let shot = UserDefaults.standard.string(forKey: "NBShot") {
+                switch shot {
+                case "shop": route = .shop
+                case "profile": route = .profile
+                case "leaderboard": route = .leaderboard
+                case "coins": route = .coins
+                case "game": startNewGame()
+                case "settings": showSettings = true
+                default: break
+                }
+                return
+            }
+            #endif
             openPendingScreen()
             // Açılış sırası: reklam rızası → izleme izni → bildirim izni → reklamlar.
             Task { await AdConsent.shared.runLaunchSequence() }

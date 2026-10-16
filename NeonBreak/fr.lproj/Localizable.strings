@@ -803,3 +803,5 @@
 "Reklam hazırlanıyor…" = "Chargement de la pub…";
 "Reklam izni verilmedi (Ayarlar > Gizlilik)" = "Consentement pub non donné (Réglages > Confidentialité)";
 "Reklam yüklenemedi: %@" = "Échec du chargement de la pub : %@";
+"rekora %lld" = "record dans %lld";
+"Top %lld" = "Balles %lld";

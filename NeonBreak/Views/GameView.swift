@@ -176,7 +176,7 @@ private struct GameRoundContent: View {
             Color.black.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                GameHUD(session: session, onPause: { setPaused(true) })
+                GameHUD(session: session, accent: accent, onPause: { setPaused(true) })
                     .frame(height: 60)
 
                 ZStack(alignment: .bottom) {
@@ -576,66 +576,101 @@ private struct TamperAbortView: View {
 // MARK: - HUD
 
 private struct GameHUD: View {
+    @EnvironmentObject private var appState: AppState
     @ObservedObject var session: GameSession
+    let accent: Color
     let onPause: () -> Void
 
+    private var toRecord: Int? {
+        let left = session.recordAtStart - session.level + 1
+        return session.recordAtStart >= session.level && left <= 10 ? left : nil
+    }
+
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 12) {
             Button(action: onPause) {
                 Image(systemName: "pause.fill")
-                    .font(.system(size: 16, weight: .black))
+                    .font(.system(size: 14, weight: .black))
                     .foregroundStyle(.white)
-                    .frame(width: 44, height: 46)
-                    .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.white.opacity(0.14), lineWidth: 1))
+                    .frame(width: 40, height: 40)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.16), lineWidth: 1))
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Duraklat")
 
-            // Rekora yaklaşırken başlık kaç seviye kaldığını gösterir.
-            HUDValue(title: session.recordAtStart >= session.level && session.recordAtStart - session.level < 10 ? "REKORA \(session.recordAtStart - session.level + 1)" : "SEVİYE", value: "\(session.level)", color: .cyan)
-            HUDValue(title: "TOP", value: "\(session.ballCount)", color: .white)
-            HUDScore(ticker: session.scoreTicker)
+            // Seviye: büyük rakam; rekora yaklaşırken altında kaç seviye kaldığı yazar.
+            VStack(alignment: .leading, spacing: 1) {
+                Text("SEVİYE")
+                    .font(.system(size: 9, weight: .heavy, design: .rounded)).tracking(1.2)
+                    .foregroundStyle(accent.opacity(0.85))
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text("\(session.level)")
+                        .font(.system(size: 24, weight: .black, design: .rounded)).monospacedDigit()
+                        .foregroundStyle(.white)
+                        .contentTransition(.numericText())
+                    if let toRecord {
+                        Text(LS("rekora \(toRecord)"))
+                            .font(.system(size: 10, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 6).padding(.vertical, 2)
+                            .background(Color.yellow, in: Capsule())
+                    }
+                }
+            }
+            .accessibilityElement(children: .combine)
+
+            Spacer(minLength: 4)
+
+            // Top sayısı: seçili topun görseliyle.
+            HStack(spacing: 6) {
+                Image(appState.selectedBall.textureName)
+                    .resizable().scaledToFit()
+                    .frame(width: 20, height: 20)
+                    .shadow(color: Color(hex: appState.selectedBall.glowHex).opacity(0.8), radius: 6)
+                Text("×\(session.ballCount)")
+                    .font(.system(size: 17, weight: .black, design: .rounded)).monospacedDigit()
+                    .foregroundStyle(.white)
+            }
+            .padding(.horizontal, 12).frame(height: 34)
+            .background(Color.white.opacity(0.06), in: Capsule())
+            .overlay(Capsule().stroke(Color.white.opacity(0.12), lineWidth: 1))
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(Text("Top \(session.ballCount)"))
+
+            Spacer(minLength: 4)
+
+            HUDScore(ticker: session.scoreTicker, accent: accent)
         }
-        .padding(.horizontal, 10)
+        .padding(.horizontal, 14)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.black)
-        .overlay(Rectangle().fill(Color.white.opacity(0.08)).frame(height: 1), alignment: .bottom)
+        .background(
+            LinearGradient(colors: [Color.black, Color(hex: 0x0B1030)], startPoint: .top, endPoint: .bottom)
+        )
+        .overlay(alignment: .bottom) {
+            LinearGradient(colors: [accent.opacity(0), accent.opacity(0.7), Color.pink.opacity(0.6), Color.pink.opacity(0)], startPoint: .leading, endPoint: .trailing)
+                .frame(height: 1)
+        }
     }
 }
 
-/// Skor kutusu yalnızca skor yayınını izler; skor değişince HUD'un geri kalanı yeniden çizilmez.
+/// Skor yalnızca skor yayınını izler; skor değişince HUD'un geri kalanı yeniden çizilmez.
 private struct HUDScore: View {
     @ObservedObject var ticker: ScoreTicker
+    let accent: Color
 
     var body: some View {
-        HUDValue(title: "SKOR", value: ticker.value.formatted(), color: .pink)
-    }
-}
-
-private struct HUDValue: View {
-    let title: LocalizedStringKey
-    let value: String
-    let color: Color
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text(title)
-                .font(.system(size: 10, weight: .heavy, design: .rounded))
-                .tracking(0.8)
-                .foregroundStyle(color.opacity(0.75))
-            Text(value)
-                .font(.system(size: 18, weight: .black, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(.white)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
+        VStack(alignment: .trailing, spacing: 1) {
+            Text("SKOR")
+                .font(.system(size: 9, weight: .heavy, design: .rounded)).tracking(1.2)
+                .foregroundStyle(Color.pink.opacity(0.85))
+            Text(ticker.value.formatted())
+                .font(.system(size: 24, weight: .black, design: .rounded)).monospacedDigit()
+                .foregroundStyle(LinearGradient(colors: [.white, Color(hex: 0xFFD6E8)], startPoint: .top, endPoint: .bottom))
+                .lineLimit(1).minimumScaleFactor(0.6)
+                .contentTransition(.numericText())
         }
-        .padding(.horizontal, 8)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: 46)
-        .background(color.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(color.opacity(0.26), lineWidth: 1))
+        .frame(minWidth: 80, alignment: .trailing)
         .accessibilityElement(children: .combine)
     }
 }

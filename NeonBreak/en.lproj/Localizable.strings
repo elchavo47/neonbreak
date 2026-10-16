@@ -803,3 +803,5 @@
 "Reklam hazırlanıyor…" = "Loading ad…";
 "Reklam izni verilmedi (Ayarlar > Gizlilik)" = "Ad consent not given (Settings > Privacy)";
 "Reklam yüklenemedi: %@" = "Ad failed to load: %@";
+"rekora %lld" = "%lld to record";
+"Top %lld" = "Balls %lld";

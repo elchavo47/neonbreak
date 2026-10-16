@@ -287,6 +287,8 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
     private var lastUpdateTime: TimeInterval = 0
     private var velocityAccumulator: TimeInterval = 0
     private var isSpedUp = false
+    /// Tahtada kırılacak blok kalmadı: toplar sekmeye devam etmeden doğrudan aşağı iner.
+    private var isDropping = false
     private var pendingLaser = false
     private var userPaused = false
     private var pendingSnapshot: RunSnapshot?
@@ -1623,6 +1625,14 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         let rightLimit = size.width - wallInset - ballRadius * 0.5
         let topLimit = size.height - wallInset - ballRadius * 0.5
 
+        // Vuracak blok kalmadıysa sırada bekleyen toplar atılmaz, sahadakiler doğrudan aşağı iner.
+        if !isDropping && maintain && liveBlocks.isEmpty {
+            isDropping = true
+            removeAction(forKey: "launch")
+            ballsToLaunch = launchedBalls
+            session.setAssist(.none)
+        }
+
         for node in ballsLayer.children {
             guard let ball = node as? BallNode, let body = ball.physicsBody else { continue }
             var velocity = body.velocity
@@ -1641,7 +1651,11 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
                 ball.position = position
                 body.velocity = velocity
             }
-            if maintain {
+            if isDropping && velocity.dy > -ballSpeed * 0.9 {
+                // Hafif eğimle, normalden hızlı aşağı.
+                velocity = CGVector(dx: (velocity.dx >= 0 ? 1 : -1) * ballSpeed * 0.25, dy: -ballSpeed * 1.6)
+                body.velocity = velocity
+            } else if maintain && !isDropping {
                 velocity = normalizedVelocity(velocity)
                 body.velocity = velocity
             }
@@ -1665,7 +1679,9 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
             return
         }
 
-        if volleyElapsed > 14 {
+        if isDropping {
+            // Toplar zaten iniyor; yardım düğmesi gösterilmez.
+        } else if volleyElapsed > 14 {
             session.setAssist(.recall)
         } else if volleyElapsed > 5 && !isSpedUp {
             session.setAssist(.speedUp)
@@ -1690,6 +1706,7 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
 
     private func finishVolley() {
         isVolleyActive = false
+        isDropping = false
         session.setVolleyActive(false)
         session.setAssist(.none)
         removeAction(forKey: "launch")

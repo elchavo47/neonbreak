@@ -803,3 +803,5 @@
 "Reklam hazırlanıyor…" = "Werbung wird geladen…";
 "Reklam izni verilmedi (Ayarlar > Gizlilik)" = "Keine Werbe-Einwilligung (Einstellungen > Datenschutz)";
 "Reklam yüklenemedi: %@" = "Werbung konnte nicht geladen werden: %@";
+"rekora %lld" = "noch %lld zum Rekord";
+"Top %lld" = "Bälle %lld";

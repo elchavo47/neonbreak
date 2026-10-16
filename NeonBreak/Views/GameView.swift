@@ -150,6 +150,7 @@ private struct GameRoundContent: View {
     @State private var startedAt = Date()
     @State private var didSubmitRun = false
     @State private var serverCoins: Int?
+    @State private var eventMultiplier: Double = 1
     @State private var canDouble = false
     @State private var rewardPending = false
     @State private var rewardFailure: String?
@@ -231,6 +232,7 @@ private struct GameRoundContent: View {
                 GameOverCard(
                     session: session,
                     serverCoins: serverCoins,
+                    eventMultiplier: eventMultiplier,
                     rewardPending: rewardPending,
                     failureText: rewardFailure,
                     isCounted: runTicket != nil,
@@ -504,6 +506,7 @@ private struct GameRoundContent: View {
         Task { @MainActor in
             let reward = await store.finishRun(ticket: ticket, score: score, level: level, blocks: blocks, balls: balls, duration: duration, coins: coins)
             serverCoins = reward?.coinsAwarded
+            eventMultiplier = reward?.eventMultiplier ?? 1
             rewardFailure = reward == nil ? store.errorMessage : nil
             canDouble = (reward?.canDouble ?? false) && (reward?.coinsAwarded ?? 0) > 0
             rewardPending = false
@@ -737,6 +740,7 @@ private struct PauseOverlay: View {
 private struct GameOverCard: View {
     @ObservedObject var session: GameSession
     let serverCoins: Int?
+    let eventMultiplier: Double
     let rewardPending: Bool
     /// Ödül alınamadıysa nedeni (sunucunun mesajı ya da "sonucun saklandı").
     let failureText: String?
@@ -897,6 +901,9 @@ private struct GameOverCard: View {
             }
             .foregroundStyle(.yellow)
             .animation(.easeOut(duration: 0.9), value: serverCoins)
+            if eventMultiplier > 1, serverCoins > 0 {
+                eventBonusBadge(total: serverCoins)
+            }
         } else if session.blocksBroken == 0 {
             Label("Ödül için en az bir blok kır", systemImage: "info.circle.fill")
                 .foregroundStyle(.white.opacity(0.5))
@@ -905,6 +912,30 @@ private struct GameOverCard: View {
                 .foregroundStyle(.orange)
                 .multilineTextAlignment(.center)
         }
+    }
+
+    /// Etkinlik çarpanı: normalde kazanacağı coin üstü çizili, etkinlik sayesinde kazandığı fark vurgulu.
+    private func eventBonusBadge(total: Int) -> some View {
+        let base = max(1, Int((Double(total) / eventMultiplier).rounded()))
+        let multText = eventMultiplier == eventMultiplier.rounded() ? "\(Int(eventMultiplier))" : String(format: "%.1f", eventMultiplier)
+        return HStack(spacing: 8) {
+            Text("x\(multText)")
+                .font(.system(size: 12, weight: .black, design: .rounded))
+                .foregroundStyle(.black)
+                .padding(.horizontal, 8).padding(.vertical, 3)
+                .background(LinearGradient(colors: [.orange, .pink], startPoint: .leading, endPoint: .trailing), in: Capsule())
+            Text(L("ETKİNLİK"))
+                .font(.system(size: 11, weight: .heavy, design: .rounded)).tracking(1)
+                .foregroundStyle(.orange)
+            Text("\(base)").strikethrough().foregroundStyle(.white.opacity(0.45))
+            Image(systemName: "arrow.right").font(.system(size: 10, weight: .bold)).foregroundStyle(.white.opacity(0.45))
+            Text("\(total)").foregroundStyle(.yellow)
+            Text("+\(total - base) bonus").foregroundStyle(.orange)
+        }
+        .font(.system(size: 13, weight: .bold, design: .rounded))
+        .padding(.horizontal, 12).padding(.vertical, 7)
+        .background(Color.orange.opacity(0.12), in: Capsule())
+        .overlay(Capsule().stroke(Color.orange.opacity(0.35), lineWidth: 1))
     }
 
     /// Rekor kıl payı kaçtıysa oyuncuya bunu söyler: bir tur daha oynatmanın en kolay yolu.

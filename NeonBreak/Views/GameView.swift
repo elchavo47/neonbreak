@@ -160,6 +160,8 @@ private struct GameRoundContent: View {
     @State private var toast: String?
     @State private var toastToken = UUID()
     @State private var lastReportedLevel = 0
+    /// Hafıza hilesi yakalandı: oyun iptal edildi.
+    @State private var tamperAborted = false
     /// Envanterde kalmayan güç için "reklam izle, 1 tane kazan" teklifi.
     @State private var adOffer: PowerUpKind?
     /// İlk oyunlarda nasıl nişan alınacağını gösteren ipucu.
@@ -228,7 +230,13 @@ private struct GameRoundContent: View {
                 .zIndex(9)
             }
 
-            if session.isGameOver {
+            if tamperAborted {
+                TamperAbortView(onExit: onExit)
+                    .transition(.opacity)
+                    .zIndex(30)
+            }
+
+            if session.isGameOver && !tamperAborted {
                 GameOverCard(
                     session: session,
                     serverCoins: serverCoins,
@@ -256,6 +264,11 @@ private struct GameRoundContent: View {
             if runTicket == nil {
                 showToast(LS("Çevrimdışı deneme: coin ve sıralama sayılmaz"))
             }
+        }
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+            // Hafıza koruması: değerler dışarıdan değiştirildiyse oyun anında iptal edilir.
+            guard !tamperAborted, !didSubmitRun else { return }
+            if !session.verifyIntegrity() { abortForTamper() }
         }
         .onChange(of: session.isGameOver) { isOver in
             guard isOver else { return }
@@ -313,6 +326,7 @@ private struct GameRoundContent: View {
     /// Her tur sonunda oyunu kaydeder; uygulama kapansa da kaldığı yerden devam edilir.
     private func saveSnapshot() {
         guard !session.isGameOver, !didSubmitRun else { return }
+        guard session.verifyIntegrity() else { abortForTamper(); return }
         let board = scene.boardSnapshot()
         RunSnapshot(
             runId: runTicket?.runId,
@@ -343,6 +357,7 @@ private struct GameRoundContent: View {
     }
 
     private func reportProgress() {
+        guard !tamperAborted, session.verifyIntegrity() else { abortForTamper(); return }
         guard let ticket = runTicket, !didSubmitRun, session.blocksBroken > 0, session.level > lastReportedLevel else { return }
         lastReportedLevel = session.level
         let score = session.score, level = session.level, blocks = session.blocksBroken, balls = session.ballCount
@@ -488,8 +503,22 @@ private struct GameRoundContent: View {
         }
     }
 
+    /// Hile yakalandığında: oyun durur, skor gönderilmez, kayıt silinir, sunucuya bildirilir.
+    private func abortForTamper() {
+        guard !tamperAborted else { return }
+        tamperAborted = true
+        didSubmitRun = true
+        isPaused = false
+        scene.setUserPaused(true)
+        RunSnapshot.clear()
+        let reason = session.tamperReason ?? "unknown"
+        let ticket = runTicket
+        Task { @MainActor in await store.reportTamper(ticket: ticket, reason: reason) }
+    }
+
     private func submitRunIfNeeded() {
         guard !didSubmitRun else { return }
+        guard session.verifyIntegrity() else { abortForTamper(); return }
         didSubmitRun = true
         session.finalize()
         RunSnapshot.clear()
@@ -512,6 +541,35 @@ private struct GameRoundContent: View {
             rewardPending = false
             requestReviewIfEarned()
         }
+    }
+}
+
+// MARK: - Hile iptali
+
+private struct TamperAbortView: View {
+    let onExit: () -> Void
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.9).ignoresSafeArea()
+            VStack(spacing: 16) {
+                Image(systemName: "exclamationmark.shield.fill")
+                    .font(.system(size: 54, weight: .bold))
+                    .foregroundStyle(.red)
+                    .shadow(color: .red.opacity(0.6), radius: 18)
+                Text("Oyun iptal edildi")
+                    .font(.system(size: 26, weight: .heavy, design: .rounded))
+                Text("Oyun verilerinde dışarıdan değişiklik algılandı. Bu oyun sayılmadı ve kayda geçti.")
+                    .font(.system(size: 15, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.7))
+                    .multilineTextAlignment(.center)
+                NeonButton(title: L("ANA MENÜ"), systemImage: "house.fill", accent: .white, filled: false, action: onExit)
+                    .padding(.top, 6)
+            }
+            .padding(28)
+            .frame(maxWidth: 380)
+        }
+        .preferredColorScheme(.dark)
     }
 }
 

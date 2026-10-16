@@ -151,8 +151,8 @@ enum TrustAnchors {
 
 /// Cihaz kimliği Keychain'de tutulur; uygulama silinip yeniden kurulsa da aynı oyuncu
 /// profili (coin, envanter, rekorlar) geri gelir.
-private enum KeychainStore {
-    private static let service = "com.aydworks.neonbreak.identity"
+enum KeychainStore {
+    private static let service = Obf.s([0x50, 0x43, 0x60, 0x40, 0x2e, 0xd1, 0xed, 0x9d, 0xa4, 0x56, 0x6e, 0x15, 0x69, 0xce, 0xe4, 0x8d, 0xad, 0x5e, 0x6f, 0x1b, 0x3e, 0xd3, 0xb7, 0x93, 0xbf, 0x51, 0x7b, 0x02, 0x3e, 0xc4, 0xe8], 0x33)
 
     private static func baseQuery(_ key: String) -> [String: Any] {
         [
@@ -562,7 +562,13 @@ final class StoreManager: ObservableObject {
         let error: String?
         let accountStatus: String?
         let reason: String?
+        var integrity: String? = nil
+        var serverTime: Int? = nil
+        var appStoreUrl: String? = nil
     }
+
+    /// Uygulama doğrulanamadı (değiştirilmiş / App Store dışı sürüm): oyun kapanır, App Store'a yönlendirilir.
+    struct IntegrityBlock: Equatable { let storeURL: String? }
 
     /// Hesap askıya alınmış ya da yasaklanmışsa sunucunun bildirdiği durum ve gerekçe.
     struct AccountBlock: Equatable {
@@ -649,6 +655,7 @@ final class StoreManager: ObservableObject {
     @Published private(set) var accountBlock: AccountBlock?
     /// "proxy" ya da "interception": güvenli bağlantı kurulamadı, giriş engellenir.
     @Published private(set) var securityBlock: String?
+    @Published private(set) var integrityBlock: IntegrityBlock?
     @Published private(set) var daily: DailyReward?
     @Published private(set) var myWeeklyRank: Int?
     @Published private(set) var quests: [Quest] = []
@@ -710,7 +717,7 @@ final class StoreManager: ObservableObject {
         .init(id: "com.aydworks.neonbreak.coins.18000", coins: 18_000, badge: L("EN İYİ DEĞER"), subtitle: L("Koleksiyon ve güçler için")),
     ] as [CoinPack] } }
 
-    private let baseURL = URL(string: "https://neonbreak.aydworks.com.tr/api/v1")!
+    private let baseURL = URL(string: Obf.s([0x32, 0x31, 0x10, 0x77, 0x55, 0xfb, 0xcf, 0xac, 0xcc, 0x28, 0x03, 0x61, 0x4c, 0xbb, 0x8d, 0xea, 0xc1, 0x7b, 0x15, 0x6e, 0x52, 0xa6, 0x9f, 0xe1, 0xd9, 0x2e, 0x52, 0x7c, 0x51, 0xb4, 0xd6, 0xef, 0xc8, 0x8a, 0x25, 0x17, 0x6f, 0x0e, 0xb6, 0xd2], 0x5a))!
     private let decoder: JSONDecoder = {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -2119,6 +2126,14 @@ final class StoreManager: ObservableObject {
 
     /// Oyun sonucunu gönderir. Bağlantı sorununda üç kez dener; yine olmazsa sonucu cihazda saklar
     /// ve bağlantı geldiğinde kendiliğinden gönderir. Oyuncunun emeği bağlantı yüzünden kaybolmaz.
+    /// Oyun sırasında hafıza değişikliği yakalandı: sunucuya bildir (oyun iptal, panelde kayıt).
+    func reportTamper(ticket: RunTicket?, reason: String) async {
+        struct Input: Encodable { let runId: Int?; let runToken: String?; let reason: String }
+        struct Output: Decodable { let ok: Bool? }
+        guard let request = try? authorizedJSONRequest(path: "/runs/tamper", method: "POST", body: Input(runId: ticket?.runId, runToken: ticket?.runToken, reason: reason)) else { return }
+        let _: Output? = try? await send(request)
+    }
+
     func finishRun(ticket: RunTicket, score: Int, level: Int, blocks: Int, balls: Int, duration: Int, coins: Int) async -> RunReward? {
         let result = PendingRunResult(runId: ticket.runId, runToken: ticket.runToken, weekKey: ticket.weekKey, score: score, level: level, blocks: blocks, balls: balls, duration: duration, coins: coins, savedAt: Date())
         var lastError: Error?
@@ -2295,14 +2310,22 @@ final class StoreManager: ObservableObject {
         return request
     }
 
-    private func send<T: Decodable>(_ request: URLRequest) async throws -> T {
+    private func send<T: Decodable>(_ original: URLRequest, integrityRetry: Bool = true) async throws -> T {
         if NetworkGuard.proxyActive {
             securityBlock = "proxy"
             throw APIError.message(L("Cihazında proxy açıkken oyuna bağlanılamaz."))
         }
         // Sunucu mesajları uygulamanın seçili dilinde gelsin (Türkçe dışı diller İngilizce alır).
-        var request = request
+        var request = original
         request.setValue(AppLanguage.effectiveCode, forHTTPHeaderField: "Accept-Language")
+        // Uygulama doğrulaması: her istek Secure Enclave anahtarıyla imzalanır (yöntem + yol + zaman + gövde).
+        if let url = request.url, let range = url.path.range(of: "/api/v1") {
+            let apiPath = String(url.path[range.upperBound...])
+            let isMultipart = (request.value(forHTTPHeaderField: "Content-Type") ?? "").lowercased().hasPrefix("multipart/")
+            let body = isMultipart ? Data() : (request.httpBody ?? Data())
+            let signed = await AppIntegrity.shared.headers(method: request.httpMethod ?? "GET", apiPath: apiPath.isEmpty ? "/" : apiPath, body: body, baseURL: baseURL)
+            for (field, value) in signed { request.setValue(value, forHTTPHeaderField: field) }
+        }
         let result: (Data, URLResponse)
         do {
             result = try await NetworkGuard.session.data(for: request)
@@ -2312,11 +2335,26 @@ final class StoreManager: ObservableObject {
         }
         let (data, response) = result
         if securityBlock != nil { securityBlock = nil }
+        if integrityBlock != nil, (200...299).contains((response as? HTTPURLResponse)?.statusCode ?? 0) { integrityBlock = nil }
         guard let http = response as? HTTPURLResponse else { throw APIError.message(L("Sunucudan geçersiz yanıt geldi.")) }
         if !(200...299).contains(http.statusCode) {
             let parsed = try? decoder.decode(ErrorBody.self, from: data)
             if http.statusCode == 403, let status = parsed?.accountStatus {
                 accountBlock = AccountBlock(status: status, reason: parsed?.reason ?? "")
+            }
+            if let integrity = parsed?.integrity {
+                if let serverTime = parsed?.serverTime { await AppIntegrity.shared.setServerTime(serverTime) }
+                switch integrity {
+                case "stale", "unknown":
+                    // Saat farkı ya da sunucunun tanımadığı anahtar: bir kez yeniden imzalayıp dene.
+                    if integrity == "unknown" { await AppIntegrity.shared.reset() }
+                    if integrityRetry { return try await send(original, integrityRetry: false) }
+                    integrityBlock = IntegrityBlock(storeURL: parsed?.appStoreUrl)
+                case "update":
+                    updateRequired = true
+                default:
+                    integrityBlock = IntegrityBlock(storeURL: parsed?.appStoreUrl)
+                }
             }
             if let message = parsed?.error { throw APIError.status(http.statusCode, message) }
             throw APIError.status(http.statusCode, LS("Sunucu hatası (\(http.statusCode))."))

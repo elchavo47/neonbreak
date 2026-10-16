@@ -11,6 +11,7 @@
 		82FDB5029E6F8623BBAF7240 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49933B2A32D31EFCFB077CA /* ContentView.swift */; };
 		1FFB803EBCD369764C3D74B7 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E2283D1E39D52C19F77F919 /* GameScene.swift */; };
 		A4D35B2BE6709BFA88994B1A /* GameSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C7A4F3B46E4D5ACDA3B61E /* GameSession.swift */; };
+		7A11C0DE5EC0AA0100000001 /* Integrity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A11C0DE5EC0AA0100000002 /* Integrity.swift */; };
 		CFFBDE00FAFBFAD0C411B834 /* Catalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 618FE77A9C8EF5D15574CCC6 /* Catalog.swift */; };
 		C61C790E6E0AACB9FAD4271F /* NeonBreakApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E3732D3BF6FF217F72D51C4 /* NeonBreakApp.swift */; };
 		96C73F5D3F695D76AFB477B8 /* HapticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38415A20537A96834711DF2D /* HapticsManager.swift */; };
@@ -41,6 +42,7 @@
 		F49933B2A32D31EFCFB077CA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView.swift"; sourceTree = "<group>"; };
 		2E2283D1E39D52C19F77F919 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Game/GameScene.swift"; sourceTree = "<group>"; };
 		F0C7A4F3B46E4D5ACDA3B61E /* GameSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Game/GameSession.swift"; sourceTree = "<group>"; };
+		7A11C0DE5EC0AA0100000002 /* Integrity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/Integrity.swift"; sourceTree = "<group>"; };
 		618FE77A9C8EF5D15574CCC6 /* Catalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Catalog.swift"; sourceTree = "<group>"; };
 		5E3732D3BF6FF217F72D51C4 /* NeonBreakApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NeonBreakApp.swift"; sourceTree = "<group>"; };
 		38415A20537A96834711DF2D /* HapticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/HapticsManager.swift"; sourceTree = "<group>"; };
@@ -112,6 +114,7 @@
 				F49933B2A32D31EFCFB077CA /* ContentView.swift */,
 				2E2283D1E39D52C19F77F919 /* GameScene.swift */,
 				F0C7A4F3B46E4D5ACDA3B61E /* GameSession.swift */,
+				7A11C0DE5EC0AA0100000002 /* Integrity.swift */,
 				618FE77A9C8EF5D15574CCC6 /* Catalog.swift */,
 				5E3732D3BF6FF217F72D51C4 /* NeonBreakApp.swift */,
 				38415A20537A96834711DF2D /* HapticsManager.swift */,
@@ -228,6 +231,7 @@
 				82FDB5029E6F8623BBAF7240 /* ContentView.swift in Sources */,
 				1FFB803EBCD369764C3D74B7 /* GameScene.swift in Sources */,
 				A4D35B2BE6709BFA88994B1A /* GameSession.swift in Sources */,
+				7A11C0DE5EC0AA0100000001 /* Integrity.swift in Sources */,
 				CFFBDE00FAFBFAD0C411B834 /* Catalog.swift in Sources */,
 				C61C790E6E0AACB9FAD4271F /* NeonBreakApp.swift in Sources */,
 				96C73F5D3F695D76AFB477B8 /* HapticsManager.swift in Sources */,
@@ -340,6 +344,14 @@
 				SWIFT_COMPILATION_MODE = wholemodule;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				SDKROOT = iphoneos;
+				COPY_PHASE_STRIP = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEPLOYMENT_POSTPROCESSING = YES;
+				STRIP_INSTALLED_PRODUCT = YES;
+				STRIP_STYLE = all;
+				STRIP_SWIFT_SYMBOLS = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
 			name = Release;
 		};

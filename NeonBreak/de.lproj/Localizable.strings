@@ -793,3 +793,9 @@
 "Günün Bölümü ödülü" = "Belohnung der Tagesherausforderung";
 "Dünkü Günün Bölümü sıralamasında %lld. oldun." = "Du bist gestern in der Tagesherausforderung auf Platz %lld gelandet.";
 "ETKİNLİK" = "EVENT";
+
+"Orijinal uygulama gerekli" = "Original-App erforderlich";
+"NeonBreak'i yalnızca App Store'dan indirilen orijinal sürümüyle oynayabilirsin. Değiştirilmiş ya da başka yerden yüklenmiş sürümler oyuna bağlanamaz." = "Du kannst NeonBreak nur mit der Originalversion aus dem App Store spielen. Veränderte oder anderswo installierte Versionen können sich nicht verbinden.";
+"APP STORE'DAN İNDİR" = "IM APP STORE LADEN";
+"Oyun iptal edildi" = "Spiel abgebrochen";
+"Oyun verilerinde dışarıdan değişiklik algılandı. Bu oyun sayılmadı ve kayda geçti." = "Externe Änderungen an den Spieldaten erkannt. Dieses Spiel zählt nicht und wurde protokolliert.";

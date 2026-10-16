@@ -148,8 +148,12 @@ struct RunSnapshot: Codable, Equatable {
     private static let key = "run.snapshot.v1"
 
     static func load() -> RunSnapshot? {
-        guard let data = UserDefaults.standard.data(forKey: key),
-              let snapshot = try? JSONDecoder().decode(RunSnapshot.self, from: data) else { return nil }
+        guard let data = UserDefaults.standard.data(forKey: key) else { return nil }
+        // Cihazda düzenlenmiş kayıt (imza tutmuyor) devam ettirilemez.
+        guard SnapshotSeal.verify(data), let snapshot = try? JSONDecoder().decode(RunSnapshot.self, from: data) else {
+            clear()
+            return nil
+        }
         // Sunucu açık oyunları 7 gün tutar; daha eski kayıt devam ettirilemez.
         guard Date().timeIntervalSince(snapshot.savedAt) < 6 * 86_400, snapshot.level >= 1 else {
             clear()
@@ -159,11 +163,15 @@ struct RunSnapshot: Codable, Equatable {
     }
 
     func save() {
-        if let data = try? JSONEncoder().encode(self) { UserDefaults.standard.set(data, forKey: Self.key) }
+        if let data = try? JSONEncoder().encode(self) {
+            UserDefaults.standard.set(data, forKey: Self.key)
+            SnapshotSeal.seal(data)
+        }
     }
 
     static func clear() {
         UserDefaults.standard.removeObject(forKey: key)
+        SnapshotSeal.clear()
     }
 }
 
@@ -183,14 +191,14 @@ final class GameSession: ObservableObject {
     }
 
     /// Oynanan tur numarası. 1'den başlar, her tamamlanan atışta bir artar.
-    @Published private(set) var level: Int = 1
-    private(set) var score: Int = 0
+    @Published private(set) var level: Int = 1 { didSet { vault.store(.level, level) } }
+    private(set) var score: Int = 0 { didSet { vault.store(.score, score) } }
     let scoreTicker = ScoreTicker()
-    @Published private(set) var ballCount: Int = 1
+    @Published private(set) var ballCount: Int = 1 { didSet { vault.store(.balls, ballCount) } }
     @Published private(set) var isGameOver = false
     @Published var didCelebrateRecord = false
     /// Sahadaki coin'lere vurarak bu oyunda toplanan coin.
-    @Published private(set) var coinsCollected: Int = 0
+    @Published private(set) var coinsCollected: Int = 0 { didSet { vault.store(.coins, coinsCollected) } }
     /// Oyun, bloklar çizgiye indiği için bitti ve reklamla devam hakkı henüz kullanılmadı.
     @Published private(set) var canContinue = false
 
@@ -204,7 +212,7 @@ final class GameSession: ObservableObject {
 
     // Bir atış içinde çok sık değişir; her blok kırılışında tüm SwiftUI gözlemcileri
     // yeniden çizilmesin diye bilerek @Published değil.
-    private(set) var blocksBroken = 0
+    private(set) var blocksBroken = 0 { didSet { vault.store(.blocks, blocksBroken) } }
     private(set) var didUseSafetyShield = false
 
     private(set) var didContinue = false
@@ -213,11 +221,16 @@ final class GameSession: ObservableObject {
     let generator: Int
     let recordAtStart: Int
     private var didPersistRun = false
+    /// Değerlerin gizli kopyası (hafıza hilesine karşı).
+    private let vault = MemoryVault()
+    /// Hafıza değişikliği yakalandıysa hangi değerler (oyun iptal edilir).
+    @Published private(set) var tamperReason: String?
 
     init(seed: Int = BoardGenerator.randomSeed()) {
         self.seed = seed
         generator = BoardGenerator.version
         recordAtStart = Persistence.shared.bestLevel
+        sealValues()
     }
 
     /// Kayıtlı oyundan devam.
@@ -239,6 +252,34 @@ final class GameSession: ObservableObject {
         multiBallArmed = snapshot.multiBallArmed
         didContinue = snapshot.didContinue
         didCelebrateRecord = snapshot.level > Persistence.shared.bestLevel
+        sealValues()
+    }
+
+    /// init içinde didSet çalışmaz; başlangıç değerleri kasaya burada yazılır.
+    private func sealValues() {
+        vault.store(.score, score)
+        vault.store(.level, level)
+        vault.store(.balls, ballCount)
+        vault.store(.coins, coinsCollected)
+        vault.store(.blocks, blocksBroken)
+    }
+
+    /// Hafızadaki değerler kasayla uyuşuyor mu. Uyuşmuyorsa dışarıdan düzenlenmiştir: false döner
+    /// ve `tamperReason` dolar.
+    @discardableResult
+    func verifyIntegrity() -> Bool {
+        guard tamperReason == nil else { return false }
+        var broken: [String] = []
+        if !vault.matches(.score, score) || score < 0 { broken.append("score") }
+        if !vault.matches(.level, level) || level < 1 { broken.append("level") }
+        if !vault.matches(.balls, ballCount) || ballCount < 1 { broken.append("balls") }
+        if !vault.matches(.coins, coinsCollected) || coinsCollected < 0 { broken.append("coins") }
+        if !vault.matches(.blocks, blocksBroken) || blocksBroken < 0 { broken.append("blocks") }
+        guard broken.isEmpty else {
+            tamperReason = broken.joined(separator: ",")
+            return false
+        }
+        return true
     }
 
     /// Sunucunun verdiği XP ile aynı formül: blok x3 + seviye x5.

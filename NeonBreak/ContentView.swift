@@ -89,6 +89,11 @@ struct ContentView: View {
                     .transition(.opacity).zIndex(200)
             }
 
+            if let block = store.integrityBlock, !showSplash {
+                IntegrityBlockedView(storeLink: block.storeURL ?? store.links?.appStore) { await store.connect() }
+                    .transition(.opacity).zIndex(215)
+            }
+
             if let reason = store.securityBlock, !showSplash {
                 SecurityBlockedView(reason: reason) { await store.connect() }
                     .transition(.opacity).zIndex(210)
@@ -923,6 +928,69 @@ private struct UpdateRequiredView: View {
         }
         .preferredColorScheme(.dark)
         .onAppear { withAnimation(.easeOut(duration: 1.6).repeatForever(autoreverses: false)) { pulse = true } }
+    }
+}
+
+/// Uygulama Apple tarafından doğrulanamadı (değiştirilmiş ya da App Store dışından yüklenmiş sürüm).
+private struct IntegrityBlockedView: View {
+    let storeLink: String?
+    let onRetry: () async -> Void
+    @Environment(\.openURL) private var openURL
+    @State private var checking = false
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.97).ignoresSafeArea()
+            VStack(spacing: 16) {
+                ZStack {
+                    Circle().fill(Color.red.opacity(0.12)).frame(width: 118, height: 118)
+                    Image(systemName: "checkmark.shield.fill")
+                        .font(.system(size: 54, weight: .bold)).foregroundStyle(.red)
+                        .shadow(color: .red.opacity(0.6), radius: 18)
+                }
+                Text("Orijinal uygulama gerekli")
+                    .font(.system(size: 26, weight: .heavy, design: .rounded))
+                    .multilineTextAlignment(.center)
+                Text("NeonBreak'i yalnızca App Store'dan indirilen orijinal sürümüyle oynayabilirsin. Değiştirilmiş ya da başka yerden yüklenmiş sürümler oyuna bağlanamaz.")
+                    .font(.system(size: 15, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.7))
+                    .multilineTextAlignment(.center)
+                Button {
+                    if let storeLink, !storeLink.isEmpty, let url = URL(string: storeLink) { openURL(url) }
+                    else if let url = URL(string: "itms-apps://apps.apple.com/search?term=Neon%20Break") { openURL(url) }
+                } label: {
+                    Label("APP STORE'DAN İNDİR", systemImage: "arrow.down.app.fill")
+                        .font(.system(size: 16, weight: .black, design: .rounded))
+                        .foregroundStyle(.black)
+                        .frame(maxWidth: .infinity).frame(height: 56)
+                        .background(Color.cyan, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .shadow(color: .cyan.opacity(0.4), radius: 14, y: 5)
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 8)
+                Button {
+                    guard !checking else { return }
+                    checking = true
+                    Task { @MainActor in
+                        await onRetry()
+                        checking = false
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        if checking { ProgressView().tint(.white) }
+                        Text("TEKRAR DENE")
+                    }
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.8))
+                    .frame(maxWidth: .infinity).frame(height: 48)
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.white.opacity(0.25), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(28)
+            .frame(maxWidth: 400)
+        }
+        .preferredColorScheme(.dark)
     }
 }
 

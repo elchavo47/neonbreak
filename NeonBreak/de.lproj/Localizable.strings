@@ -767,3 +767,4 @@
 "MYTHIC" = "MYTHISCH";
 "Satın alma tamamlandı" = "Kauf abgeschlossen";
 "%lld coin hesabına eklendi." = "%lld Coins wurden deinem Konto gutgeschrieben.";
+"Ödeme alındı, coinler henüz eklenemedi: %@ Uygulama bir sonraki açılışta tekrar deneyecek." = "Zahlung erhalten, die Coins konnten noch nicht gutgeschrieben werden: %@ Die App versucht es beim nächsten Start erneut.";

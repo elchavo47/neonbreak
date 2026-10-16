@@ -1811,6 +1811,11 @@ final class StoreManager: ObservableObject {
                     try await creditCoins(for: transaction, signedTransaction: verification.jwsRepresentation)
                     errorMessage = nil
                     return true
+                } catch let api as APIError {
+                    // Sunucu cevap verdi ama işlemi kabul etmedi (ör. test satın alma günlük sınırı).
+                    // İşlem kapatılmaz; sonraki açılışlarda tekrar denenir, coin kaybolmaz.
+                    errorMessage = LS("Ödeme alındı, coinler henüz eklenemedi: \(api.description) Uygulama bir sonraki açılışta tekrar deneyecek.")
+                    return false
                 } catch {
                     // Ödeme alındı ama sunucuya ulaşılamadı: işlem kapatılmaz, bir sonraki
                     // bağlantıda otomatik olarak tekrar denenir. Coin kaybolmaz.

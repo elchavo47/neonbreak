@@ -767,3 +767,4 @@
 "MYTHIC" = "MÍTICA";
 "Satın alma tamamlandı" = "Compra concluída";
 "%lld coin hesabına eklendi." = "%lld moedas foram adicionadas à sua conta.";
+"Ödeme alındı, coinler henüz eklenemedi: %@ Uygulama bir sonraki açılışta tekrar deneyecek." = "Pagamento recebido, mas as moedas ainda não foram adicionadas: %@ O app tentará de novo na próxima abertura.";

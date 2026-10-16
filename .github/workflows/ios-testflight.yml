@@ -43,7 +43,7 @@ jobs:
             exit 1
           fi
           cat BUILD_SOURCE_VERSION.txt
-          grep -q "NEONBREAK SOURCE VERSION: 5.18.1" BUILD_SOURCE_VERSION.txt
+          grep -q "NEONBREAK SOURCE VERSION: 5.18.2" BUILD_SOURCE_VERSION.txt
           grep -q "struct NotificationItem" NeonBreak/Services/StoreManager.swift
           grep -q "static let columns = 7" NeonBreak/Game/GameScene.swift
           grep -q "signedTransaction" NeonBreak/Services/StoreManager.swift

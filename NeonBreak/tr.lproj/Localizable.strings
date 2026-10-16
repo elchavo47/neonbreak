@@ -59,3 +59,4 @@
 "DEVAM ET" = "DEVAM ET";
 "Satın alma tamamlandı" = "Satın alma tamamlandı";
 "%lld coin hesabına eklendi." = "%lld coin hesabına eklendi.";
+"Ödeme alındı, coinler henüz eklenemedi: %@ Uygulama bir sonraki açılışta tekrar deneyecek." = "Ödeme alındı, coinler henüz eklenemedi: %@ Uygulama bir sonraki açılışta tekrar deneyecek.";

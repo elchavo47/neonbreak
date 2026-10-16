@@ -63,9 +63,9 @@ struct HomeView: View {
                     notificationReminderCard
                     hero
                     playCard
+                    rewardTiles
                     dailyCard
                     dailyChallengeCard
-                    rewardTiles
                     questsCard
                     achievementsCard
                     progressCard
@@ -266,20 +266,20 @@ struct HomeView: View {
                 heroSide(neighborBall(-1), icon: "chevron.left", visible: canSwitch, glow: glow) { switchBall(by: -1) }
                 ZStack {
                     Circle()
-                        .fill(RadialGradient(colors: [glow.opacity(0.28), glow.opacity(0.0)], center: .center, startRadius: 10, endRadius: 95))
-                        .frame(width: 190, height: 190)
+                        .fill(RadialGradient(colors: [glow.opacity(0.28), glow.opacity(0.0)], center: .center, startRadius: 10, endRadius: 76))
+                        .frame(width: 150, height: 150)
                     Image(ball.textureName)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 132, height: 132)
-                        .shadow(color: glow.opacity(0.7), radius: 22)
+                        .frame(width: 100, height: 100)
+                        .shadow(color: glow.opacity(0.7), radius: 18)
                         .id(ball.id)
                         .transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
                 .frame(maxWidth: .infinity)
                 heroSide(neighborBall(1), icon: "chevron.right", visible: canSwitch, glow: glow) { switchBall(by: 1) }
             }
-            .frame(height: 176)
+            .frame(height: 132)
 
             VStack(spacing: 8) {
                 HStack(spacing: 8) {
@@ -337,17 +337,17 @@ struct HomeView: View {
             if visible, let neighbor {
                 Image(neighbor.textureName)
                     .resizable().scaledToFit()
-                    .frame(width: 46, height: 46)
+                    .frame(width: 36, height: 36)
                     .opacity(0.22)
                     .blur(radius: 0.5)
-                    .offset(x: icon == "chevron.left" ? -14 : 14, y: 46)
+                    .offset(x: icon == "chevron.left" ? -14 : 14, y: 36)
                     .allowsHitTesting(false)
             }
             Button(action: action) {
                 Image(systemName: icon)
                     .font(.system(size: 17, weight: .bold))
                     .foregroundStyle(.white)
-                    .frame(width: 48, height: 48)
+                    .frame(width: 44, height: 44)
                     .background(.ultraThinMaterial, in: Circle())
                     .background(Circle().fill(glow.opacity(0.16)))
                     .overlay(Circle().stroke(LinearGradient(colors: [glow.opacity(0.7), glow.opacity(0.15)], startPoint: .top, endPoint: .bottom), lineWidth: 1.2))

@@ -740,3 +740,28 @@
 "Oturum bulunamadı." = "Сессия не найдена.";
 "Bağlı değil • hesabın korunmuyor" = "Не привязан • аккаунт не защищён";
 "Başka cihazdaki hesabını e-postanla buraya taşı" = "Перенеси аккаунт с другого устройства по эл. почте";
+
+/* v5.18.0 ana sayfa ve bildirimler */
+"UYARI" = "ПРЕДУПРЕЖДЕНИЕ";
+"BİLGİ" = "ИНФО";
+"SATIN ALMA" = "ПОКУПКА";
+"HESABINLA İLGİLİ UYARI" = "УВЕДОМЛЕНИЕ ОБ АККАУНТЕ";
+"BİLGİLENDİRME" = "ИНФОРМАЦИЯ";
+"ANLADIM" = "ПОНЯТНО";
+"SATIN ALMA TAMAMLANDI" = "ПОКУПКА ЗАВЕРШЕНА";
+"Yükselme bölgesi" = "Зона повышения";
+"Düşme bölgesi" = "Зона вылета";
+"Yükselmeye %lld sıra" = "До повышения: %lld";
+"Güvende" = "В безопасности";
+"Ücretsiz hakkın hazır" = "Бесплатный спин готов";
+"Reklamla bir kez daha" = "Ещё раз за рекламу";
+"+%lld coin" = "+%lld монет";
+"Reklam izle • %lld hak" = "Реклама • осталось %lld";
+"Önceki top" = "Предыдущий шар";
+"Sonraki top" = "Следующий шар";
+"CORE" = "ЯДРО";
+"COMMON" = "ОБЫЧНЫЙ";
+"RARE" = "РЕДКИЙ";
+"EPIC" = "ЭПИЧЕСКИЙ";
+"LEGENDARY" = "ЛЕГЕНДАРНЫЙ";
+"MYTHIC" = "МИФИЧЕСКИЙ";

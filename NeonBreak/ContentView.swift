@@ -1387,7 +1387,7 @@ private struct LeaderboardView: View {
             }
             if leagueOpen {
                 if let state, placed {
-                    Text("Grubunda \(state.size) oyuncu var. İlk \(state.promote) yükselir\(state.demote > 0 ? String(localized: ", son \(state.demote) düşer") : "").")
+                    Text("Grubunda \(state.size) oyuncu var. İlk \(state.promote) yükselir\(state.demote > 0 ? LS(", son \(state.demote) düşer") : "").")
                         .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.6))
                     if state.prizes.count >= 3 {
@@ -1776,7 +1776,7 @@ private struct ProfileView: View {
         Button {
             if let remaining = store.avatarChangeRemaining() {
                 profileSaved = false
-                profileMessage = String(localized: "Profil fotoğrafını haftada bir kez değiştirebilirsin. Kalan süre: \(formatRemaining(remaining))")
+                profileMessage = LS("Profil fotoğrafını haftada bir kez değiştirebilirsin. Kalan süre: \(formatRemaining(remaining))")
             } else {
                 showAvatarPicker = true
             }
@@ -2015,7 +2015,7 @@ private struct ProfileView: View {
                     .background(accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Canlı destek").font(.system(size: 14, weight: .medium, design: .rounded)).foregroundStyle(.white)
-                    Text(store.supportTickets.isEmpty ? L("Yeni destek talebi oluştur") : String(localized: "\(store.supportTickets.count) talebin var • mesajlarını takip et"))
+                    Text(store.supportTickets.isEmpty ? L("Yeni destek talebi oluştur") : LS("\(store.supportTickets.count) talebin var • mesajlarını takip et"))
                         .font(.system(size: 12, weight: .regular, design: .rounded)).foregroundStyle(muted)
                         .lineLimit(1).minimumScaleFactor(0.8)
                 }
@@ -2109,9 +2109,9 @@ private struct ProfileView: View {
         let hours = (total % 86_400) / 3_600
         let minutes = (total % 3_600) / 60
         let seconds = total % 60
-        if days > 0 { return String(localized: "\(days)g \(hours)sa \(minutes)dk") }
-        if hours > 0 { return String(localized: "\(hours)sa \(minutes)dk \(seconds)sn") }
-        return String(localized: "\(minutes)dk \(seconds)sn")
+        if days > 0 { return LS("\(days)g \(hours)sa \(minutes)dk") }
+        if hours > 0 { return LS("\(hours)sa \(minutes)dk \(seconds)sn") }
+        return LS("\(minutes)dk \(seconds)sn")
     }
 
     private var profileRankTitle: String {
@@ -3085,7 +3085,7 @@ private struct InboxView: View {
                     }
                     VStack(alignment: .leading, spacing: 2) {
                         Text("BİLDİRİMLER").font(.system(size: 18, weight: .bold, design: .rounded))
-                        Text(store.unreadNotificationCount > 0 ? String(localized: "\(store.unreadNotificationCount) okunmamış bildirim") : L("Her şey güncel"))
+                        Text(store.unreadNotificationCount > 0 ? LS("\(store.unreadNotificationCount) okunmamış bildirim") : L("Her şey güncel"))
                             .font(.caption2).foregroundStyle(store.unreadNotificationCount > 0 ? .cyan : .white.opacity(0.42))
                     }
                     Spacer()
@@ -3176,6 +3176,9 @@ private struct InboxView: View {
         case "support": return ("checkmark.seal.fill", .green, L("DESTEK"))
         case "announcement": return ("megaphone.fill", .cyan, L("DUYURU"))
         case "weekly_reward": return ("crown.fill", .yellow, L("HAFTALIK ÖDÜL"))
+        case "warning": return ("exclamationmark.triangle.fill", .orange, L("UYARI"))
+        case "info": return ("info.circle.fill", .cyan, L("BİLGİ"))
+        case "purchase": return ("bag.fill", .mint, L("SATIN ALMA"))
         default: return ("gift.fill", .pink, L("ÖDÜL"))
         }
     }
@@ -3214,17 +3217,29 @@ private struct AnnouncementPopup: View {
 private struct RewardPopup: View {
     let reward: StoreManager.RewardNotice
     let onDismiss: () -> Void
+
+    /// Ödül dışı kayıtlar (uyarı, bilgi, satın alma) "ödül geldi" diye gösterilmez.
+    private var style: (icon: String, color: Color, header: String, button: String, buttonIcon: String) {
+        switch StoreManager.noticeType(for: reward) {
+        case "warning": return ("exclamationmark.triangle.fill", .orange, L("HESABINLA İLGİLİ UYARI"), L("ANLADIM"), "checkmark")
+        case "info": return ("info.circle.fill", .cyan, L("BİLGİLENDİRME"), L("TAMAM"), "checkmark")
+        case "purchase": return ("bag.fill", .mint, L("SATIN ALMA TAMAMLANDI"), L("TAMAM"), "checkmark")
+        default: return ("gift.fill", .yellow, L("HESABINA ÖDÜL GELDİ"), L("ÖDÜLÜ AL"), "sparkles")
+        }
+    }
+
     var body: some View {
+        let st = style
         ZStack {
             Color.black.opacity(0.78).ignoresSafeArea()
             VStack(spacing:15) {
-                ZStack { Circle().fill(LinearGradient(colors:[.yellow.opacity(0.3),.orange.opacity(0.12)],startPoint:.top,endPoint:.bottom)).frame(width:88,height:88); Image(systemName:"gift.fill").font(.system(size:38,weight:.black)).foregroundStyle(.yellow).shadow(color:.yellow.opacity(0.5),radius:15) }
-                Text("HESABINA ÖDÜL GELDİ").font(.system(size:9,weight:.black,design:.rounded)).tracking(1.7).foregroundStyle(.yellow)
+                ZStack { Circle().fill(LinearGradient(colors:[st.color.opacity(0.3),st.color.opacity(0.08)],startPoint:.top,endPoint:.bottom)).frame(width:88,height:88); Image(systemName:st.icon).font(.system(size:36,weight:.black)).foregroundStyle(st.color).shadow(color:st.color.opacity(0.5),radius:15) }
+                Text(st.header).font(.system(size:9,weight:.black,design:.rounded)).tracking(1.7).foregroundStyle(st.color)
                 Text(L(reward.title)).font(.system(size:24,weight:.black,design:.rounded)).multilineTextAlignment(.center)
                 Text(LM(reward.message)).font(.system(size:12,weight:.medium,design:.rounded)).foregroundStyle(.white.opacity(0.62)).multilineTextAlignment(.center)
                 if reward.coinsAwarded > 0 { Label("+\(reward.coinsAwarded.formatted()) COIN",systemImage:"hexagon.fill").font(.system(size:17,weight:.black,design:.rounded)).foregroundStyle(.yellow).padding(.vertical,10).padding(.horizontal,16).background(Color.yellow.opacity(0.10),in:Capsule()) }
-                NeonButton(title:L("ÖDÜLÜ AL"),systemImage:"sparkles",accent:.yellow,action:onDismiss)
-            }.padding(24).background(.ultraThinMaterial,in:RoundedRectangle(cornerRadius:30)).overlay(RoundedRectangle(cornerRadius:30).stroke(Color.yellow.opacity(0.22))).padding(.horizontal,28)
+                NeonButton(title:st.button,systemImage:st.buttonIcon,accent:st.color,action:onDismiss)
+            }.padding(24).background(.ultraThinMaterial,in:RoundedRectangle(cornerRadius:30)).overlay(RoundedRectangle(cornerRadius:30).stroke(st.color.opacity(0.22))).padding(.horizontal,28)
         }
     }
 }
@@ -3257,7 +3272,7 @@ private struct CoinStoreView: View {
                                 let ok = await store.purchaseCoinPack(pack)
                                 messageIsSuccess = ok
                                 // Kullanıcı satın almayı kendisi iptal ettiyse hata mesajı gösterme.
-                                message = ok ? String(localized: "+\(pack.coins.formatted()) coin hesabına eklendi.") : store.errorMessage
+                                message = ok ? LS("+\(pack.coins.formatted()) coin hesabına eklendi.") : store.errorMessage
                                 busy = nil
                             }
                         } label: {

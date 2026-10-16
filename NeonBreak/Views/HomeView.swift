@@ -60,8 +60,7 @@ struct HomeView: View {
                     hero
                     playCard
                     dailyCard
-                    wheelCard
-                    adCoinCard
+                    rewardTiles
                     questsCard
                     achievementsCard
                     progressCard
@@ -93,9 +92,17 @@ struct HomeView: View {
                     }
                     .frame(width: 44, height: 44)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(store.playerName)
-                            .font(.system(size: 16, weight: .bold, design: .rounded)).foregroundStyle(.white)
-                            .lineLimit(1)
+                        HStack(spacing: 5) {
+                            Text(store.playerName)
+                                .font(.system(size: 16, weight: .semibold, design: .rounded)).foregroundStyle(.white)
+                                .lineLimit(1)
+                            Text("\(progression.rank)")
+                                .font(.system(size: 9, weight: .heavy, design: .rounded)).monospacedDigit()
+                                .foregroundStyle(.black)
+                                .padding(.horizontal, 5).frame(minWidth: 18, minHeight: 16)
+                                .background(LinearGradient(colors: [.cyan, .purple], startPoint: .leading, endPoint: .trailing), in: Capsule())
+                                .accessibilityLabel(Text("Rütbe \(progression.rank)"))
+                        }
                         if let title = store.cosmetics?.title ?? store.profile?.title {
                             Text(Cosmetic.titleName(title))
                                 .font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(.yellow)
@@ -119,22 +126,22 @@ struct HomeView: View {
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .animation(.easeOut(duration: 0.9), value: store.balance)
                     }
-                    .padding(.leading, 12).padding(.trailing, 8).frame(height: 38)
+                    .padding(.leading, 11).padding(.trailing, 7).frame(height: 34)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Mağaza")
                 Button(action: onCoins) {
                     Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 16)).foregroundStyle(.yellow)
-                        .padding(.trailing, 10).frame(height: 38)
+                        .font(.system(size: 15)).foregroundStyle(.yellow)
+                        .padding(.trailing, 9).frame(height: 34)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Coin al")
             }
             .background(.ultraThinMaterial, in: Capsule())
-            .overlay(Capsule().stroke(Color.yellow.opacity(0.2), lineWidth: 1))
+            .overlay(Capsule().stroke(Color.yellow.opacity(0.16), lineWidth: 1))
             Button(action: onNotifications) {
                 ZStack(alignment: .topTrailing) {
                     Image(systemName: store.unreadNotificationCount > 0 ? "bell.fill" : "bell")
@@ -175,7 +182,7 @@ struct HomeView: View {
                     if let coins {
                         coinBurst += 1
                         NotificationManager.requestPermissionIfNeeded()
-                        dailyNotice = String(localized: "+\(coins.formatted()) coin hesabına eklendi. Yarın tekrar gel!")
+                        dailyNotice = LS("+\(coins.formatted()) coin hesabına eklendi. Yarın tekrar gel!")
                     } else {
                         dailyNotice = store.errorMessage ?? L("Günlük ödül alınamadı.")
                     }
@@ -203,8 +210,7 @@ struct HomeView: View {
                     }
                 }
                 .padding(13)
-                .background(Color.yellow.opacity(0.10), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.yellow.opacity(0.35), lineWidth: 1))
+                .background(HomeCardBackground(tint: .yellow, strong: true))
             }
             .buttonStyle(.plain)
             .disabled(isClaimingDaily)
@@ -237,48 +243,80 @@ struct HomeView: View {
         }
     }
 
+    /// Seçili topun sağındaki / solundaki sahip olunan top (kenarlarda soluk önizleme için).
+    private func neighborBall(_ step: Int) -> BallSkin? {
+        let owned = ownedBalls
+        guard owned.count > 1, let index = owned.firstIndex(where: { $0.id == appState.selectedBallID }) else { return nil }
+        return owned[(index + step + owned.count) % owned.count]
+    }
+
     private var hero: some View {
         let ball = appState.selectedBall
         let owned = ownedBalls
         let canSwitch = owned.count > 1
-        return VStack(spacing: 8) {
+        let glow = Color(hex: ball.glowHex)
+        let position = (owned.firstIndex(where: { $0.id == ball.id }) ?? 0) + 1
+        return VStack(spacing: 10) {
             HStack(spacing: 0) {
-                heroArrow("chevron.left", visible: canSwitch) { switchBall(by: -1) }
+                heroSide(neighborBall(-1), icon: "chevron.left", visible: canSwitch, glow: glow) { switchBall(by: -1) }
                 ZStack {
                     Circle()
-                        .fill(Color(hex: ball.glowHex).opacity(0.14))
-                        .frame(width: 150, height: 150)
-                        .blur(radius: 6)
+                        .fill(RadialGradient(colors: [glow.opacity(0.28), glow.opacity(0.0)], center: .center, startRadius: 10, endRadius: 95))
+                        .frame(width: 190, height: 190)
                     Image(ball.textureName)
                         .resizable()
                         .scaledToFit()
                         .frame(width: 132, height: 132)
-                        .shadow(color: Color(hex: ball.glowHex).opacity(0.7), radius: 22)
+                        .shadow(color: glow.opacity(0.7), radius: 22)
                         .id(ball.id)
                         .transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
                 .frame(maxWidth: .infinity)
-                heroArrow("chevron.right", visible: canSwitch) { switchBall(by: 1) }
+                heroSide(neighborBall(1), icon: "chevron.right", visible: canSwitch, glow: glow) { switchBall(by: 1) }
             }
-            Text(ball.name)
-                .font(.system(size: 24, weight: .bold, design: .rounded))
-            Text(ball.subtitle)
-                .font(.system(size: 13, weight: .regular, design: .rounded))
-                .foregroundStyle(.white.opacity(0.6))
-                .lineLimit(1).minimumScaleFactor(0.8)
-            if canSwitch {
-                HStack(spacing: 5) {
-                    ForEach(owned) { item in
-                        Circle()
-                            .fill(item.id == ball.id ? Color(hex: ball.glowHex) : Color.white.opacity(0.22))
-                            .frame(width: item.id == ball.id ? 7 : 5, height: item.id == ball.id ? 7 : 5)
+            .frame(height: 176)
+
+            VStack(spacing: 8) {
+                HStack(spacing: 8) {
+                    Text(ball.name)
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                    Text(LocalizedStringKey(ball.rarity))
+                        .font(.system(size: 10, weight: .heavy, design: .rounded)).tracking(1.0)
+                        .foregroundStyle(rarityColor(ball.rarity))
+                        .padding(.horizontal, 8).frame(height: 20)
+                        .background(rarityColor(ball.rarity).opacity(0.14), in: Capsule())
+                        .overlay(Capsule().stroke(rarityColor(ball.rarity).opacity(0.45), lineWidth: 1))
+                }
+                // Alt başlık "Şok dalgası • hız x1.50 • hasar x1.40" -> ayrı rozetler.
+                let traits = ball.subtitle.components(separatedBy: " • ").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+                HStack(spacing: 6) {
+                    ForEach(Array(traits.enumerated()), id: \.offset) { index, trait in
+                        HStack(spacing: 4) {
+                            Image(systemName: traitIcon(trait, first: index == 0))
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundStyle(index == 0 ? glow : Color.white.opacity(0.6))
+                            Text(trait)
+                                .font(.system(size: 11, weight: .medium, design: .rounded))
+                                .foregroundStyle(.white.opacity(index == 0 ? 0.9 : 0.7))
+                                .lineLimit(1)
+                        }
+                        .padding(.horizontal, 9).frame(height: 24)
+                        .background(Color.white.opacity(0.06), in: Capsule())
+                        .overlay(Capsule().stroke(index == 0 ? glow.opacity(0.35) : Color.white.opacity(0.08), lineWidth: 1))
                     }
                 }
-                .padding(.top, 2)
+                .minimumScaleFactor(0.75)
+                if canSwitch {
+                    Text("\(position) / \(owned.count)")
+                        .font(.system(size: 11, weight: .semibold, design: .rounded)).monospacedDigit()
+                        .foregroundStyle(.white.opacity(0.45))
+                        .padding(.horizontal, 10).frame(height: 20)
+                        .background(Color.white.opacity(0.05), in: Capsule())
+                }
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 6)
+        .padding(.vertical, 4)
         .contentShape(Rectangle())
         .gesture(
             DragGesture(minimumDistance: 24).onEnded { value in
@@ -288,17 +326,55 @@ struct HomeView: View {
         )
     }
 
-    private func heroArrow(_ icon: String, visible: Bool, _ action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: icon)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.55))
-                .frame(width: 44, height: 64)
-                .contentShape(Rectangle())
+    /// Kenardaki soluk komşu top + cam ok butonu.
+    private func heroSide(_ neighbor: BallSkin?, icon: String, visible: Bool, glow: Color, _ action: @escaping () -> Void) -> some View {
+        ZStack {
+            if visible, let neighbor {
+                Image(neighbor.textureName)
+                    .resizable().scaledToFit()
+                    .frame(width: 46, height: 46)
+                    .opacity(0.22)
+                    .blur(radius: 0.5)
+                    .offset(x: icon == "chevron.left" ? -14 : 14, y: 46)
+                    .allowsHitTesting(false)
+            }
+            Button(action: action) {
+                Image(systemName: icon)
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 48, height: 48)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .background(Circle().fill(glow.opacity(0.16)))
+                    .overlay(Circle().stroke(LinearGradient(colors: [glow.opacity(0.7), glow.opacity(0.15)], startPoint: .top, endPoint: .bottom), lineWidth: 1.2))
+                    .shadow(color: glow.opacity(0.35), radius: 10)
+                    .contentShape(Circle())
+            }
+            .buttonStyle(PressScaleStyle())
+            .accessibilityLabel(icon == "chevron.left" ? Text("Önceki top") : Text("Sonraki top"))
         }
-        .buttonStyle(.plain)
+        .frame(width: 64)
         .opacity(visible ? 1 : 0)
         .disabled(!visible)
+    }
+
+    private func rarityColor(_ rarity: String) -> Color {
+        switch rarity.uppercased() {
+        case "COMMON": return Color.white.opacity(0.75)
+        case "RARE": return Color(hex: 0x4DA3FF)
+        case "EPIC": return Color(hex: 0xB76BFF)
+        case "LEGENDARY": return Color(hex: 0xFFB020)
+        case "MYTHIC": return Color(hex: 0xFF4D8D)
+        default: return .cyan
+        }
+    }
+
+    private func traitIcon(_ trait: String, first: Bool) -> String {
+        let lower = trait.lowercased()
+        if lower.contains("x") && lower.rangeOfCharacter(from: .decimalDigits) != nil {
+            if lower.contains("hız") || lower.contains("speed") || lower.contains("geschw") || lower.contains("vitesse") || lower.contains("velo") || lower.contains("скор") { return "hare.fill" }
+            return "flame.fill"
+        }
+        return first ? "sparkles" : "circle.fill"
     }
 
     @ViewBuilder
@@ -306,14 +382,14 @@ struct HomeView: View {
         let accent = Color(hex: appState.selectedBackground.accentHex)
         if let savedRun {
             VStack(spacing: 10) {
-                NeonButton(title: L("DEVAM ET"), systemImage: "play.fill", accent: accent, action: onResume)
+                PlayButton(title: L("DEVAM ET"), systemImage: "play.fill", accent: accent, action: onResume)
                 Text("Kayıtlı oyun: seviye \(savedRun.level) • \(savedRun.score.formatted()) skor • \(savedRun.coinsCollected) coin")
-                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.6))
                 NeonButton(title: L("YENİ OYUN"), systemImage: "arrow.counterclockwise", accent: .white, filled: false, action: onPlay)
             }
         } else {
-            NeonButton(title: L("OYNA"), systemImage: "play.fill", accent: accent, action: onPlay)
+            PlayButton(title: L("OYNA"), systemImage: "play.fill", accent: accent, action: onPlay)
         }
         leagueStrip
     }
@@ -331,17 +407,28 @@ struct HomeView: View {
         let days = seconds / 86_400
         let hours = (seconds % 86_400) / 3600
         let minutes = (seconds % 3600) / 60
-        return days > 0 ? String(localized: "Bitimine \(days)g \(hours)sa") : String(localized: "Bitimine \(hours)sa \(minutes)dk")
+        return days > 0 ? LS("Bitimine \(days)g \(hours)sa") : LS("Bitimine \(hours)sa \(minutes)dk")
+    }
+
+    /// Ligdeki durum: yükselme bölgesi / güvende / düşme bölgesi.
+    private var leagueZone: (text: String, color: Color)? {
+        guard let state = store.league, let rank = state.rank, state.size > 0 else { return nil }
+        if state.promote > 0 && rank <= state.promote { return (L("Yükselme bölgesi"), .mint) }
+        if state.demote > 0 && rank > state.size - state.demote { return (L("Düşme bölgesi"), Color(hex: 0xFF5C7A)) }
+        if state.promote > 0 { return (LS("Yükselmeye \(rank - state.promote) sıra"), .white.opacity(0.7)) }
+        return (L("Güvende"), .white.opacity(0.7))
     }
 
     private var leagueStrip: some View {
         let league = store.league?.league ?? store.profile?.league ?? 1
         let color = Cosmetic.leagueColor(league)
         return Button(action: onLeaderboard) {
-            HStack(spacing: 10) {
+            HStack(spacing: 12) {
                 Image(systemName: "shield.lefthalf.filled")
-                    .font(.system(size: 17, weight: .semibold)).foregroundStyle(color)
-                VStack(alignment: .leading, spacing: 1) {
+                    .font(.system(size: 16, weight: .semibold)).foregroundStyle(color)
+                    .frame(width: 38, height: 38)
+                    .background(color.opacity(0.14), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+                VStack(alignment: .leading, spacing: 2) {
                     if let rank = store.league?.rank {
                         Text("\(Cosmetic.leagueName(league)) Ligi • #\(rank)")
                             .font(.system(size: 14, weight: .semibold, design: .rounded)).foregroundStyle(.white)
@@ -353,14 +440,20 @@ struct HomeView: View {
                         .font(.system(size: 11, weight: .regular, design: .rounded)).foregroundStyle(.white.opacity(0.55))
                 }
                 Spacer(minLength: 4)
+                if let zone = leagueZone {
+                    Text(zone.text)
+                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                        .foregroundStyle(zone.color)
+                        .padding(.horizontal, 8).frame(height: 22)
+                        .background(zone.color.opacity(0.12), in: Capsule())
+                }
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold)).foregroundStyle(.white.opacity(0.35))
             }
             .lineLimit(1)
             .minimumScaleFactor(0.8)
-            .padding(.horizontal, 14).frame(height: 54)
-            .background(Color.black.opacity(0.24), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(color.opacity(0.3), lineWidth: 1))
+            .padding(.horizontal, 12).frame(height: 62)
+            .background(HomeCardBackground(tint: color))
         }
         .buttonStyle(.plain)
     }
@@ -434,95 +527,48 @@ struct HomeView: View {
                 .accessibilityLabel("Kapat")
             }
             .padding(12)
-            .background(Color.cyan.opacity(0.09), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.cyan.opacity(0.3), lineWidth: 1))
+            .background(HomeCardBackground(tint: .cyan))
         }
     }
 
     // MARK: Reklamla coin
 
-    /// "Reklam izle, coin kazan": günlük hak bitene kadar ve reklam hazırken görünür.
-    @ViewBuilder
-    private var wheelCard: some View {
-        if let wheel = store.wheel, wheel.enabled {
-            Button { showWheel = true } label: {
-                HStack(spacing: 12) {
-                    Image(systemName: "chart.pie.fill")
-                        .font(.system(size: 20, weight: .bold)).foregroundStyle(.black)
-                        .frame(width: 42, height: 42)
-                        .background(LinearGradient(colors: [Color(hex: 0xFFE066), Color(hex: 0xFF8A00)], startPoint: .top, endPoint: .bottom), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Günlük çark").font(.system(size: 14, weight: .semibold, design: .rounded)).foregroundStyle(.white)
-                        Text(wheel.freeLeft > 0 ? L("Bugünkü ücretsiz hakkın hazır") : (wheel.adLeft > 0 ? L("Reklam izleyip bir kez daha çevir") : L("Yarın yeni haklar")))
-                            .font(.system(size: 12, weight: .regular, design: .rounded)).foregroundStyle(.white.opacity(0.55))
-                    }
-                    Spacer(minLength: 4)
-                    if wheel.freeLeft > 0 {
-                        Text("ÜCRETSİZ")
-                            .font(.system(size: 10, weight: .heavy, design: .rounded)).foregroundStyle(.black)
-                            .padding(.horizontal, 8).padding(.vertical, 4)
-                            .background(Color.mint, in: Capsule())
-                    } else {
-                        Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(.white.opacity(0.4))
-                    }
-                }
-                .padding(.horizontal, 14).frame(height: 62)
-                .background(Color.black.opacity(0.24), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color(hex: 0xFFB000).opacity(0.35), lineWidth: 1))
-            }
-            .buttonStyle(.plain)
-            .sheet(isPresented: $showWheel) { WheelSheet() }
-        }
+    private var wheelAvailable: Bool { store.wheel?.enabled == true }
+    private var adAvailable: Bool {
+        if let ads = store.adRewards, ads.enabled, ads.coinsLeft > 0, ads.coinAmount > 0, rewardedAds.isReady { return true }
+        return false
     }
 
+    /// Günlük çark ve reklamla coin: yan yana iki kompakt kart.
     @ViewBuilder
-    private var adCoinCard: some View {
-        if let ads = store.adRewards, ads.enabled, ads.coinsLeft > 0, ads.coinAmount > 0, rewardedAds.isReady {
-            Button {
-                guard !adBusy else { return }
-                adBusy = true
-                adMessage = nil
-                Task { @MainActor in
-                    let claim = await store.earnWithAd(kind: "coins")
-                    adBusy = false
-                    if let claim {
-                        coinBurst += 1
-                        HapticsManager.shared.celebration()
-                        adMessageOK = true
-                        adMessage = String(localized: "+\(claim.coins) coin kazandın")
-                    } else {
-                        adMessageOK = false
-                        adMessage = store.errorMessage ?? L("Ödül için reklamı sonuna kadar izle.")
-                    }
-                    try? await Task.sleep(nanoseconds: 4_000_000_000)
-                    adMessage = nil
+    private var rewardTiles: some View {
+        if wheelAvailable || adAvailable {
+            HStack(spacing: 10) {
+                if let wheel = store.wheel, wheel.enabled {
+                    rewardTile(
+                        icon: "chart.pie.fill",
+                        iconFill: AnyShapeStyle(LinearGradient(colors: [Color(hex: 0xFFE066), Color(hex: 0xFF8A00)], startPoint: .top, endPoint: .bottom)),
+                        tint: Color(hex: 0xFFB000),
+                        title: L("Günlük çark"),
+                        detail: wheel.freeLeft > 0 ? L("Ücretsiz hakkın hazır") : (wheel.adLeft > 0 ? L("Reklamla bir kez daha") : L("Yarın yeni haklar")),
+                        badge: wheel.freeLeft > 0 ? L("ÜCRETSİZ") : nil,
+                        busy: false
+                    ) { showWheel = true }
+                    .sheet(isPresented: $showWheel) { WheelSheet() }
                 }
-            } label: {
-                HStack(spacing: 12) {
-                    Image(systemName: "play.rectangle.fill")
-                        .font(.system(size: 19, weight: .bold)).foregroundStyle(.black)
-                        .frame(width: 42, height: 42)
-                        .background(Color.yellow, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Reklam izle, +\(ads.coinAmount) coin kazan")
-                            .font(.system(size: 14, weight: .semibold, design: .rounded)).foregroundStyle(.white)
-                        Text("Bugün \(ads.coinsLeft) hakkın kaldı")
-                            .font(.system(size: 12, weight: .regular, design: .rounded)).foregroundStyle(.white.opacity(0.55))
-                    }
-                    Spacer(minLength: 4)
-                    if adBusy {
-                        ProgressView().tint(.yellow)
-                    } else {
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 12, weight: .semibold)).foregroundStyle(.white.opacity(0.35))
-                    }
+                if let ads = store.adRewards, adAvailable {
+                    rewardTile(
+                        icon: "play.rectangle.fill",
+                        iconFill: AnyShapeStyle(Color.yellow),
+                        tint: .yellow,
+                        title: LS("+\(ads.coinAmount) coin"),
+                        detail: LS("Reklam izle • \(ads.coinsLeft) hak"),
+                        badge: nil,
+                        busy: adBusy
+                    ) { watchAdForCoins() }
+                    .disabled(adBusy)
                 }
-                .padding(.horizontal, 14).frame(height: 62)
-                .background(Color.black.opacity(0.24), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.yellow.opacity(0.3), lineWidth: 1))
             }
-            .buttonStyle(.plain)
-            .disabled(adBusy)
         }
         if let adMessage {
             Text(adMessage)
@@ -533,16 +579,72 @@ struct HomeView: View {
         }
     }
 
+    private func rewardTile(icon: String, iconFill: AnyShapeStyle, tint: Color, title: String, detail: String, badge: String?, busy: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .top) {
+                    Image(systemName: icon)
+                        .font(.system(size: 17, weight: .bold)).foregroundStyle(.black)
+                        .frame(width: 38, height: 38)
+                        .background(iconFill, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+                    Spacer(minLength: 4)
+                    if busy {
+                        ProgressView().tint(tint)
+                    } else if let badge {
+                        Text(badge)
+                            .font(.system(size: 9, weight: .heavy, design: .rounded)).foregroundStyle(.black)
+                            .padding(.horizontal, 7).frame(height: 18)
+                            .background(Color.mint, in: Capsule())
+                    }
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 15, weight: .semibold, design: .rounded)).foregroundStyle(.white)
+                        .lineLimit(1).minimumScaleFactor(0.8)
+                    Text(detail)
+                        .font(.system(size: 11, weight: .regular, design: .rounded)).foregroundStyle(.white.opacity(0.55))
+                        .lineLimit(1).minimumScaleFactor(0.75)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(13)
+            .background(HomeCardBackground(tint: tint))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PressScaleStyle())
+    }
+
+    private func watchAdForCoins() {
+        guard !adBusy else { return }
+        adBusy = true
+        adMessage = nil
+        Task { @MainActor in
+            let claim = await store.earnWithAd(kind: "coins")
+            adBusy = false
+            if let claim {
+                coinBurst += 1
+                HapticsManager.shared.celebration()
+                adMessageOK = true
+                adMessage = LS("+\(claim.coins) coin kazandın")
+            } else {
+                adMessageOK = false
+                adMessage = store.errorMessage ?? L("Ödül için reklamı sonuna kadar izle.")
+            }
+            try? await Task.sleep(nanoseconds: 4_000_000_000)
+            adMessage = nil
+        }
+    }
+
     // MARK: Kariyer hedefleri
 
     private func achievementTitle(_ item: StoreManager.Achievement) -> String {
         let target = item.target.formatted()
         switch item.type {
-        case "level": return String(localized: "Seviye \(target)'e ulaş")
-        case "blocks": return String(localized: "Toplam \(target) blok kır")
-        case "games": return String(localized: "\(target) oyun oyna")
-        case "streak": return String(localized: "\(target) gün üst üste giriş yap")
-        case "league": return String(localized: "\(Cosmetic.leagueName(item.target)) ligine çık")
+        case "level": return LS("Seviye \(target)'e ulaş")
+        case "blocks": return LS("Toplam \(target) blok kır")
+        case "games": return LS("\(target) oyun oyna")
+        case "streak": return LS("\(target) gün üst üste giriş yap")
+        case "league": return LS("\(Cosmetic.leagueName(item.target)) ligine çık")
         default: return item.key
         }
     }
@@ -558,7 +660,7 @@ struct HomeView: View {
     @ViewBuilder
     private var achievementsCard: some View {
         if !visibleAchievements.isEmpty {
-            GlassCard {
+            VStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 12) {
                     collapseHeader("Kariyer hedefleri", count: "\(store.achievements.filter { $0.claimed }.count)/\(store.achievements.count)", ready: store.achievements.contains { $0.completed && !$0.claimed }, color: .yellow, isOpen: $achievementsOpen)
                     if achievementsOpen {
@@ -568,6 +670,8 @@ struct HomeView: View {
                     }
                 }
             }
+            .padding(16)
+            .background(HomeCardBackground())
         }
     }
 
@@ -630,12 +734,12 @@ struct HomeView: View {
     private func questTitle(_ quest: StoreManager.Quest) -> String {
         let target = quest.target.formatted()
         switch quest.type {
-        case "blocks": return String(localized: "\(target) blok kır")
-        case "level": return String(localized: "Seviye \(target)'e ulaş")
-        case "runs": return String(localized: "\(target) oyun tamamla")
-        case "powerups": return String(localized: "\(target) güç kullan")
-        case "coins": return String(localized: "\(target) coin kazan")
-        case "score": return String(localized: "Toplam \(target) skor yap")
+        case "blocks": return LS("\(target) blok kır")
+        case "level": return LS("Seviye \(target)'e ulaş")
+        case "runs": return LS("\(target) oyun tamamla")
+        case "powerups": return LS("\(target) güç kullan")
+        case "coins": return LS("\(target) coin kazan")
+        case "score": return LS("Toplam \(target) skor yap")
         default: return quest.type
         }
     }
@@ -643,7 +747,7 @@ struct HomeView: View {
     @ViewBuilder
     private var questsCard: some View {
         if !store.quests.isEmpty {
-            GlassCard {
+            VStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 12) {
                     collapseHeader("Günlük görevler", count: "\(store.quests.filter { $0.claimed }.count)/\(store.quests.count)", ready: store.quests.contains { $0.completed && !$0.claimed }, color: .cyan, isOpen: $questsOpen)
                     if questsOpen {
@@ -653,6 +757,8 @@ struct HomeView: View {
                     }
                 }
             }
+            .padding(16)
+            .background(HomeCardBackground())
         }
     }
 
@@ -717,14 +823,14 @@ struct HomeView: View {
         let league = store.league?.league ?? store.profile?.league ?? 1
         let unread = store.supportTickets.filter { store.isSupportTicketUnread($0) }.count
         let rankText: String = {
-            if let rank = store.league?.rank { return String(localized: "\(Cosmetic.leagueName(league)) Ligi • #\(rank)") }
-            return String(localized: "\(Cosmetic.leagueName(league)) Ligi")
+            if let rank = store.league?.rank { return LS("\(Cosmetic.leagueName(league)) Ligi • #\(rank)") }
+            return LS("\(Cosmetic.leagueName(league)) Ligi")
         }()
         return LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-            actionTile(L("MAĞAZA"), String(localized: "\(store.balance.formatted()) coin"), "bag.fill", .purple, badge: nil, onShop)
+            actionTile(L("MAĞAZA"), LS("\(store.balance.formatted()) coin"), "bag.fill", .purple, badge: nil, onShop)
             actionTile(L("SIRALAMA"), rankText, "trophy.fill", .yellow, badge: nil, onLeaderboard)
             actionTile(L("PROFİL"), store.profile?.username ?? L("Oyuncu"), "person.crop.circle.fill", .cyan, badge: nil, onProfile)
-            actionTile(L("CANLI DESTEK"), unread > 0 ? String(localized: "\(unread) yeni yanıt") : L("Yardım ve talepler"), "message.fill", .green, badge: unread > 0 ? unread : nil, onSupport)
+            actionTile(L("CANLI DESTEK"), unread > 0 ? LS("\(unread) yeni yanıt") : L("Yardım ve talepler"), "message.fill", .green, badge: unread > 0 ? unread : nil, onSupport)
         }
     }
 
@@ -769,7 +875,7 @@ struct HomeView: View {
     }
 
     private var progressCard: some View {
-        GlassCard {
+        VStack(spacing: 0) {
             VStack(spacing: 12) {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
@@ -789,6 +895,8 @@ struct HomeView: View {
                 }.frame(height: 7)
             }
         }
+            .padding(16)
+            .background(HomeCardBackground())
     }
 
     private var quickStats: some View {
@@ -925,7 +1033,7 @@ struct WheelSheet: View {
                     .buttonStyle(.plain).disabled(spinning)
                 }
                 if let jackpotAmount {
-                    Label(String(localized: "Büyük ödül: \(jackpotAmount) coin"), systemImage: "crown.fill")
+                    Label(LS("Büyük ödül: \(jackpotAmount) coin"), systemImage: "crown.fill")
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
                         .foregroundStyle(LinearGradient(colors: [Color(hex: 0xFFF3B0), Color(hex: 0xFFC53D)], startPoint: .top, endPoint: .bottom))
                         .padding(.horizontal, 14).padding(.vertical, 7)
@@ -1118,14 +1226,99 @@ struct WheelSheet: View {
             spinning = false
             resultOK = true
             if coins > 0, index < slices.count, slices[index].jackpot == true {
-                resultText = String(localized: "BÜYÜK ÖDÜL! +\(coins) coin")
+                resultText = LS("BÜYÜK ÖDÜL! +\(coins) coin")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { HapticsManager.shared.celebration() }
             } else if coins > 0 {
-                resultText = String(localized: "+\(coins) coin kazandın")
+                resultText = LS("+\(coins) coin kazandın")
             } else if let itemKey, let kind = PowerUpKind.all.first(where: { $0.key == itemKey }) {
-                resultText = String(localized: "\(kind.localizedTitle) kazandın")
+                resultText = LS("\(kind.localizedTitle) kazandın")
             }
             HapticsManager.shared.celebration()
+        }
+    }
+}
+
+// MARK: - Ana sayfa ortak parçaları
+
+/// Ana sayfadaki tüm kartların ortak zemini: cam, ince çizgi, hafif renk tonu.
+struct HomeCardBackground: View {
+    var tint: Color = .white
+    var strong = false
+    var body: some View {
+        RoundedRectangle(cornerRadius: 20, style: .continuous)
+            .fill(Color.white.opacity(0.045))
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(tint.opacity(strong ? 0.10 : 0.04)))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(LinearGradient(colors: [tint.opacity(strong ? 0.45 : 0.28), Color.white.opacity(0.05)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
+            )
+    }
+}
+
+/// Basınca hafifçe küçülen buton.
+struct PressScaleStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.94 : 1)
+            .animation(.spring(response: 0.22, dampingFraction: 0.7), value: configuration.isPressed)
+    }
+}
+
+/// Ana OYNA butonu: neon gradyan, nefes alan parıltı ve üstünden geçen ışık süzmesi.
+struct PlayButton: View {
+    let title: String
+    let systemImage: String
+    let accent: Color
+    let action: () -> Void
+    @State private var breathe = false
+    @State private var sweep = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        Button {
+            HapticsManager.shared.launcherSnap()
+            action()
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 15, weight: .black))
+                    .foregroundStyle(.white)
+                    .frame(width: 36, height: 36)
+                    .background(Color.black.opacity(0.35), in: Circle())
+                Text(LocalizedStringKey(title))
+                    .font(.system(size: 22, weight: .heavy, design: .rounded))
+                    .tracking(2)
+                    .foregroundStyle(.black)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 68)
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .fill(LinearGradient(colors: [accent, Color(hex: 0x7C5CFF)], startPoint: .leading, endPoint: .trailing))
+                    // Işık süzmesi
+                    GeometryReader { proxy in
+                        LinearGradient(colors: [.clear, .white.opacity(0.45), .clear], startPoint: .leading, endPoint: .trailing)
+                            .frame(width: proxy.size.width * 0.35)
+                            .rotationEffect(.degrees(18))
+                            .offset(x: sweep ? proxy.size.width * 1.2 : -proxy.size.width * 0.5)
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .allowsHitTesting(false)
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .stroke(Color.white.opacity(0.45), lineWidth: 1)
+                        .blendMode(.overlay)
+                }
+            )
+            .shadow(color: accent.opacity(breathe ? 0.75 : 0.35), radius: breathe ? 26 : 14, y: 6)
+            .shadow(color: Color(hex: 0x7C5CFF).opacity(breathe ? 0.45 : 0.2), radius: breathe ? 30 : 16, y: 10)
+        }
+        .buttonStyle(PressScaleStyle())
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) { breathe = true }
+            withAnimation(.easeInOut(duration: 2.6).delay(0.8).repeatForever(autoreverses: false)) { sweep = true }
         }
     }
 }

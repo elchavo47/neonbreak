@@ -257,7 +257,7 @@ extension RewardedAds: FullScreenContentDelegate {
 
     func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         DispatchQueue.main.async {
-            self.lastFailure = String(localized: "Reklam gösterilemedi: \(error.localizedDescription)")
+            self.lastFailure = LS("Reklam gösterilemedi: \(error.localizedDescription)")
             self.finish()
         }
     }
@@ -379,11 +379,11 @@ enum NotificationManager {
                 dailyDate = calendar.date(byAdding: .day, value: 1, to: calendar.date(bySettingHour: 12, minute: 0, second: 0, of: now) ?? now) ?? now.addingTimeInterval(86_400)
             }
             if isOn(.reminders) {
-                add("nb.daily", title: String(localized: "Günlük ödülün hazır"), body: String(localized: "Seri bozulmadan coin'lerini al ve günün görevlerine bak."), date: dailyDate, screen: "home")
+                add("nb.daily", title: LS("Günlük ödülün hazır"), body: LS("Seri bozulmadan coin'lerini al ve günün görevlerine bak."), date: dailyDate, screen: "home")
                 if hasUnfinishedRun {
-                    add("nb.resume", title: String(localized: "Oyunun seni bekliyor"), body: String(localized: "Yarım kalan oyununa kaldığın yerden devam et."), date: now.addingTimeInterval(4 * 3600), screen: "home")
+                    add("nb.resume", title: LS("Oyunun seni bekliyor"), body: LS("Yarım kalan oyununa kaldığın yerden devam et."), date: now.addingTimeInterval(4 * 3600), screen: "home")
                 }
-                add("nb.comeback", title: String(localized: "Bloklar birikti"), body: String(localized: "Rekorunu geçmek için bir tur at."), date: now.addingTimeInterval(3 * 86_400), screen: "home")
+                add("nb.comeback", title: LS("Bloklar birikti"), body: LS("Rekorunu geçmek için bir tur at."), date: now.addingTimeInterval(3 * 86_400), screen: "home")
             }
             guard isOn(.ranking) else { return }
 
@@ -392,8 +392,8 @@ enum NotificationManager {
             sunday.weekday = 1
             sunday.hour = 18
             let content = UNMutableNotificationContent()
-            content.title = String(localized: "Haftalık sıralama bitiyor")
-            content.body = String(localized: "İlk 10'a girenler coin ödülü kazanır. Son saatler!")
+            content.title = LS("Haftalık sıralama bitiyor")
+            content.body = LS("İlk 10'a girenler coin ödülü kazanır. Son saatler!")
             content.sound = .default
             content.userInfo = ["screen": "leaderboard"]
             center.add(UNNotificationRequest(identifier: "nb.weekly", content: content, trigger: UNCalendarNotificationTrigger(dateMatching: sunday, repeats: true)))
@@ -441,6 +441,9 @@ enum AppLanguage {
         let locale = Locale(identifier: code)
         return locale.localizedString(forIdentifier: code)?.capitalized(with: locale) ?? code
     }
+
+    /// Seçili dilin .lproj paketi ("Otomatik"te ana paket).
+    static var bundle: Bundle { LanguageBundle.selected ?? .main }
 
     static func apply(_ code: String) {
         UserDefaults.standard.set(code, forKey: key)

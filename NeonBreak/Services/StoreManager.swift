@@ -404,6 +404,19 @@ final class StoreManager: ObservableObject {
         let isRead: Bool?
     }
 
+    /// Sunucudan "ödül" olarak gelen kayıtların türü. Ceza / uyarı içerikli kayıtlar (fotoğraf kaldırıldı,
+    /// ad sıfırlandı...) eskiden "ÖDÜL" etiketiyle görünüyordu.
+    static func noticeType(for reward: RewardNotice) -> String {
+        let text = (reward.title + " " + reward.message).lowercased()
+        let gaveSomething = reward.coinsAwarded > 0 || reward.itemKey != nil
+        if text.contains("satın alma") || text.contains("satın aldın") || text.contains("purchase") { return "purchase" }
+        let warningWords = ["kaldırıldı", "sıfırlandı", "uyarı", "askıya", "yasak", "kısıtla", "ihlal", "removed", "reset", "warning", "suspend", "banned"]
+        if !gaveSomething && warningWords.contains(where: { text.contains($0) }) { return "warning" }
+        if reward.title.lowercased().contains("hafta") || text.contains("weekly") { return "weekly_reward" }
+        if !gaveSomething { return "info" }
+        return "reward"
+    }
+
     struct NotificationItem: Identifiable, Equatable {
         let id: String
         let type: String
@@ -788,7 +801,7 @@ final class StoreManager: ObservableObject {
             let key = "reward.\(reward.id)"
             append(NotificationItem(
                 id: key,
-                type: reward.title.lowercased().contains("hafta") ? "weekly_reward" : "reward",
+                type: Self.noticeType(for: reward),
                 title: reward.title,
                 message: reward.message,
                 createdAt: reward.createdAt,
@@ -805,7 +818,7 @@ final class StoreManager: ObservableObject {
             } else {
                 append(NotificationItem(
                     id: key,
-                    type: reward.title.lowercased().contains("hafta") ? "weekly_reward" : "reward",
+                    type: Self.noticeType(for: reward),
                     title: reward.title,
                     message: reward.message,
                     createdAt: reward.createdAt,
@@ -1535,7 +1548,7 @@ final class StoreManager: ObservableObject {
 
     func priceText(itemKey: String) -> String {
         guard let item = item(forKey: itemKey) else { return "—" }
-        return item.priceCoins == 0 ? L("ÜCRETSİZ") : String(localized: "\(item.priceCoins.formatted()) COIN")
+        return item.priceCoins == 0 ? L("ÜCRETSİZ") : LS("\(item.priceCoins.formatted()) COIN")
     }
 
     func purchase(productID: String) async -> Bool {
@@ -2196,7 +2209,7 @@ final class StoreManager: ObservableObject {
                 accountBlock = AccountBlock(status: status, reason: parsed?.reason ?? "")
             }
             if let message = parsed?.error { throw APIError.status(http.statusCode, message) }
-            throw APIError.status(http.statusCode, String(localized: "Sunucu hatası (\(http.statusCode))."))
+            throw APIError.status(http.statusCode, LS("Sunucu hatası (\(http.statusCode))."))
         }
         return try decoder.decode(T.self, from: data)
     }

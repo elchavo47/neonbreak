@@ -389,7 +389,7 @@ struct ShopView: View {
             let claim = await store.earnWithAd(kind: "coins")
             adBusy = false
             if let claim {
-                show(String(localized: "+\(claim.coins) coin kazandın"), success: true)
+                show(LS("+\(claim.coins) coin kazandın"), success: true)
             } else if let message = store.errorMessage {
                 show(message, success: false)
             }
@@ -439,7 +439,7 @@ struct ShopView: View {
             let claim = await store.earnWithAd(kind: "powerup", itemKey: kind.key)
             adBusy = false
             if claim != nil {
-                show(String(localized: "\(kind.localizedTitle) kazandın • rafından kullanabilirsin"), success: true)
+                show(LS("\(kind.localizedTitle) kazandın • rafından kullanabilirsin"), success: true)
             } else if let message = store.errorMessage {
                 show(message, success: false)
             }
@@ -467,7 +467,7 @@ struct ShopView: View {
                     .font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(accent)
             }
             Spacer(minLength: 4)
-            buyButton(item: item, accent: accent) { String(localized: "\(L(item.name)) alındı • envanterinde \(store.quantity(itemKey: item.itemKey)) adet var") }
+            buyButton(item: item, accent: accent) { LS("\(L(item.name)) alındı • envanterinde \(store.quantity(itemKey: item.itemKey)) adet var") }
         }
         .padding(14)
         .background(cardBackground(selected: false, accent: accent))
@@ -492,7 +492,7 @@ struct ShopView: View {
                         .foregroundStyle(.white.opacity(0.5)).lineLimit(3)
                 }
                 Spacer(minLength: 4)
-                buyButton(item: item, accent: accent) { String(localized: "\(L(item.name)) alındı • güçler envanterine eklendi") }
+                buyButton(item: item, accent: accent) { LS("\(L(item.name)) alındı • güçler envanterine eklendi") }
             }
             if let grants = item.grants, !grants.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -532,7 +532,7 @@ struct ShopView: View {
     private func canAfford(_ item: StoreManager.RemoteStoreItem) -> Bool {
         let missing = item.priceCoins - store.balance
         guard missing > 0 else { return true }
-        show(String(localized: "Yetersiz coin • \(missing.formatted()) coin daha gerekli"), success: false, offersCoins: true)
+        show(LS("Yetersiz coin • \(missing.formatted()) coin daha gerekli"), success: false, offersCoins: true)
         return false
     }
 
@@ -599,7 +599,7 @@ struct ShopView: View {
                     if bought {
                         equipLocal()
                         _ = await store.equip(itemKey: key)
-                        show(String(localized: "\(name) alındı ve takıldı"), success: true)
+                        show(LS("\(name) alındı ve takıldı"), success: true)
                     } else {
                         show(store.errorMessage ?? L("Satın alma tamamlanamadı"), success: false)
                     }

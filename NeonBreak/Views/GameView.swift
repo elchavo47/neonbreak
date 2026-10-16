@@ -252,7 +252,7 @@ private struct GameRoundContent: View {
             startedAt = Date()
             scene.onStableState = { saveSnapshot() }
             if runTicket == nil {
-                showToast(String(localized: "Çevrimdışı deneme: coin ve sıralama sayılmaz"))
+                showToast(LS("Çevrimdışı deneme: coin ve sıralama sayılmaz"))
             }
         }
         .onChange(of: session.isGameOver) { isOver in
@@ -386,7 +386,7 @@ private struct GameRoundContent: View {
         guard busyPowerUp == nil, !session.isGameOver, !isPaused else { return }
         let name = kind.localizedTitle
         if session.isPowerUpActive(kind.key) {
-            showToast(String(localized: "\(name) zaten hazır"))
+            showToast(LS("\(name) zaten hazır"))
             return
         }
         guard store.quantity(itemKey: kind.key) > 0 else {
@@ -395,16 +395,16 @@ private struct GameRoundContent: View {
                 setPaused(true)
                 adOffer = kind
             } else {
-                showToast(String(localized: "\(name) yok • Mağazadan alabilirsin"))
+                showToast(LS("\(name) yok • Mağazadan alabilirsin"))
             }
             return
         }
         if kind.key == "powerup.laser" && !scene.hasLiveBlocks {
-            showToast(String(localized: "Sahada kırılacak blok yok"))
+            showToast(LS("Sahada kırılacak blok yok"))
             return
         }
         if kind.key == "powerup.coinboost" && runTicket == nil {
-            showToast(String(localized: "Kredi Takviyesi için çevrimiçi olmalısın"))
+            showToast(LS("Kredi Takviyesi için çevrimiçi olmalısın"))
             return
         }
 
@@ -414,7 +414,7 @@ private struct GameRoundContent: View {
             let remaining = await store.useRunPowerup(ticket: ticket, itemKey: kind.key)
             busyPowerUp = nil
             guard let remaining else {
-                showToast(store.errorMessage ?? String(localized: "\(name) şu an kullanılamadı"))
+                showToast(store.errorMessage ?? LS("\(name) şu an kullanılamadı"))
                 return
             }
             // Güç ancak sunucu/envanter düşümü başarılı olduktan sonra uygulanır ve
@@ -422,9 +422,9 @@ private struct GameRoundContent: View {
             scene.applyPowerUp(kind.key)
             saveSnapshot()
             if kind.appliesToNextVolley {
-                showToast(String(localized: "\(name) sıradaki atış için hazır • kalan \(remaining)"))
+                showToast(LS("\(name) sıradaki atış için hazır • kalan \(remaining)"))
             } else {
-                showToast(String(localized: "\(name) kullanıldı • kalan \(remaining)"))
+                showToast(LS("\(name) kullanıldı • kalan \(remaining)"))
             }
         }
     }
@@ -440,7 +440,7 @@ private struct GameRoundContent: View {
             adBusy = false
             setPaused(false) // teklif için duraklatılan oyun, reklamdan sonra kaldığı yerden devam eder
             if claim != nil {
-                showToast(String(localized: "\(kind.localizedTitle) kazandın • rafından kullanabilirsin"))
+                showToast(LS("\(kind.localizedTitle) kazandın • rafından kullanabilirsin"))
             } else if let message = store.errorMessage {
                 showToast(message)
             }
@@ -911,7 +911,7 @@ private struct GameOverCard: View {
     private var nearMiss: String? {
         let gap = session.recordAtStart - session.level + 1
         guard !session.isNewRecord, session.recordAtStart > 3, gap >= 1, gap <= 3 else { return nil }
-        return String(localized: "Rekoruna \(gap) seviye kalmıştı. Bir tur daha?")
+        return LS("Rekoruna \(gap) seviye kalmıştı. Bir tur daha?")
     }
 
     private func result(value: Double, prefix: String, label: LocalizedStringKey) -> some View {

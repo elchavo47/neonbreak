@@ -44,7 +44,7 @@ struct SettingsView: View {
                             SettingsRow(icon: "hand.raised.fill", color: .purple, title: "Gizlilik", subtitle: L("Gizlilik politikası ve reklam tercihleri"))
                         }
                         NavigationLink { AboutPage(closeSheet: { dismiss() }) } label: {
-                            SettingsRow(icon: "info.circle.fill", color: .gray, title: "Hakkında ve destek", subtitle: String(localized: "Sürüm \(versionText)"))
+                            SettingsRow(icon: "info.circle.fill", color: .gray, title: "Hakkında ve destek", subtitle: LS("Sürüm \(versionText)"))
                         }
                     }
                     .padding(18)
@@ -323,7 +323,7 @@ private struct FPSCard: View {
     private var footnote: String {
         let maxFPS = UIScreen.main.maximumFramesPerSecond
         if appState.preferredFPS > maxFPS {
-            return String(localized: "Bu cihaz en fazla \(maxFPS) Hz destekliyor; oyun desteklenen en yüksek değerde çalışır.")
+            return LS("Bu cihaz en fazla \(maxFPS) Hz destekliyor; oyun desteklenen en yüksek değerde çalışır.")
         }
         return L("Seçim yeni oyuna girildiğinde gerçek SKView preferredFramesPerSecond değerine uygulanır.")
     }
@@ -460,7 +460,7 @@ private struct InvitePage: View {
                                     .foregroundStyle(.black)
                             }
                         }
-                        Text(String(localized: "Arkadaşın kodu girince \(invite.inviteeCoins) coin kazanır; \(invite.qualifyLevel). seviyeye ulaşınca sen de \(invite.inviterCoins) coin kazanırsın."))
+                        Text(LS("Arkadaşın kodu girince \(invite.inviteeCoins) coin kazanır; \(invite.qualifyLevel). seviyeye ulaşınca sen de \(invite.inviterCoins) coin kazanırsın."))
                             .font(.system(size: 12, weight: .regular, design: .rounded)).foregroundStyle(.white.opacity(0.6))
                             .multilineTextAlignment(.center)
                     }
@@ -562,7 +562,7 @@ private struct InvitePage: View {
                         .foregroundStyle(done ? Color.mint : Color.cyan)
                 }
                 ProgressView(value: Double(shown), total: Double(max(1, target))).tint(done ? .mint : .cyan)
-                Text(done ? L("Açıldı") : String(localized: "\(target) arkadaşın \(level). seviyeye ulaşınca açılır"))
+                Text(done ? L("Açıldı") : LS("\(target) arkadaşın \(level). seviyeye ulaşınca açılır"))
                     .font(.system(size: 11, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.55))
             }
         }
@@ -577,7 +577,7 @@ private struct InvitePage: View {
     }
 
     private func shareMessage(_ code: String) -> String {
-        var text = String(localized: "NEON BREAK oynuyorum! Davet kodumu gir, ikimiz de coin kazanalım: \(code)")
+        var text = LS("NEON BREAK oynuyorum! Davet kodumu gir, ikimiz de coin kazanalım: \(code)")
         if let link = store.links?.appStore, !link.isEmpty { text += "\n" + link }
         return text
     }
@@ -590,7 +590,7 @@ private struct InvitePage: View {
         Task { @MainActor in
             if let coins = await store.redeemInvite(code: enteredCode) {
                 messageIsError = false
-                message = String(localized: "Kod kabul edildi: +\(coins) coin")
+                message = LS("Kod kabul edildi: +\(coins) coin")
                 enteredCode = ""
             } else {
                 messageIsError = true
@@ -705,7 +705,7 @@ private struct AboutPage: View {
         let info = Bundle.main.infoDictionary
         let version = (info?["CFBundleShortVersionString"] as? String) ?? "1"
         let build = (info?["CFBundleVersion"] as? String) ?? "1"
-        return String(localized: "Sürüm \(version) (\(build))")
+        return LS("Sürüm \(version) (\(build))")
     }
 
     var body: some View {
@@ -999,7 +999,7 @@ struct EmailAccountSheet: View {
             .padding(12).background(Color.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             HStack {
                 Button { sendCode() } label: {
-                    Text(cooldown > 0 ? String(localized: "\(cooldown) sn sonra tekrar gönderebilirsin") : L("Tekrar gönder"))
+                    Text(cooldown > 0 ? LS("\(cooldown) sn sonra tekrar gönderebilirsin") : L("Tekrar gönder"))
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                 }
                 .disabled(cooldown > 0 || working)
@@ -1019,7 +1019,7 @@ struct EmailAccountSheet: View {
             Text(mode == .link ? L("E-postan bağlandı.") : L("Hesabın bu cihaza taşındı."))
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
             if mode == .link, store.lastEmailBonus > 0 {
-                Label(String(localized: "+\(store.lastEmailBonus) coin kazandın"), systemImage: "hexagon.fill")
+                Label(LS("+\(store.lastEmailBonus) coin kazandın"), systemImage: "hexagon.fill")
                     .font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(Color(hex: 0xFFD60A))
             }
             NeonButton(title: L("Kapat"), systemImage: "xmark", accent: .white, filled: false) { dismiss() }
@@ -1091,7 +1091,7 @@ struct EmailNudgeSheet: View {
                         .font(.system(size: 14, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.65))
                         .multilineTextAlignment(.center)
                     if let coins = store.emailReward?.coins, coins > 0 {
-                        Label(String(localized: "İlk bağlamada \(coins) coin hediye"), systemImage: "hexagon.fill")
+                        Label(LS("İlk bağlamada \(coins) coin hediye"), systemImage: "hexagon.fill")
                             .font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(Color(hex: 0xFFD60A))
                             .padding(.horizontal, 16).padding(.vertical, 10)
                             .background(Color(hex: 0xFFD60A).opacity(0.12), in: Capsule())

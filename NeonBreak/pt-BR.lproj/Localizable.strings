@@ -740,3 +740,28 @@
 "Oturum bulunamadı." = "Sessão não encontrada.";
 "Bağlı değil • hesabın korunmuyor" = "Não vinculado • sua conta não está protegida";
 "Başka cihazdaki hesabını e-postanla buraya taşı" = "Traga sua conta de outro aparelho usando seu e-mail";
+
+/* v5.18.0 ana sayfa ve bildirimler */
+"UYARI" = "AVISO";
+"BİLGİ" = "INFO";
+"SATIN ALMA" = "COMPRA";
+"HESABINLA İLGİLİ UYARI" = "AVISO DA CONTA";
+"BİLGİLENDİRME" = "INFORMAÇÃO";
+"ANLADIM" = "ENTENDI";
+"SATIN ALMA TAMAMLANDI" = "COMPRA CONCLUÍDA";
+"Yükselme bölgesi" = "Zona de promoção";
+"Düşme bölgesi" = "Zona de rebaixamento";
+"Yükselmeye %lld sıra" = "%lld para subir";
+"Güvende" = "Seguro";
+"Ücretsiz hakkın hazır" = "Giro grátis pronto";
+"Reklamla bir kez daha" = "Mais um com anúncio";
+"+%lld coin" = "+%lld moedas";
+"Reklam izle • %lld hak" = "Ver anúncio • restam %lld";
+"Önceki top" = "Bola anterior";
+"Sonraki top" = "Próxima bola";
+"CORE" = "NÚCLEO";
+"COMMON" = "COMUM";
+"RARE" = "RARA";
+"EPIC" = "ÉPICA";
+"LEGENDARY" = "LENDÁRIA";
+"MYTHIC" = "MÍTICA";

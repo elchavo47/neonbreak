@@ -740,3 +740,28 @@
 "Oturum bulunamadı." = "Session introuvable.";
 "Bağlı değil • hesabın korunmuyor" = "Non lié • ton compte n'est pas protégé";
 "Başka cihazdaki hesabını e-postanla buraya taşı" = "Transfère ton compte depuis un autre appareil avec ton e-mail";
+
+/* v5.18.0 ana sayfa ve bildirimler */
+"UYARI" = "ALERTE";
+"BİLGİ" = "INFO";
+"SATIN ALMA" = "ACHAT";
+"HESABINLA İLGİLİ UYARI" = "AVIS SUR TON COMPTE";
+"BİLGİLENDİRME" = "INFORMATION";
+"ANLADIM" = "COMPRIS";
+"SATIN ALMA TAMAMLANDI" = "ACHAT TERMINÉ";
+"Yükselme bölgesi" = "Zone de promotion";
+"Düşme bölgesi" = "Zone de relégation";
+"Yükselmeye %lld sıra" = "%lld avant la promotion";
+"Güvende" = "En sécurité";
+"Ücretsiz hakkın hazır" = "Tour gratuit prêt";
+"Reklamla bir kez daha" = "Encore un avec une pub";
+"+%lld coin" = "+%lld pièces";
+"Reklam izle • %lld hak" = "Regarder une pub • %lld restantes";
+"Önceki top" = "Balle précédente";
+"Sonraki top" = "Balle suivante";
+"CORE" = "NOYAU";
+"COMMON" = "COMMUNE";
+"RARE" = "RARE";
+"EPIC" = "ÉPIQUE";
+"LEGENDARY" = "LÉGENDAIRE";
+"MYTHIC" = "MYTHIQUE";

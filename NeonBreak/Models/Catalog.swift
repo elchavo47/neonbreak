@@ -527,6 +527,12 @@ func L(_ key: String) -> String {
     NSLocalizedString(key, comment: "")
 }
 
+/// `String(localized:)` uygulama içi dil seçimini görmüyor, telefonun dilini kullanıyordu
+/// (ör. dil İngilizceyken "Bitimine 2g 13sa"). Değişkenli metinler bunun yerine LS ile çevrilir.
+func LS(_ value: String.LocalizationValue) -> String {
+    String(localized: value, bundle: AppLanguage.bundle)
+}
+
 /// Çevrilmiş metin içeren sabit listeler (toplar, dünyalar, güçler...) dil başına bir kez kurulur.
 /// Eskiden `static let` idi ve uygulama ilk açıldığındaki dilde donup kalıyordu: oyun içinden dil
 /// değiştirilince bu metinler Türkçe kalıyordu. Dil değişince önbellek kendiliğinden yenilenir.

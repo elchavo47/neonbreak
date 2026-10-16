@@ -740,3 +740,28 @@
 "Oturum bulunamadı." = "Session not found.";
 "Bağlı değil • hesabın korunmuyor" = "Not linked • your account isn't protected";
 "Başka cihazdaki hesabını e-postanla buraya taşı" = "Move your account from another device using your email";
+
+/* v5.18.0 ana sayfa ve bildirimler */
+"UYARI" = "WARNING";
+"BİLGİ" = "INFO";
+"SATIN ALMA" = "PURCHASE";
+"HESABINLA İLGİLİ UYARI" = "ACCOUNT NOTICE";
+"BİLGİLENDİRME" = "NOTICE";
+"ANLADIM" = "GOT IT";
+"SATIN ALMA TAMAMLANDI" = "PURCHASE COMPLETE";
+"Yükselme bölgesi" = "Promotion zone";
+"Düşme bölgesi" = "Relegation zone";
+"Yükselmeye %lld sıra" = "%lld to promotion";
+"Güvende" = "Safe";
+"Ücretsiz hakkın hazır" = "Free spin ready";
+"Reklamla bir kez daha" = "One more with an ad";
+"+%lld coin" = "+%lld coins";
+"Reklam izle • %lld hak" = "Watch an ad • %lld left";
+"Önceki top" = "Previous ball";
+"Sonraki top" = "Next ball";
+"CORE" = "CORE";
+"COMMON" = "COMMON";
+"RARE" = "RARE";
+"EPIC" = "EPIC";
+"LEGENDARY" = "LEGENDARY";
+"MYTHIC" = "MYTHIC";

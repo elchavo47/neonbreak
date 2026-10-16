@@ -23,3 +23,37 @@
 "Oturum bulunamadı." = "Oturum bulunamadı.";
 "Bağlı değil • hesabın korunmuyor" = "Bağlı değil • hesabın korunmuyor";
 "Başka cihazdaki hesabını e-postanla buraya taşı" = "Başka cihazdaki hesabını e-postanla buraya taşı";
+
+/* v5.18.0 ana sayfa ve bildirimler */
+"UYARI" = "UYARI";
+"BİLGİ" = "BİLGİ";
+"SATIN ALMA" = "SATIN ALMA";
+"HESABINLA İLGİLİ UYARI" = "HESABINLA İLGİLİ UYARI";
+"BİLGİLENDİRME" = "BİLGİLENDİRME";
+"ANLADIM" = "ANLADIM";
+"TAMAM" = "TAMAM";
+"SATIN ALMA TAMAMLANDI" = "SATIN ALMA TAMAMLANDI";
+"HESABINA ÖDÜL GELDİ" = "HESABINA ÖDÜL GELDİ";
+"ÖDÜLÜ AL" = "ÖDÜLÜ AL";
+"Yükselme bölgesi" = "Yükselme bölgesi";
+"Düşme bölgesi" = "Düşme bölgesi";
+"Yükselmeye %lld sıra" = "Yükselmeye %lld sıra";
+"Güvende" = "Güvende";
+"Günlük çark" = "Günlük çark";
+"Ücretsiz hakkın hazır" = "Ücretsiz hakkın hazır";
+"Reklamla bir kez daha" = "Reklamla bir kez daha";
+"Yarın yeni haklar" = "Yarın yeni haklar";
+"ÜCRETSİZ" = "ÜCRETSİZ";
+"+%lld coin" = "+%lld coin";
+"Reklam izle • %lld hak" = "Reklam izle • %lld hak";
+"+%lld coin kazandın" = "+%lld coin kazandın";
+"Önceki top" = "Önceki top";
+"Sonraki top" = "Sonraki top";
+"CORE" = "ÇEKİRDEK";
+"COMMON" = "SIRADAN";
+"RARE" = "NADİR";
+"EPIC" = "EPİK";
+"LEGENDARY" = "EFSANEVİ";
+"MYTHIC" = "MİTİK";
+"OYNA" = "OYNA";
+"DEVAM ET" = "DEVAM ET";

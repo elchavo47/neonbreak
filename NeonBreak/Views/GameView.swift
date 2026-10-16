@@ -111,7 +111,9 @@ private struct GameRoundView: View {
             }
         }
         .preferredColorScheme(.dark)
-        .statusBarHidden(true)
+        // iPad'de (iPhone uyumluluk modu) sistem saat çubuğu gizlenemez; gizlemeye çalışmak üst güvenli
+        // alanı sıfırlar ve HUD saatin altında kalır. Bu yüzden yalnızca iPhone'da gizlenir.
+        .statusBarHidden(!UIDevice.current.model.hasPrefix("iPad"))
         .task { await prepare() }
     }
 

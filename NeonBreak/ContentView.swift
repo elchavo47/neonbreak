@@ -1619,6 +1619,7 @@ private struct ProfileView: View {
     @State private var isUploadingAvatar = false
     @State private var localAvatarPreview: UIImage?
     @State private var emailSheet: EmailAccountSheet.Mode?
+    @State private var showCosmetics = false
     @FocusState private var nameFocused: Bool
 
     // Tek tip, sakin bir görünüm: tek vurgu rengi, ince çizgiler, ölçülü yazı ağırlıkları.
@@ -1638,6 +1639,7 @@ private struct ProfileView: View {
                 VStack(spacing: 14) {
                     header
                     identityCard
+                    styleCard
                     careerCard
                     accountCard
                     supportRow
@@ -1700,6 +1702,7 @@ private struct ProfileView: View {
             }
         }
         .sheet(item: $emailSheet) { mode in EmailAccountSheet(mode: mode) }
+        .sheet(isPresented: $showCosmetics) { CosmeticsSheet().environmentObject(store) }
         .sheet(isPresented: $showSupport) { SupportCenterView().environmentObject(store).environmentObject(appState) }
         .task { await store.loadSupportTickets() }
     }
@@ -1740,6 +1743,11 @@ private struct ProfileView: View {
                     Text(store.playerName)
                         .font(.system(size: 24, weight: .semibold, design: .rounded))
                         .lineLimit(1).minimumScaleFactor(0.7)
+                    if let title = store.cosmetics?.title ?? store.profile?.title {
+                        Text(Cosmetic.titleName(title))
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.yellow)
+                    }
                     HStack(spacing: 8) {
                         HStack(spacing: 5) {
                             Image(systemName: "bolt.shield.fill").font(.system(size: 10, weight: .semibold))
@@ -1836,6 +1844,64 @@ private struct ProfileView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 6)
+    }
+
+    // MARK: Görünüm (çerçeve + unvan)
+
+    private var styleCard: some View {
+        let frames = store.cosmetics?.frames ?? []
+        let titles = store.cosmetics?.titles ?? []
+        let frame = store.cosmetics?.frame ?? store.profile?.frame
+        let title = store.cosmetics?.title ?? store.profile?.title
+        return Button { showCosmetics = true } label: {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    sectionLabel(L("GÖRÜNÜM"))
+                    Spacer()
+                    Text("Değiştir")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded)).foregroundStyle(accent)
+                    Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(faint)
+                }
+                HStack(spacing: 10) {
+                    styleTile(
+                        preview: AnyView(ZStack { Circle().fill(Color.white.opacity(0.06)); AvatarFrameRing(frame: frame, lineWidth: 3) }.frame(width: 34, height: 34)),
+                        label: L("Çerçeve"),
+                        value: frame.map { Cosmetic.frameName($0) } ?? L("Takılı değil"),
+                        count: "\(frames.count)/\(Cosmetic.allFrames.count)"
+                    )
+                    styleTile(
+                        preview: AnyView(Image(systemName: "textformat").font(.system(size: 14, weight: .bold)).foregroundStyle(.yellow).frame(width: 34, height: 34).background(Color.yellow.opacity(0.12), in: Circle())),
+                        label: L("Unvan"),
+                        value: title.map { Cosmetic.titleName($0) } ?? L("Takılı değil"),
+                        count: "\(titles.count)/\(Cosmetic.allTitles.count)"
+                    )
+                }
+            }
+            .padding(18)
+            .background(cardBackground())
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func styleTile(preview: AnyView, label: String, value: String, count: String) -> some View {
+        HStack(spacing: 10) {
+            preview
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 4) {
+                    Text(label).font(.system(size: 11, weight: .medium, design: .rounded)).foregroundStyle(faint)
+                    Text(count).font(.system(size: 10, weight: .semibold, design: .rounded)).monospacedDigit().foregroundStyle(faint)
+                }
+                Text(value)
+                    .font(.system(size: 13, weight: .semibold, design: .rounded)).foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.75)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity)
+        .background(Color.white.opacity(0.035), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(hairline, lineWidth: 1))
     }
 
     // MARK: Kariyer

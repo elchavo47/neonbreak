@@ -768,3 +768,6 @@
 "Satın alma tamamlandı" = "Покупка завершена";
 "%lld coin hesabına eklendi." = "На твой счёт зачислено монет: %lld.";
 "Ödeme alındı, coinler henüz eklenemedi: %@ Uygulama bir sonraki açılışta tekrar deneyecek." = "Оплата получена, но монеты пока не зачислены: %@ Приложение повторит попытку при следующем запуске.";
+"GÖRÜNÜM" = "ВНЕШНИЙ ВИД";
+"Unvan" = "Титул";
+"Takılı değil" = "Нет";

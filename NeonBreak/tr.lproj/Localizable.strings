@@ -60,3 +60,7 @@
 "Satın alma tamamlandı" = "Satın alma tamamlandı";
 "%lld coin hesabına eklendi." = "%lld coin hesabına eklendi.";
 "Ödeme alındı, coinler henüz eklenemedi: %@ Uygulama bir sonraki açılışta tekrar deneyecek." = "Ödeme alındı, coinler henüz eklenemedi: %@ Uygulama bir sonraki açılışta tekrar deneyecek.";
+"GÖRÜNÜM" = "GÖRÜNÜM";
+"Çerçeve" = "Çerçeve";
+"Unvan" = "Unvan";
+"Takılı değil" = "Takılı değil";

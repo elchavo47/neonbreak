@@ -1,0 +1,13 @@
+name: Network Check
+on:
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reach backend from a datacenter IP
+        run: |
+          for u in https://neonbreak.aydworks.com.tr/health https://neonbreak.aydworks.com.tr/api/v1/bootstrap https://neonbreak.aydworks.com.tr/robots.txt; do
+            code=$(curl -s -o body.txt -w "%{http_code} %{content_type}" -A "NeonBreak/1.0 CFNetwork" "$u")
+            echo "::notice::$u -> $code :: $(head -c 160 body.txt | tr '\n' ' ')"
+          done

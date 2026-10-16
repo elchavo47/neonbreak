@@ -1663,6 +1663,9 @@ private struct ProfileView: View {
         .onChange(of: store.playerName) { newValue in
             if !nameFocused { username = newValue }
         }
+        .onChange(of: store.avatarURL) { newValue in
+            if newValue == nil, Persistence.shared.pendingAvatarJPEG == nil { localAvatarPreview = nil }
+        }
         .sheet(isPresented: $showAvatarPicker) {
             AvatarImagePicker { image in
                 // Normalize + downsample ONCE before opening the editor. Camera photos

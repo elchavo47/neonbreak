@@ -2226,6 +2226,10 @@ final class StoreManager: ObservableObject {
 
     private func apply(player: RemotePlayer) {
         profile = player
+        // Sunucuda fotoğraf yoksa (ör. panelden kaldırıldı) yerel kopyayı da sil; bekleyen yükleme varsa dokunma.
+        if (player.avatarUrl ?? "").isEmpty, Persistence.shared.pendingAvatarJPEG == nil {
+            Persistence.shared.cachedAvatarJPEG = nil
+        }
         Persistence.shared.bestLevel = max(Persistence.shared.bestLevel, player.bestLevel)
         Persistence.shared.bestScore = max(Persistence.shared.bestScore, player.bestScore)
         Persistence.shared.lifetimeXP = max(Persistence.shared.lifetimeXP, player.lifetimeXp)

@@ -139,7 +139,11 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
             CODE_SIGN_ENTITLEMENTS="$PUSH_ENTITLEMENTS" \
             OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH" \
-            clean archive
+            clean archive 2>&1 | tee "$RUNNER_TEMP/xcodebuild.log" || {
+              # Derleme hatalarını GitHub hata notu olarak da yaz (log indirilemeyen ortamlarda okunabilsin).
+              grep -E "error:|fatal error" "$RUNNER_TEMP/xcodebuild.log" | sed -E 's#^.*/NeonBreak/##' | sort -u | head -40 | while IFS= read -r line; do echo "::error::$line"; done
+              exit 1
+            }
 
       - name: Create ExportOptions.plist
         env:

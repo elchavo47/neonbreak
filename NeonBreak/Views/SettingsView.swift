@@ -68,7 +68,7 @@ private struct SettingsRow: View {
     var body: some View {
         GlassCard {
             HStack(spacing: 12) {
-                Image(systemName: icon).font(.system(size: 20, weight: .bold)).foregroundStyle(color)
+                GameSymbol(name: icon, size: 20, weight: .bold).foregroundStyle(color)
                     .frame(width: 42, height: 42).background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: 13))
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title).font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(.white)
@@ -114,7 +114,7 @@ private struct ToggleCard: View {
     var body: some View {
         GlassCard {
             HStack(spacing: 12) {
-                Image(systemName: icon).font(.system(size: 21, weight: .bold)).foregroundStyle(.cyan)
+                GameSymbol(name: icon, size: 21, weight: .bold).foregroundStyle(.cyan)
                     .frame(width: 42, height: 42).background(Color.cyan.opacity(0.1), in: RoundedRectangle(cornerRadius: 13))
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title).font(.system(size: 15, weight: .bold, design: .rounded))
@@ -215,7 +215,7 @@ private struct NotificationSettingsPage: View {
             if systemStatus == .denied {
                 GlassCard {
                     HStack(spacing: 12) {
-                        Image(systemName: "bell.slash.fill").font(.system(size: 20, weight: .bold)).foregroundStyle(.orange)
+                        GameSymbol(name: "bell.slash.fill", size: 20, weight: .bold).foregroundStyle(.orange)
                         VStack(alignment: .leading, spacing: 3) {
                             Text("Bildirimler cihaz ayarlarında kapalı").font(.system(size: 14, weight: .bold, design: .rounded))
                             Text("Ödül ve sıralama bildirimlerini almak için iPhone Ayarları'ndan izin ver.")
@@ -267,7 +267,7 @@ private struct GameSettingsPage: View {
             ToggleCard(icon: "sparkles", title: L("Premium Efektler"), subtitle: L("Arka plan parlama ve ekstra görsel efektler"), isOn: $appState.premiumEffectsEnabled)
             GlassCard {
                 HStack(spacing: 12) {
-                    Image(systemName: "gauge.with.dots.needle.33percent").font(.system(size: 21, weight: .bold)).foregroundStyle(.green)
+                    GameSymbol(name: "gauge.with.dots.needle.33percent", size: 21, weight: .bold).foregroundStyle(.green)
                         .frame(width: 42, height: 42).background(Color.green.opacity(0.1), in: RoundedRectangle(cornerRadius: 13))
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Performans İpucu").font(.system(size: 15, weight: .bold, design: .rounded))
@@ -287,8 +287,7 @@ private struct FPSCard: View {
         GlassCard {
             VStack(alignment: .leading, spacing: 13) {
                 HStack(spacing: 12) {
-                    Image(systemName: "speedometer")
-                        .font(.system(size: 21, weight: .bold)).foregroundStyle(.mint)
+                    GameSymbol(name: "speedometer", size: 21, weight: .bold).foregroundStyle(.mint)
                         .frame(width: 42, height: 42)
                         .background(Color.mint.opacity(0.1), in: RoundedRectangle(cornerRadius: 13))
                     VStack(alignment: .leading, spacing: 3) {
@@ -336,8 +335,7 @@ private struct HapticCard: View {
         GlassCard {
             VStack(spacing: 16) {
                 HStack(spacing: 12) {
-                    Image(systemName: "iphone.radiowaves.left.and.right")
-                        .font(.system(size: 21, weight: .bold)).foregroundStyle(Color(hex: appState.selectedBackground.accentHex))
+                    GameSymbol(name: "iphone.radiowaves.left.and.right", size: 21, weight: .bold).foregroundStyle(Color(hex: appState.selectedBackground.accentHex))
                         .frame(width: 42, height: 42).background(Color(hex: appState.selectedBackground.accentHex).opacity(0.1), in: RoundedRectangle(cornerRadius: 13))
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Haptic Feedback").font(.system(size: 15, weight: .bold, design: .rounded))
@@ -547,7 +545,7 @@ private struct InvitePage: View {
                 if isBall {
                     Image("BallHalo").resizable().scaledToFit().padding(4)
                 } else {
-                    Image(systemName: "person.fill").font(.system(size: 18, weight: .bold)).foregroundStyle(.white.opacity(0.55))
+                    GameSymbol(name: "person.fill", size: 18, weight: .bold).foregroundStyle(.white.opacity(0.55))
                     AvatarFrameRing(frame: "ambassador", lineWidth: 3, animated: false)
                 }
             }
@@ -556,7 +554,7 @@ private struct InvitePage: View {
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 6) {
                     Text(title).font(.system(size: 14, weight: .bold, design: .rounded))
-                    if done { Image(systemName: "checkmark.seal.fill").font(.system(size: 13)).foregroundStyle(.mint) }
+                    if done { GameSymbol(name: "checkmark.seal.fill", size: 13).foregroundStyle(.mint) }
                     Spacer(minLength: 4)
                     Text("\(shown)/\(target)").font(.system(size: 12, weight: .heavy, design: .rounded)).monospacedDigit()
                         .foregroundStyle(done ? Color.mint : Color.cyan)
@@ -644,11 +642,11 @@ private struct PrivacyPage: View {
                 Link(destination: url) {
                     GlassCard {
                         HStack(spacing: 12) {
-                            Image(systemName: "doc.text.fill").font(.system(size: 20, weight: .bold)).foregroundStyle(.purple)
+                            GameSymbol(name: "doc.text.fill", size: 20, weight: .bold).foregroundStyle(.purple)
                                 .frame(width: 42, height: 42).background(Color.purple.opacity(0.12), in: RoundedRectangle(cornerRadius: 13))
                             Text("Gizlilik politikası").font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(.white)
                             Spacer()
-                            Image(systemName: "arrow.up.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(.white.opacity(0.4))
+                            GameSymbol(name: "arrow.up.right", size: 12, weight: .semibold).foregroundStyle(.white.opacity(0.4))
                         }
                     }
                 }
@@ -659,7 +657,7 @@ private struct PrivacyPage: View {
                 } label: {
                     GlassCard {
                         HStack(spacing: 12) {
-                            Image(systemName: "slider.horizontal.3").font(.system(size: 20, weight: .bold)).foregroundStyle(.cyan)
+                            GameSymbol(name: "slider.horizontal.3", size: 20, weight: .bold).foregroundStyle(.cyan)
                                 .frame(width: 42, height: 42).background(Color.cyan.opacity(0.12), in: RoundedRectangle(cornerRadius: 13))
                             Text("Reklam gizlilik seçenekleri").font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(.white)
                             Spacer()
@@ -671,7 +669,7 @@ private struct PrivacyPage: View {
             }
             GlassCard {
                 HStack(spacing: 12) {
-                    Image(systemName: "eye.slash.fill").font(.system(size: 20, weight: .bold)).foregroundStyle(.orange)
+                    GameSymbol(name: "eye.slash.fill", size: 20, weight: .bold).foregroundStyle(.orange)
                         .frame(width: 42, height: 42).background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 13))
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Reklam izleme izni").font(.system(size: 15, weight: .bold, design: .rounded))
@@ -725,7 +723,7 @@ private struct AboutPage: View {
             } label: {
                 GlassCard {
                     HStack(spacing: 12) {
-                        Image(systemName: "message.fill").font(.system(size: 20, weight: .bold)).foregroundStyle(.green)
+                        GameSymbol(name: "message.fill", size: 20, weight: .bold).foregroundStyle(.green)
                             .frame(width: 42, height: 42).background(Color.green.opacity(0.12), in: RoundedRectangle(cornerRadius: 13))
                         Text("Canlı destek").font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(.white)
                         Spacer()
@@ -772,8 +770,7 @@ struct AccountSecurityCard: View {
         GlassCard {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 12) {
-                    Image(systemName: masked == nil ? "envelope.badge.shield.half.filled" : "checkmark.shield.fill")
-                        .font(.system(size: 20, weight: .bold)).foregroundStyle(masked == nil ? Color.cyan : Color.mint)
+                    GameSymbol(name: masked == nil ? "envelope.badge.shield.half.filled" : "checkmark.shield.fill", size: 20, weight: .bold).foregroundStyle(masked == nil ? Color.cyan : Color.mint)
                         .frame(width: 42, height: 42)
                         .background((masked == nil ? Color.cyan : Color.mint).opacity(0.12), in: RoundedRectangle(cornerRadius: 13))
                     VStack(alignment: .leading, spacing: 3) {
@@ -879,8 +876,7 @@ struct EmailAccountSheet: View {
             ZStack {
                 Circle().fill(Color.orange.opacity(0.12)).frame(width: 92, height: 92)
                 Circle().stroke(Color.orange.opacity(0.4), lineWidth: 1.5).frame(width: 92, height: 92)
-                Image(systemName: "key.fill")
-                    .font(.system(size: 36, weight: .bold)).foregroundStyle(.orange)
+                GameSymbol(name: "key.fill", size: 36, weight: .bold).foregroundStyle(.orange)
                     .shadow(color: .orange.opacity(0.6), radius: 10)
             }
             .padding(.top, 4)
@@ -905,8 +901,7 @@ struct EmailAccountSheet: View {
             ZStack {
                 Circle().fill(Color.cyan.opacity(0.12)).frame(width: 92, height: 92)
                 Circle().stroke(Color.cyan.opacity(0.35), lineWidth: 1.5).frame(width: 92, height: 92)
-                Image(systemName: mode == .link ? "lock.shield.fill" : "arrow.down.circle.fill")
-                    .font(.system(size: 38, weight: .bold)).foregroundStyle(.cyan)
+                GameSymbol(name: mode == .link ? "lock.shield.fill" : "arrow.down.circle.fill", size: 38, weight: .bold).foregroundStyle(.cyan)
                     .shadow(color: .cyan.opacity(0.6), radius: 10)
             }
             .frame(maxWidth: .infinity).padding(.vertical, 4)
@@ -984,8 +979,7 @@ struct EmailAccountSheet: View {
             ZStack {
                 Circle().fill(Color.cyan.opacity(0.12)).frame(width: 92, height: 92)
                 Circle().stroke(Color.cyan.opacity(0.35), lineWidth: 1.5).frame(width: 92, height: 92)
-                Image(systemName: "envelope.badge.fill")
-                    .font(.system(size: 36, weight: .bold)).foregroundStyle(.cyan)
+                GameSymbol(name: "envelope.badge.fill", size: 36, weight: .bold).foregroundStyle(.cyan)
                     .shadow(color: .cyan.opacity(0.6), radius: 10)
             }
             .padding(.top, 4)
@@ -1027,7 +1021,7 @@ struct EmailAccountSheet: View {
 
     private var successView: some View {
         VStack(spacing: 16) {
-            Image(systemName: "checkmark.seal.fill").font(.system(size: 54)).foregroundStyle(.mint)
+            GameSymbol(name: "checkmark.seal.fill", size: 54).foregroundStyle(.mint)
             Text(mode == .link ? L("E-postan bağlandı.") : L("Hesabın bu cihaza taşındı."))
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
             if mode == .link, store.lastEmailBonus > 0 {
@@ -1094,8 +1088,7 @@ struct EmailNudgeSheet: View {
                 NeonBackground(theme: appState.selectedBackground)
                 VStack(spacing: 18) {
                     Spacer(minLength: 0)
-                    Image(systemName: "lock.shield.fill")
-                        .font(.system(size: 58, weight: .bold)).foregroundStyle(.cyan)
+                    GameSymbol(name: "lock.shield.fill", size: 58, weight: .bold).foregroundStyle(.cyan)
                         .shadow(color: .cyan.opacity(0.6), radius: 16)
                     Text("İlerlemeni koru")
                         .font(.system(size: 24, weight: .heavy, design: .rounded))

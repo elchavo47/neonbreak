@@ -218,7 +218,7 @@ struct ShopView: View {
 
     private var emptyState: some View {
         VStack(spacing: 10) {
-            Image(systemName: "wifi.slash").font(.system(size: 28, weight: .bold)).foregroundStyle(.white.opacity(0.4))
+            GameSymbol(name: "wifi.slash", size: 28, weight: .bold).foregroundStyle(.white.opacity(0.4))
             Text("Bu bölüm için internet bağlantısı gerekiyor.")
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.6))
@@ -325,7 +325,7 @@ struct ShopView: View {
         Button(action: onBuyCoins) {
             HStack(spacing: 12) {
                 ZStack {
-                    Image(systemName: "hexagon.fill").font(.system(size: 26, weight: .black)).foregroundStyle(.yellow)
+                    GameSymbol(name: "hexagon.fill", size: 26, weight: .black).foregroundStyle(.yellow)
                     Image(systemName: "plus").font(.system(size: 11, weight: .black)).foregroundStyle(.black)
                 }
                 .frame(width: 46, height: 46)
@@ -357,8 +357,7 @@ struct ShopView: View {
         if let offers = store.adRewards, offers.enabled, offers.coinsLeft > 0, offers.coinAmount > 0 {
             Button { earnCoins() } label: {
                 HStack(spacing: 12) {
-                    Image(systemName: "play.circle.fill")
-                        .font(.system(size: 21, weight: .bold)).foregroundStyle(.black)
+                    GameSymbol(name: "play.circle.fill", size: 21, weight: .bold).foregroundStyle(.black)
                         .frame(width: 42, height: 42)
                         .background(Color.yellow, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
                     VStack(alignment: .leading, spacing: 2) {
@@ -408,8 +407,7 @@ struct ShopView: View {
                 }
             } label: {
                 HStack(spacing: 12) {
-                    Image(systemName: "play.rectangle.fill")
-                        .font(.system(size: 19, weight: .bold)).foregroundStyle(.black)
+                    GameSymbol(name: "play.rectangle.fill", size: 19, weight: .bold).foregroundStyle(.black)
                         .frame(width: 42, height: 42)
                         .background(Color.yellow, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
                     VStack(alignment: .leading, spacing: 2) {
@@ -452,8 +450,7 @@ struct ShopView: View {
         let kind = PowerUpKind.find(item.itemKey)
         let accent = kind?.color ?? Color.yellow
         return HStack(spacing: 12) {
-            Image(systemName: kind?.icon ?? "sparkles")
-                .font(.system(size: 26, weight: .bold))
+            GameSymbol(name: kind?.icon ?? "sparkles", size: 26, weight: .bold)
                 .foregroundStyle(accent)
                 .frame(width: 60, height: 60)
                 .background(accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -479,8 +476,7 @@ struct ShopView: View {
         let accent = Color.purple
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
-                Image(systemName: "shippingbox.fill")
-                    .font(.system(size: 26, weight: .bold))
+                GameSymbol(name: "shippingbox.fill", size: 26, weight: .bold)
                     .foregroundStyle(accent)
                     .frame(width: 60, height: 60)
                     .background(accent.opacity(0.14), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -540,7 +536,7 @@ struct ShopView: View {
 
     private func priceLabel(_ item: StoreManager.RemoteStoreItem) -> some View {
         HStack(spacing: 4) {
-            if item.priceCoins > 0 { Image(systemName: "hexagon.fill").font(.system(size: 10, weight: .bold)) }
+            if item.priceCoins > 0 { GameSymbol(name: "hexagon.fill", size: 10, weight: .bold) }
             if item.isDiscounted, let original = item.originalPrice {
                 // İndirimde eski fiyat üstü çizili görünür.
                 Text(original.formatted()).strikethrough().opacity(0.55).font(.system(size: 11, weight: .semibold, design: .rounded))
@@ -597,7 +593,7 @@ struct ShopView: View {
                         HStack(spacing: 6) {
                             Text(offer.originalPrice.formatted()).strikethrough().foregroundStyle(.white.opacity(0.45))
                             Image(systemName: "arrow.right").font(.system(size: 10, weight: .bold)).foregroundStyle(.white.opacity(0.4))
-                            Image(systemName: "hexagon.fill").font(.system(size: 11)).foregroundStyle(.yellow)
+                            GameSymbol(name: "hexagon.fill", size: 11).foregroundStyle(.yellow)
                             Text(offer.priceCoins.formatted()).foregroundStyle(.white)
                         }
                         .font(.system(size: 14, weight: .bold, design: .rounded)).monospacedDigit()
@@ -648,8 +644,7 @@ struct ShopView: View {
         } else if offer.category == "background", let theme = BackgroundTheme.all.first(where: { "background.\($0.id)" == offer.itemKey }) {
             Image(theme.textureName).resizable().scaledToFill().clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         } else {
-            Image(systemName: offer.category == "bundle" ? "shippingbox.fill" : "bolt.fill")
-                .font(.system(size: 28, weight: .bold)).foregroundStyle(.yellow)
+            GameSymbol(name: offer.category == "bundle" ? "shippingbox.fill" : "bolt.fill", size: 28, weight: .bold).foregroundStyle(.yellow)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color.yellow.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }

@@ -365,7 +365,7 @@ private struct CosmeticsSheet: View {
                 if kind == "frame" {
                     AvatarFrameRing(frame: key).opacity(unlocked ? 1 : 0.35)
                 } else {
-                    Image(systemName: "textformat").font(.system(size: 14, weight: .bold)).foregroundStyle(.yellow.opacity(unlocked ? 0.9 : 0.35))
+                    GameSymbol(name: "textformat", size: 14, weight: .bold).foregroundStyle(.yellow.opacity(unlocked ? 0.9 : 0.35))
                 }
             }
             .frame(width: 42, height: 42)
@@ -397,7 +397,7 @@ private struct CosmeticsSheet: View {
                 .buttonStyle(.plain)
                 .disabled(busy)
             } else {
-                Image(systemName: "lock.fill").font(.system(size: 13, weight: .bold)).foregroundStyle(.white.opacity(0.3))
+                GameSymbol(name: "lock.fill", size: 13, weight: .bold).foregroundStyle(.white.opacity(0.3))
                     .frame(width: 64)
             }
         }
@@ -630,7 +630,7 @@ private struct ReportPlayerSheet: View {
                     ForEach(reasons, id: \.0) { item in
                         Button { reason = item.0 } label: {
                             HStack(spacing: 12) {
-                                Image(systemName: item.1).font(.system(size: 15, weight: .bold)).frame(width: 26)
+                                GameSymbol(name: item.1, size: 15, weight: .bold).frame(width: 26)
                                     .foregroundStyle(reason == item.0 ? Color.cyan : Color.white.opacity(0.6))
                                 Text(LocalizedStringKey(item.2)).font(.system(size: 15, weight: .semibold, design: .rounded))
                                 Spacer()
@@ -713,6 +713,12 @@ struct PlayerCardSheet: View {
                             .background(Color.mint.opacity(0.10), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     }
                     if let card {
+                        if let keys = card.showcase, !keys.isEmpty {
+                            HStack(spacing: 10) { ForEach(keys, id: \.self) { ShowcaseBadge(key: $0, size: 58) } }
+                                .padding(.vertical, 12).padding(.horizontal, 10)
+                                .background(LinearGradient(colors: [Color.orange.opacity(0.12), Color.black.opacity(0.3)], startPoint: .top, endPoint: .bottom), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                                .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.orange.opacity(0.25), lineWidth: 1))
+                        }
                         if let clan = card.clan { clanCard(clan) }
                         leagueStrip(card)
                         LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
@@ -873,7 +879,7 @@ struct PlayerCardSheet: View {
                 }
                 Spacer(minLength: 4)
                 VStack(spacing: 2) {
-                    Image(systemName: "arrow.up.right.circle.fill").font(.system(size: 24)).foregroundStyle(ClanStyle.color(clan.color))
+                    GameSymbol(name: "arrow.up.right.circle.fill", size: 24).foregroundStyle(ClanStyle.color(clan.color))
                     Text("Klana git").font(.system(size: 9, weight: .heavy, design: .rounded)).foregroundStyle(.white.opacity(0.55))
                 }
             }
@@ -973,8 +979,7 @@ private struct WhatsNewView: View {
                     .padding(.top, 26)
                 ForEach(items, id: \.0) { item in
                     HStack(alignment: .top, spacing: 14) {
-                        Image(systemName: item.0)
-                            .font(.system(size: 19, weight: .bold)).foregroundStyle(item.1)
+                        GameSymbol(name: item.0, size: 19, weight: .bold).foregroundStyle(item.1)
                             .frame(width: 42, height: 42)
                             .background(item.1.opacity(0.14), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
                         VStack(alignment: .leading, spacing: 3) {
@@ -1019,8 +1024,7 @@ private struct UpdateRequiredView: View {
                     Circle().stroke(Color.cyan.opacity(0.25), lineWidth: 2).frame(width: 150, height: 150)
                         .scaleEffect(pulse ? 1.18 : 0.95).opacity(pulse ? 0 : 0.9)
                     Circle().fill(Color.cyan.opacity(0.12)).frame(width: 118, height: 118)
-                    Image(systemName: "arrow.down.app.fill")
-                        .font(.system(size: 54, weight: .bold)).foregroundStyle(.cyan)
+                    GameSymbol(name: "arrow.down.app.fill", size: 54, weight: .bold).foregroundStyle(.cyan)
                         .shadow(color: .cyan.opacity(0.7), radius: 18)
                 }
                 Text("Güncelleme gerekli")
@@ -1080,8 +1084,7 @@ private struct IntegrityBlockedView: View {
             VStack(spacing: 16) {
                 ZStack {
                     Circle().fill(Color.red.opacity(0.12)).frame(width: 118, height: 118)
-                    Image(systemName: "checkmark.shield.fill")
-                        .font(.system(size: 54, weight: .bold)).foregroundStyle(.red)
+                    GameSymbol(name: "checkmark.shield.fill", size: 54, weight: .bold).foregroundStyle(.red)
                         .shadow(color: .red.opacity(0.6), radius: 18)
                 }
                 Text("Orijinal uygulama gerekli")
@@ -1139,8 +1142,7 @@ private struct SecurityBlockedView: View {
         ZStack {
             Color.black.opacity(0.96).ignoresSafeArea()
             VStack(spacing: 16) {
-                Image(systemName: "lock.trianglebadge.exclamationmark.fill")
-                    .font(.system(size: 52))
+                GameSymbol(name: "lock.trianglebadge.exclamationmark.fill", size: 52)
                     .foregroundStyle(.orange)
                 Text("Güvenli bağlantı kurulamadı")
                     .font(.system(size: 23, weight: .bold, design: .rounded))
@@ -1187,8 +1189,7 @@ private struct AccountBlockedView: View {
         ZStack {
             Color.black.opacity(0.94).ignoresSafeArea()
             VStack(spacing: 16) {
-                Image(systemName: block.status == "banned" ? "hand.raised.slash.fill" : "pause.circle.fill")
-                    .font(.system(size: 54))
+                GameSymbol(name: block.status == "banned" ? "hand.raised.slash.fill" : "pause.circle.fill", size: 54)
                     .foregroundStyle(block.status == "banned" ? Color.red : Color.orange)
                 Text(block.status == "banned" ? L("Hesabın yasaklandı") : L("Hesabın askıya alındı"))
                     .font(.system(size: 24, weight: .bold, design: .rounded))
@@ -1387,7 +1388,7 @@ private struct AppealView: View {
                 }
             } label: {
                 Group {
-                    if sending { ProgressView().tint(.black) } else { Image(systemName: "paperplane.fill").font(.system(size: 15, weight: .bold)) }
+                    if sending { ProgressView().tint(.black) } else { GameSymbol(name: "paperplane.fill", size: 15, weight: .bold) }
                 }
                 .foregroundStyle(.black)
                 .frame(width: 42, height: 42)
@@ -1457,7 +1458,7 @@ private struct LeaderboardView: View {
                             HStack(spacing: 12) {
                                 ZStack {
                                     Circle().fill(Color.cyan.opacity(0.13)).frame(width: 42, height: 42)
-                                    Image(systemName: "timer").font(.system(size: 16, weight: .bold)).foregroundStyle(.cyan)
+                                    GameSymbol(name: "timer", size: 16, weight: .bold).foregroundStyle(.cyan)
                                 }
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("HAFTANIN BİTMESİNE").font(.system(size: 10, weight: .bold, design: .rounded)).tracking(1.2).foregroundStyle(.white.opacity(0.42))
@@ -1478,7 +1479,7 @@ private struct LeaderboardView: View {
                                 .foregroundStyle(.white.opacity(0.45))
                             Spacer(minLength: 4)
                             if store.weeklyPrizes.count >= 4 {
-                                Image(systemName: "hexagon.fill").font(.system(size: 9)).foregroundStyle(Color(hex: 0xFFD60A))
+                                GameSymbol(name: "hexagon.fill", size: 9).foregroundStyle(Color(hex: 0xFFD60A))
                                 Text("1. \(store.weeklyPrizes[0].formatted()) • 2. \(store.weeklyPrizes[1].formatted()) • 3. \(store.weeklyPrizes[2].formatted()) • 4-10 \(store.weeklyPrizes[3].formatted())")
                                     .font(.system(size: 10, weight: .bold, design: .rounded)).monospacedDigit()
                                     .foregroundStyle(.white.opacity(0.6)).lineLimit(1).minimumScaleFactor(0.7)
@@ -1557,8 +1558,7 @@ private struct LeaderboardView: View {
             HStack(spacing: 10) {
                 Button { withAnimation(.easeInOut(duration: 0.2)) { leagueOpen.toggle() } } label: {
                     HStack(spacing: 10) {
-                        Image(systemName: "shield.lefthalf.filled")
-                            .font(.system(size: 17, weight: .bold)).foregroundStyle(color)
+                        GameSymbol(name: "shield.lefthalf.filled", size: 17, weight: .bold).foregroundStyle(color)
                             .frame(width: 36, height: 36)
                             .background(color.opacity(0.14), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
                         VStack(alignment: .leading, spacing: 1) {
@@ -1581,8 +1581,7 @@ private struct LeaderboardView: View {
                 }
                 .buttonStyle(.plain)
                 Button { showCosmetics = true } label: {
-                    Image(systemName: "person.crop.circle.badge.checkmark")
-                        .font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
+                    GameSymbol(name: "person.crop.circle.badge.checkmark", size: 15, weight: .bold).foregroundStyle(.white)
                         .frame(width: 36, height: 36)
                         .background(Color.white.opacity(0.08), in: Circle())
                 }
@@ -1684,7 +1683,7 @@ private struct LeaderboardView: View {
                         }
                     }
                     Spacer()
-                    Image(systemName: "chart.bar.fill").font(.system(size: 22, weight: .bold)).foregroundStyle(.cyan.opacity(0.8))
+                    GameSymbol(name: "chart.bar.fill", size: 22, weight: .bold).foregroundStyle(.cyan.opacity(0.8))
                 }
                 if store.weeklyPrizes.count >= 4 {
                     HStack(spacing: 6) {
@@ -1829,6 +1828,7 @@ private struct ProfileView: View {
     @State private var localAvatarPreview: UIImage?
     @State private var emailSheet: EmailAccountSheet.Mode?
     @State private var showCosmetics = false
+    @State private var showShowcase = false
     @FocusState private var nameFocused: Bool
 
     // Tek tip, sakin bir görünüm: tek vurgu rengi, ince çizgiler, ölçülü yazı ağırlıkları.
@@ -1848,8 +1848,9 @@ private struct ProfileView: View {
                 VStack(spacing: 14) {
                     header
                     identityCard
-                    styleCard
+                    showcaseCard
                     careerCard
+                    styleCard
                     accountCard
                     supportRow
                     if let error = store.errorMessage, !error.localizedCaseInsensitiveContains("bağlant"), !error.localizedCaseInsensitiveContains("connect") {
@@ -1915,6 +1916,7 @@ private struct ProfileView: View {
         }
         .sheet(item: $emailSheet) { mode in EmailAccountSheet(mode: mode) }
         .sheet(isPresented: $showCosmetics) { CosmeticsSheet().environmentObject(store) }
+        .sheet(isPresented: $showShowcase) { ShowcasePickerSheet().environmentObject(store) }
         .sheet(isPresented: $showSupport) { SupportCenterView().environmentObject(store).environmentObject(appState) }
         .task { await store.loadSupportTickets() }
     }
@@ -1947,49 +1949,50 @@ private struct ProfileView: View {
 
     // MARK: Kimlik kartı
 
+    private var leagueColor: Color { Cosmetic.leagueColor(store.profile?.league ?? 1) }
+
     private var identityCard: some View {
         VStack(spacing: 0) {
-            VStack(spacing: 14) {
-                avatarButton
-                VStack(spacing: 6) {
-                    Text(store.playerName)
-                        .font(.system(size: 24, weight: .semibold, design: .rounded))
-                        .lineLimit(1).minimumScaleFactor(0.7)
-                    if let title = store.cosmetics?.title ?? store.profile?.title {
-                        Text(Cosmetic.titleName(title))
-                            .font(.system(size: 13, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.yellow)
-                    }
-                    HStack(spacing: 8) {
-                        HStack(spacing: 5) {
-                            Image(systemName: "bolt.shield.fill").font(.system(size: 10, weight: .semibold))
-                            Text(profileRankTitle).font(.system(size: 11, weight: .semibold, design: .rounded)).tracking(0.6)
+            ZStack(alignment: .top) {
+                // Kapak: ligin renginde parlayan şerit
+                LinearGradient(colors: [leagueColor.opacity(0.55), Color.purple.opacity(0.25), .clear], startPoint: .top, endPoint: .bottom)
+                    .frame(height: 120)
+                    .overlay(RadialGradient(colors: [Color.white.opacity(0.18), .clear], center: .topTrailing, startRadius: 0, endRadius: 200))
+                VStack(spacing: 12) {
+                    avatarButton
+                        .shadow(color: leagueColor.opacity(0.55), radius: 22)
+                        .padding(.top, 40)
+                    VStack(spacing: 7) {
+                        Text(store.playerName)
+                            .font(.system(size: 26, weight: .black, design: .rounded))
+                            .lineLimit(1).minimumScaleFactor(0.7)
+                        HStack(spacing: 6) {
+                            if let title = store.cosmetics?.title ?? store.profile?.title {
+                                Text(Cosmetic.titleName(title))
+                                    .font(.system(size: 12, weight: .heavy, design: .rounded)).foregroundStyle(.black)
+                                    .padding(.horizontal, 11).frame(height: 24)
+                                    .background(LinearGradient(colors: [.yellow, .orange], startPoint: .leading, endPoint: .trailing), in: Capsule())
+                            }
+                            if let tag = store.clanState?.clan?.tag { ClanTagBadge(tag: tag, size: 13) }
                         }
-                        .foregroundStyle(accent)
-                        .padding(.horizontal, 10).frame(height: 24)
-                        .background(accent.opacity(0.12), in: Capsule())
                         Text("Katılım \(profileDateText)")
                             .font(.system(size: 11, weight: .medium, design: .rounded))
                             .foregroundStyle(faint)
                     }
+                    rankProgress
                 }
-                rankProgress
+                .padding(.horizontal, 18).padding(.bottom, 16)
             }
-            .padding(.horizontal, 18).padding(.top, 22).padding(.bottom, 18)
-
-            Rectangle().fill(hairline).frame(height: 1)
-
-            HStack(spacing: 0) {
+            HStack(spacing: 8) {
                 metric(value: store.balance.formatted(), label: L("COIN"), icon: "hexagon.fill", tint: .yellow)
-                Rectangle().fill(hairline).frame(width: 1, height: 34)
                 metric(value: (store.profile?.bestScore ?? 0).formatted(), label: L("REKOR"), icon: "trophy.fill", tint: .pink)
-                Rectangle().fill(hairline).frame(width: 1, height: 34)
                 metric(value: "\(store.profile?.bestLevel ?? 0)", label: L("SEVİYE"), icon: "chevron.up.2", tint: accent)
             }
-            .padding(.vertical, 14)
+            .padding(.horizontal, 12).padding(.bottom, 14)
         }
         .frame(maxWidth: .infinity)
-        .background(cardBackground(glow: true))
+        .background(cardBackground(glow: true, tint: leagueColor))
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 
     private var avatarButton: some View {
@@ -2003,16 +2006,16 @@ private struct ProfileView: View {
         } label: {
             ZStack(alignment: .bottomTrailing) {
                 profileAvatar
-                    .overlay(AvatarFrameRing(frame: store.cosmetics?.frame ?? store.profile?.frame, lineWidth: 4).frame(width: 104, height: 104))
+                    .overlay(AvatarFrameRing(frame: store.cosmetics?.frame ?? store.profile?.frame, lineWidth: 5).frame(width: 112, height: 112))
                 Group {
                     if isUploadingAvatar { ProgressView().controlSize(.small).tint(.black) }
-                    else { Image(systemName: "camera.fill").font(.system(size: 11, weight: .semibold)) }
+                    else { Image(systemName: "camera.fill").font(.system(size: 12, weight: .bold)) }
                 }
                 .foregroundStyle(.black)
-                .frame(width: 30, height: 30)
-                .background(Color.white, in: Circle())
+                .frame(width: 32, height: 32)
+                .background(LinearGradient(colors: [.white, Color(white: 0.8)], startPoint: .top, endPoint: .bottom), in: Circle())
                 .overlay(Circle().stroke(Color.black.opacity(0.6), lineWidth: 2))
-                .offset(x: 2, y: 2)
+                .offset(x: 4, y: 4)
             }
         }
         .buttonStyle(.plain)
@@ -2020,42 +2023,96 @@ private struct ProfileView: View {
     }
 
     private var rankProgress: some View {
-        VStack(spacing: 6) {
-            GeometryReader { proxy in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color.white.opacity(0.07))
-                    Capsule()
-                        .fill(LinearGradient(colors: [accent, Color.purple.opacity(0.9)], startPoint: .leading, endPoint: .trailing))
-                        .frame(width: max(6, proxy.size.width * progression.progress))
+        HStack(spacing: 12) {
+            ZStack {
+                Image("GIMedal").resizable().scaledToFit().frame(width: 46, height: 46)
+                Text(verbatim: "\(progression.rank)")
+                    .font(.system(size: 12, weight: .black, design: .rounded)).foregroundStyle(.black.opacity(0.8))
+                    .offset(y: -8)
+            }
+            .frame(width: 48, height: 48)
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text(verbatim: profileRankTitle.uppercased(with: Locale(identifier: AppLanguage.effectiveCode)))
+                        .font(.system(size: 12, weight: .black, design: .rounded)).tracking(0.8).foregroundStyle(.orange)
+                    Spacer()
+                    Text("\(progression.xpIntoRank.formatted()) / \(progression.xpNeededForRank.formatted()) XP")
+                        .font(.system(size: 11, weight: .bold, design: .rounded)).monospacedDigit().foregroundStyle(muted)
                 }
+                GeometryReader { proxy in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color.white.opacity(0.08))
+                        Capsule()
+                            .fill(LinearGradient(colors: [.orange, .pink, .purple], startPoint: .leading, endPoint: .trailing))
+                            .frame(width: max(8, proxy.size.width * progression.progress))
+                            .shadow(color: .pink.opacity(0.6), radius: 5)
+                    }
+                }
+                .frame(height: 9)
+                Text("Rütbe \(progression.rank)").font(.system(size: 10, weight: .semibold, design: .rounded)).foregroundStyle(faint)
             }
-            .frame(height: 6)
-            HStack {
-                Text("Rütbe \(progression.rank)")
-                Spacer()
-                Text("\(progression.xpIntoRank.formatted()) / \(progression.xpNeededForRank.formatted()) XP")
-                    .monospacedDigit()
-            }
-            .font(.system(size: 11, weight: .medium, design: .rounded))
-            .foregroundStyle(faint)
         }
-        .padding(.top, 2)
+        .padding(12)
+        .background(Color.black.opacity(0.25), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.orange.opacity(0.25), lineWidth: 1))
     }
 
     private func metric(value: String, label: String, icon: String, tint: Color) -> some View {
-        VStack(spacing: 5) {
-            HStack(spacing: 5) {
-                Image(systemName: icon).font(.system(size: 11, weight: .semibold)).foregroundStyle(tint)
-                Text(value)
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
-            }
+        VStack(spacing: 4) {
+            GameSymbol(name: icon, size: 17, color: tint).frame(height: 26)
+            Text(value)
+                .font(.system(size: 17, weight: .black, design: .rounded))
+                .monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
             Text(label)
-                .font(.system(size: 10, weight: .medium, design: .rounded)).tracking(1.2)
+                .font(.system(size: 9, weight: .heavy, design: .rounded)).tracking(1.2)
                 .foregroundStyle(faint)
         }
         .frame(maxWidth: .infinity)
-        .padding(.horizontal, 6)
+        .padding(.vertical, 11).padding(.horizontal, 4)
+        .background(LinearGradient(colors: [tint.opacity(0.13), Color.black.opacity(0.25)], startPoint: .top, endPoint: .bottom), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(tint.opacity(0.2), lineWidth: 1))
+    }
+
+    // MARK: Vitrin (seçilen 3 rozet)
+
+    private var showcaseCard: some View {
+        let keys = store.profile?.showcase ?? []
+        let earned = store.achievements.filter { $0.completed }
+        return Button { showShowcase = true } label: {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    sectionLabel(L("VİTRİN"))
+                    Spacer()
+                    Text(keys.isEmpty ? L("Rozet seç") : L("Değiştir"))
+                        .font(.system(size: 13, weight: .bold, design: .rounded)).foregroundStyle(accent)
+                    Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(faint)
+                }
+                HStack(spacing: 10) {
+                    ForEach(0..<3, id: \.self) { i in
+                        if i < keys.count {
+                            ShowcaseBadge(key: keys[i])
+                        } else {
+                            VStack(spacing: 6) {
+                                Image(systemName: "plus").font(.system(size: 16, weight: .bold)).foregroundStyle(faint)
+                                    .frame(width: 54, height: 54)
+                                    .background(Circle().strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [4, 4])).foregroundStyle(Color.white.opacity(0.2)))
+                                Text(earned.isEmpty ? L("Kilitli") : L("Boş"))
+                                    .font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(faint)
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                    }
+                }
+                if earned.isEmpty {
+                    Text("Kariyer hedeflerini tamamladıkça rozet kazanırsın; seçtiğin 3 rozet oyuncu kartında görünür.")
+                        .font(.system(size: 11, design: .rounded)).foregroundStyle(faint)
+                }
+            }
+            .padding(18)
+            .background(cardBackground(tint: .orange))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: Görünüm (çerçeve + unvan)
@@ -2071,49 +2128,58 @@ private struct ProfileView: View {
                     sectionLabel(L("GÖRÜNÜM"))
                     Spacer()
                     Text("Değiştir")
-                        .font(.system(size: 13, weight: .semibold, design: .rounded)).foregroundStyle(accent)
+                        .font(.system(size: 13, weight: .bold, design: .rounded)).foregroundStyle(accent)
                     Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(faint)
                 }
                 HStack(spacing: 10) {
                     styleTile(
-                        preview: AnyView(ZStack { Circle().fill(Color.white.opacity(0.06)); AvatarFrameRing(frame: frame, lineWidth: 3) }.frame(width: 34, height: 34)),
+                        preview: AnyView(ZStack { Circle().fill(Color.white.opacity(0.06)); AvatarFrameRing(frame: frame, lineWidth: 3) }.frame(width: 40, height: 40)),
                         label: L("Çerçeve"),
                         value: frame.map { Cosmetic.frameName($0) } ?? L("Takılı değil"),
-                        count: "\(frames.count)/\(Cosmetic.allFrames.count)"
+                        done: frames.count, total: Cosmetic.allFrames.count, tint: .orange
                     )
                     styleTile(
-                        preview: AnyView(Image(systemName: "textformat").font(.system(size: 14, weight: .bold)).foregroundStyle(.yellow).frame(width: 34, height: 34).background(Color.yellow.opacity(0.12), in: Circle())),
+                        preview: AnyView(GameSymbol(name: "textformat", size: 20).frame(width: 40, height: 40)),
                         label: L("Unvan"),
                         value: title.map { Cosmetic.titleName($0) } ?? L("Takılı değil"),
-                        count: "\(titles.count)/\(Cosmetic.allTitles.count)"
+                        done: titles.count, total: Cosmetic.allTitles.count, tint: .yellow
                     )
                 }
             }
             .padding(18)
-            .background(cardBackground())
+            .background(cardBackground(tint: .purple))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
 
-    private func styleTile(preview: AnyView, label: String, value: String, count: String) -> some View {
-        HStack(spacing: 10) {
-            preview
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 4) {
-                    Text(label).font(.system(size: 11, weight: .medium, design: .rounded)).foregroundStyle(faint)
-                    Text(count).font(.system(size: 10, weight: .semibold, design: .rounded)).monospacedDigit().foregroundStyle(faint)
+    private func styleTile(preview: AnyView, label: String, value: String, done: Int, total: Int, tint: Color) -> some View {
+        VStack(alignment: .leading, spacing: 9) {
+            HStack(spacing: 10) {
+                preview
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(label).font(.system(size: 11, weight: .semibold, design: .rounded)).foregroundStyle(faint)
+                    Text(value)
+                        .font(.system(size: 14, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                        .lineLimit(1).minimumScaleFactor(0.7)
                 }
-                Text(value)
-                    .font(.system(size: 13, weight: .semibold, design: .rounded)).foregroundStyle(.white)
-                    .lineLimit(1).minimumScaleFactor(0.75)
+                Spacer(minLength: 0)
             }
-            Spacer(minLength: 0)
+            HStack(spacing: 6) {
+                GeometryReader { g in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color.white.opacity(0.08))
+                        Capsule().fill(tint).frame(width: max(4, g.size.width * Double(done) / Double(max(1, total))))
+                    }
+                }
+                .frame(height: 5)
+                Text(verbatim: "\(done)/\(total)").font(.system(size: 10, weight: .heavy, design: .rounded)).monospacedDigit().foregroundStyle(tint)
+            }
         }
-        .padding(10)
+        .padding(11)
         .frame(maxWidth: .infinity)
-        .background(Color.white.opacity(0.035), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(hairline, lineWidth: 1))
+        .background(LinearGradient(colors: [tint.opacity(0.10), Color.black.opacity(0.2)], startPoint: .top, endPoint: .bottom), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(tint.opacity(0.2), lineWidth: 1))
     }
 
     // MARK: Kariyer
@@ -2125,43 +2191,39 @@ private struct ProfileView: View {
                 Spacer()
                 if let rank = weeklyRank {
                     HStack(spacing: 5) {
-                        Image(systemName: "crown.fill").font(.system(size: 10, weight: .semibold))
-                        Text("Bu hafta #\(rank)").font(.system(size: 11, weight: .semibold, design: .rounded))
+                        GameSymbol(name: "crown.fill", size: 11)
+                        Text("Bu hafta #\(rank)").font(.system(size: 12, weight: .heavy, design: .rounded))
                     }
                     .foregroundStyle(rank <= 3 ? Color.yellow : muted)
-                    .padding(.horizontal, 10).frame(height: 24)
-                    .background((rank <= 3 ? Color.yellow : Color.white).opacity(0.10), in: Capsule())
+                    .padding(.horizontal, 10).frame(height: 28)
+                    .background((rank <= 3 ? Color.yellow : Color.white).opacity(0.12), in: Capsule())
+                    .overlay(Capsule().stroke((rank <= 3 ? Color.yellow : Color.white).opacity(0.3), lineWidth: 1))
                 }
             }
             HStack(spacing: 10) {
-                careerTile(value: (store.profile?.gamesPlayed ?? 0).formatted(), label: L("Oyun"), icon: "flag.checkered", tint: .purple)
-                careerTile(value: (store.profile?.lifetimeBlocks ?? 0).formatted(), label: L("Kırılan blok"), icon: "square.grid.3x3.fill", tint: .orange)
-                careerTile(value: (store.profile?.lifetimeXp ?? 0).formatted(), label: "XP", icon: "sparkles", tint: accent)
+                careerTile(value: (store.profile?.gamesPlayed ?? 0).formatted(), label: L("Oyun"), icon: "gamecontroller.fill", tint: .cyan)
+                careerTile(value: (store.profile?.lifetimeBlocks ?? 0).formatted(), label: L("Kırılan blok"), icon: "square.grid.3x3.fill", tint: .pink)
+                careerTile(value: (store.profile?.lifetimeXp ?? 0).formatted(), label: "XP", icon: "sparkles", tint: .purple)
             }
         }
         .padding(18)
-        .background(cardBackground())
+        .background(cardBackground(tint: .cyan))
     }
 
     private func careerTile(value: String, label: String, icon: String, tint: Color) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: icon)
-                .font(.system(size: 12, weight: .semibold)).foregroundStyle(tint)
-                .frame(width: 28, height: 28)
-                .background(tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
-            VStack(alignment: .leading, spacing: 2) {
-                Text(value)
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
-                    .monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
-                Text(label)
-                    .font(.system(size: 11, weight: .medium, design: .rounded))
-                    .foregroundStyle(faint).lineLimit(1).minimumScaleFactor(0.8)
-            }
+        VStack(spacing: 6) {
+            GameSymbol(name: icon, size: 20, color: tint).frame(height: 30)
+            Text(value)
+                .font(.system(size: 17, weight: .black, design: .rounded))
+                .monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
+            Text(label)
+                .font(.system(size: 10, weight: .bold, design: .rounded))
+                .foregroundStyle(faint).lineLimit(1).minimumScaleFactor(0.8)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .background(Color.white.opacity(0.035), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(hairline, lineWidth: 1))
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 13).padding(.horizontal, 6)
+        .background(LinearGradient(colors: [tint.opacity(0.13), Color.black.opacity(0.25)], startPoint: .top, endPoint: .bottom), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(tint.opacity(0.2), lineWidth: 1))
     }
 
     // MARK: Hesap (oyuncu adı + e-posta tek kartta)
@@ -2255,18 +2317,18 @@ private struct ProfileView: View {
                     .padding(.horizontal, 18).padding(.bottom, 14)
             }
         }
-        .background(cardBackground())
+        .background(cardBackground(tint: .mint))
     }
 
     private func accountRow(icon: String, tint: Color, title: String, detail: String, action: String?, onTap: @escaping () -> Void) -> some View {
         Button(action: onTap) {
             HStack(spacing: 12) {
-                Image(systemName: icon)
-                    .font(.system(size: 14, weight: .semibold)).foregroundStyle(tint)
-                    .frame(width: 34, height: 34)
-                    .background(tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                GameSymbol(name: icon, size: 17, color: tint)
+                    .frame(width: 40, height: 40)
+                    .background(tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(tint.opacity(0.25), lineWidth: 1))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(title).font(.system(size: 14, weight: .medium, design: .rounded)).foregroundStyle(.white)
+                    Text(title).font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(.white)
                     Text(detail).font(.system(size: 12, weight: .regular, design: .rounded)).foregroundStyle(muted)
                         .lineLimit(1).minimumScaleFactor(0.8)
                 }
@@ -2287,12 +2349,12 @@ private struct ProfileView: View {
     private var supportRow: some View {
         Button { showSupport = true } label: {
             HStack(spacing: 12) {
-                Image(systemName: "bubble.left.and.bubble.right.fill")
-                    .font(.system(size: 14, weight: .semibold)).foregroundStyle(accent)
-                    .frame(width: 34, height: 34)
-                    .background(accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                GameSymbol(name: "headphones", size: 20)
+                    .frame(width: 46, height: 46)
+                    .background(Color.green.opacity(0.14), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.green.opacity(0.3), lineWidth: 1))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Canlı destek").font(.system(size: 14, weight: .medium, design: .rounded)).foregroundStyle(.white)
+                    Text("Canlı destek").font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(.white)
                     Text(store.supportTickets.isEmpty ? L("Yeni destek talebi oluştur") : LS("\(store.supportTickets.count) talebin var • mesajlarını takip et"))
                         .font(.system(size: 12, weight: .regular, design: .rounded)).foregroundStyle(muted)
                         .lineLimit(1).minimumScaleFactor(0.8)
@@ -2300,8 +2362,8 @@ private struct ProfileView: View {
                 Spacer(minLength: 6)
                 Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(faint)
             }
-            .padding(.horizontal, 18).padding(.vertical, 14)
-            .background(cardBackground())
+            .padding(.horizontal, 16).padding(.vertical, 14)
+            .background(cardBackground(tint: .green))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -2315,18 +2377,15 @@ private struct ProfileView: View {
             .foregroundStyle(faint)
     }
 
-    private func cardBackground(glow: Bool = false) -> some View {
-        RoundedRectangle(cornerRadius: 22, style: .continuous)
-            .fill(Color.white.opacity(0.045))
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+    private func cardBackground(glow: Bool = false, tint: Color = .white) -> some View {
+        RoundedRectangle(cornerRadius: 24, style: .continuous)
+            .fill(LinearGradient(colors: [tint.opacity(glow ? 0.16 : 0.09), Color(red: 0.06, green: 0.06, blue: 0.13).opacity(0.85)], startPoint: .topLeading, endPoint: .bottomTrailing))
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .stroke(
-                        LinearGradient(colors: [Color.white.opacity(glow ? 0.16 : 0.10), Color.white.opacity(0.04)], startPoint: .top, endPoint: .bottom),
-                        lineWidth: 1
-                    )
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .stroke(LinearGradient(colors: [tint.opacity(glow ? 0.45 : 0.28), Color.white.opacity(0.04)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1.2)
             )
-            .shadow(color: .black.opacity(0.25), radius: 18, y: 8)
+            .shadow(color: tint.opacity(glow ? 0.25 : 0.12), radius: 18, y: 8)
     }
 
     private func saveName() {
@@ -2347,10 +2406,10 @@ private struct ProfileView: View {
         if let localAvatarPreview {
             Image(uiImage: localAvatarPreview)
                 .resizable().scaledToFill()
-                .frame(width: 104, height: 104).clipShape(Circle())
+                .frame(width: 112, height: 112).clipShape(Circle())
         } else if let url = store.avatarURL {
             AsyncImage(url: url) { image in image.resizable().scaledToFill() } placeholder: { fallbackAvatar }
-                .frame(width: 104, height: 104).clipShape(Circle())
+                .frame(width: 112, height: 112).clipShape(Circle())
         } else { fallbackAvatar }
     }
 
@@ -2425,7 +2484,7 @@ private struct ProfileView: View {
         Circle()
             .fill(LinearGradient(colors: [.cyan.opacity(0.35), .purple.opacity(0.35)], startPoint: .topLeading, endPoint: .bottomTrailing))
             .overlay(Text(String(store.playerName.prefix(1)).uppercased()).font(.system(size: 36, weight: .semibold, design: .rounded)))
-            .frame(width: 104, height: 104)
+            .frame(width: 112, height: 112)
     }
 }
 
@@ -2921,8 +2980,7 @@ private struct SupportCenterView: View {
                         Button {
                             if let onClose { onClose() } else { dismiss() }
                         } label: {
-                            Image(systemName: embedded ? "chevron.left" : "xmark")
-                                .font(.system(size: 15, weight: .semibold))
+                            GameSymbol(name: embedded ? "chevron.left" : "xmark", size: 15, weight: .semibold)
                                 .frame(width: 34, height: 34)
                                 .background(Color.white.opacity(0.08), in: Circle())
                         }
@@ -3086,8 +3144,7 @@ private struct SupportCenterView: View {
                 ForEach(Array(topics.enumerated()), id: \.element.id) { index, topic in
                     Button { path.append(Route.topic(topic.id)) } label: {
                         HStack(spacing: 12) {
-                            Image(systemName: topic.icon)
-                                .font(.system(size: 15, weight: .semibold))
+                            GameSymbol(name: topic.icon, size: 15, weight: .semibold)
                                 .foregroundStyle(.white)
                                 .frame(width: 32, height: 32)
                                 .background(topic.tint, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
@@ -3120,7 +3177,7 @@ private struct SupportCenterView: View {
             }
         if hits.isEmpty {
             VStack(spacing: 10) {
-                Image(systemName: "text.magnifyingglass").font(.system(size: 30)).foregroundStyle(SupportStyle.text3)
+                GameSymbol(name: "text.magnifyingglass", size: 30).foregroundStyle(SupportStyle.text3)
                 Text("Sonuç bulunamadı").font(.headline)
                 Text("Ekibimiz sana yardımcı olsun.").font(.subheadline).foregroundStyle(SupportStyle.text2)
                 Button { openCompose(nil) } label: {
@@ -3369,7 +3426,7 @@ private struct SupportTicketsList: View {
             VStack(alignment: .leading, spacing: 20) {
                 if store.supportTickets.isEmpty {
                     VStack(spacing: 10) {
-                        Image(systemName: "tray").font(.system(size: 32)).foregroundStyle(SupportStyle.text3)
+                        GameSymbol(name: "tray", size: 32).foregroundStyle(SupportStyle.text3)
                         Text("Henüz destek talebin yok").font(.headline)
                         Text("Bir sorun yaşarsan buradan bize yazabilirsin.").font(.subheadline).foregroundStyle(SupportStyle.text2).multilineTextAlignment(.center)
                     }
@@ -3468,8 +3525,7 @@ private struct SupportComposeView: View {
                         ForEach(Array(topics.enumerated()), id: \.element.id) { index, topic in
                             Button { topicId = topic.id } label: {
                                 HStack(spacing: 12) {
-                                    Image(systemName: topic.icon)
-                                        .font(.system(size: 14, weight: .semibold))
+                                    GameSymbol(name: topic.icon, size: 14, weight: .semibold)
                                         .foregroundStyle(.white)
                                         .frame(width: 28, height: 28)
                                         .background(topic.tint, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
@@ -3575,8 +3631,7 @@ private struct SupportComposeView: View {
     private func success(_ id: Int) -> some View {
         VStack(spacing: 14) {
             Spacer()
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 64))
+            GameSymbol(name: "checkmark.circle.fill", size: 64)
                 .foregroundStyle(Color(red: 0.30, green: 0.85, blue: 0.55))
             Text("Talebin alındı").font(.system(size: 24, weight: .bold))
             if id > 0 {
@@ -3882,7 +3937,7 @@ private struct InboxView: View {
                 if store.notifications.isEmpty {
                     Spacer()
                     VStack(spacing: 12) {
-                        Image(systemName: "bell.slash.fill").font(.system(size: 34, weight: .bold)).foregroundStyle(.white.opacity(0.22))
+                        GameSymbol(name: "bell.slash.fill", size: 34, weight: .bold).foregroundStyle(.white.opacity(0.22))
                         Text("Henüz bildirim yok").font(.system(size: 15, weight: .bold, design: .rounded))
                         Text("Ödüller, duyurular ve destek yanıtları burada toplanacak.")
                             .font(.caption).foregroundStyle(.white.opacity(0.4)).multilineTextAlignment(.center)
@@ -3917,8 +3972,7 @@ private struct InboxView: View {
                     RoundedRectangle(cornerRadius: 15, style: .continuous)
                         .fill(presentation.color.opacity(item.isRead ? 0.07 : 0.15))
                         .frame(width: 46, height: 46)
-                    Image(systemName: presentation.icon)
-                        .font(.system(size: 18, weight: .bold)).foregroundStyle(presentation.color)
+                    GameSymbol(name: presentation.icon, size: 18, weight: .bold).foregroundStyle(presentation.color)
                 }
                 VStack(alignment: .leading, spacing: 5) {
                     HStack(spacing: 7) {

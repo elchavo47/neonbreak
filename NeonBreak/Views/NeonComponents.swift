@@ -15,24 +15,37 @@ enum GameIcons {
         "calendar.badge.clock": "GICalendar", "sparkles": "GISparkles", "person.crop.circle": "GIPerson", "person.crop.circle.fill": "GIPerson",
         "megaphone.fill": "GIMegaphone", "play.rectangle.fill": "GIClapper", "chart.pie.fill": "GIWheel", "list.number": "GIPodium",
         "gearshape.fill": "GICog", "headphones": "GIHeadphones", "square.grid.2x2.fill": "GIChecklist", "clock.arrow.circlepath": "GIStopwatch",
-        "shield.lefthalf.filled.badge.checkmark": "GIShield", "medal.fill": "GIMedal", "arrow.up.circle.fill": "GIUpgrade", "checklist": "GIChecklist"
+        "shield.lefthalf.filled.badge.checkmark": "GIShield", "medal.fill": "GIMedal", "arrow.up.circle.fill": "GIUpgrade", "checklist": "GIChecklist",
+        "hexagon.fill": "GICoins", "chevron.up.2": "GIUpgrade", "envelope": "GIEnvelope", "checkmark.shield.fill": "GIShield",
+        "arrow.triangle.2.circlepath": "GICycle", "textformat": "GIScroll", "bolt.shield.fill": "GIMedal", "crown": "GICrown",
+        "shippingbox.fill": "GIChest", "timer": "GIStopwatch", "speedometer": "GIBolt", "burst.fill": "GIStar", "lock.shield.fill": "GIShield",
+        "envelope.badge.fill": "GIEnvelope", "doc.text.fill": "GIScroll", "tray.full.fill": "GIChest", "person.fill": "GIPerson",
+        "trophy.circle.fill": "GITrophy", "rosette": "GIMedal", "medal": "GIMedal",
+        "hare.fill": "GISpeed", "circle.grid.cross.fill": "GIBalls", "bolt.horizontal.fill": "GIBolt", "shield.fill": "GIShield",
+        "creditcard.fill": "GICoins", "burst": "GIExplosion", "sparkle": "GISparkles"
     ]
     static func asset(_ systemName: String) -> String? { map[systemName] }
 }
 
 /// Oyun ikonu ya da (karşılığı yoksa) sistem simgesi. `size` sistem simgesinin punto boyutudur; oyun ikonu biraz daha büyük çizilir.
+/// `color` verilmezse sistem simgesi dıştaki foregroundStyle'ı kullanır.
 struct GameSymbol: View {
     let name: String
     var size: CGFloat = 18
-    var color: Color = .white
+    var weight: Font.Weight = .bold
+    var color: Color? = nil
     var dimmed = false
     var body: some View {
         if let asset = GameIcons.asset(name) {
             Image(asset).resizable().interpolation(.high).scaledToFit()
                 .frame(width: size * 1.45, height: size * 1.45)
                 .saturation(dimmed ? 0 : 1).opacity(dimmed ? 0.5 : 1)
+        } else if dimmed {
+            Image(systemName: name).font(.system(size: size, weight: weight)).foregroundStyle(Color.white.opacity(0.5))
+        } else if let color {
+            Image(systemName: name).font(.system(size: size, weight: weight)).foregroundStyle(color)
         } else {
-            Image(systemName: name).font(.system(size: size, weight: .bold)).foregroundStyle(dimmed ? Color.white.opacity(0.5) : color)
+            Image(systemName: name).font(.system(size: size, weight: weight))
         }
     }
 }
@@ -512,5 +525,156 @@ private struct FlyingCoin: View {
             .onAppear {
                 withAnimation(.easeIn(duration: 0.75).delay(delay)) { flying = true }
             }
+    }
+}
+
+// MARK: - Profil vitrini
+
+/// Kariyer hedefi rozeti (vitrinde gösterilir). Anahtar biçimi: "<tür>_<hedef>" (ör. level_100).
+struct ShowcaseBadge: View {
+    let key: String
+    var size: CGFloat = 54
+
+    private static let tiers: [String: [Int]] = [
+        "level": [10, 25, 50, 75, 100], "blocks": [1000, 10000, 50000], "games": [10, 100, 500], "streak": [7, 30], "league": [3, 5]
+    ]
+    private var type: String { String(key.split(separator: "_").first ?? "") }
+    private var target: Int { Int(key.split(separator: "_").last ?? "") ?? 0 }
+    /// 0..1 arası: türün içindeki en zor hedef 1 olur.
+    private var rarity: Double {
+        let list = Self.tiers[type] ?? [target]
+        guard let i = list.firstIndex(of: target), list.count > 1 else { return 1 }
+        return Double(i) / Double(list.count - 1)
+    }
+    private var ringColors: [Color] {
+        switch rarity {
+        case ..<0.34: return [Color(red: 1, green: 0.8, blue: 0.6), Color(red: 0.7, green: 0.42, blue: 0.2)]
+        case ..<0.67: return [Color(white: 0.97), Color(white: 0.55)]
+        case ..<0.99: return [Color(red: 1, green: 0.93, blue: 0.5), Color(red: 0.9, green: 0.6, blue: 0.05)]
+        default: return [Color(red: 0.75, green: 1, blue: 1), Color(red: 0.6, green: 0.45, blue: 1)]
+        }
+    }
+    private var icon: String {
+        switch type {
+        case "level": return "flag.checkered"
+        case "blocks": return "square.grid.3x3.fill"
+        case "games": return "gamecontroller.fill"
+        case "streak": return "flame.fill"
+        case "league": return "shield.lefthalf.filled"
+        default: return "star.fill"
+        }
+    }
+    var label: String {
+        switch type {
+        case "level": return LS("Seviye \(target)")
+        case "blocks": return LS("\(target.formatted()) blok")
+        case "games": return LS("\(target) oyun")
+        case "streak": return LS("\(target) gün seri")
+        case "league": return LS("\(Cosmetic.leagueName(target)) lig")
+        default: return key
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: 6) {
+            ZStack {
+                Circle().fill(LinearGradient(colors: ringColors, startPoint: .topLeading, endPoint: .bottomTrailing))
+                Circle().fill(RadialGradient(colors: [ringColors[1].opacity(0.55), Color(red: 0.05, green: 0.05, blue: 0.12)], center: .top, startRadius: 1, endRadius: size * 0.6))
+                    .padding(size * 0.08)
+                if type == "league" {
+                    Image("GIShield").resizable().scaledToFit().frame(width: size * 0.55, height: size * 0.55).colorMultiply(Cosmetic.leagueColor(target))
+                } else {
+                    GameSymbol(name: icon, size: size * 0.38)
+                }
+            }
+            .frame(width: size, height: size)
+            .shadow(color: ringColors[1].opacity(0.6), radius: rarity >= 0.99 ? 10 : 5)
+            Text(verbatim: label)
+                .font(.system(size: 10, weight: .heavy, design: .rounded)).foregroundStyle(.white.opacity(0.85))
+                .lineLimit(1).minimumScaleFactor(0.7)
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+/// Vitrin rozetlerini seçme ekranı: tamamlanan kariyer hedeflerinden en fazla 3 tanesi.
+struct ShowcasePickerSheet: View {
+    @EnvironmentObject var store: StoreManager
+    @Environment(\.dismiss) private var dismiss
+    @State private var selected: [String] = []
+    @State private var busy = false
+    @State private var error: String?
+
+    private var earned: [StoreManager.Achievement] { store.achievements.filter { $0.completed } }
+    private var locked: [StoreManager.Achievement] { store.achievements.filter { !$0.completed } }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color(red: 0.04, green: 0.05, blue: 0.10).ignoresSafeArea()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack(spacing: 10) {
+                            ForEach(0..<3, id: \.self) { i in
+                                if i < selected.count {
+                                    ShowcaseBadge(key: selected[i], size: 62).onTapGesture { selected.remove(at: i) }
+                                } else {
+                                    Circle().strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [4, 4])).foregroundStyle(Color.white.opacity(0.25))
+                                        .frame(width: 62, height: 62).frame(maxWidth: .infinity)
+                                }
+                            }
+                        }
+                        .padding(14)
+                        .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        Text("Oyuncu kartında görünecek en fazla 3 rozet seç. Kaldırmak için üstteki rozete dokun.")
+                            .font(.system(size: 12, design: .rounded)).foregroundStyle(.white.opacity(0.55))
+                        if let error { Text(verbatim: error).font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(.orange) }
+                        Text("KAZANDIKLARIN").font(.system(size: 11, weight: .black, design: .rounded)).tracking(1.4).foregroundStyle(.white.opacity(0.45))
+                        if earned.isEmpty {
+                            Text("Henüz rozet kazanmadın. Kariyer hedeflerini tamamla!").font(.system(size: 13, design: .rounded)).foregroundStyle(.white.opacity(0.6))
+                        }
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 14) {
+                            ForEach(earned) { a in
+                                let on = selected.contains(a.key)
+                                Button {
+                                    if on { selected.removeAll { $0 == a.key } } else if selected.count < 3 { selected.append(a.key) }
+                                } label: {
+                                    ShowcaseBadge(key: a.key, size: 56)
+                                        .padding(.vertical, 8)
+                                        .background(on ? Color.cyan.opacity(0.16) : Color.clear, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(on ? Color.cyan : .clear, lineWidth: 1.5))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        if !locked.isEmpty {
+                            Text("KİLİTLİ").font(.system(size: 11, weight: .black, design: .rounded)).tracking(1.4).foregroundStyle(.white.opacity(0.45)).padding(.top, 6)
+                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 14) {
+                                ForEach(locked) { a in
+                                    ShowcaseBadge(key: a.key, size: 56).saturation(0).opacity(0.35)
+                                }
+                            }
+                        }
+                    }
+                    .padding(16)
+                }
+            }
+            .navigationTitle(Text("Vitrin"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button { dismiss() } label: { Text("Vazgeç") } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        busy = true; error = nil
+                        Task { @MainActor in
+                            if let e = await store.setShowcase(selected) { error = e; busy = false } else { dismiss() }
+                        }
+                    } label: { if busy { ProgressView() } else { Text("Kaydet").bold() } }
+                    .disabled(busy)
+                }
+            }
+        }
+        .preferredColorScheme(.dark)
+        .onAppear { selected = store.profile?.showcase ?? [] }
     }
 }

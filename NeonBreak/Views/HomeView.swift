@@ -126,7 +126,7 @@ struct HomeView: View {
             HStack(spacing: 0) {
                 Button(action: onShop) {
                     HStack(spacing: 6) {
-                        Image(systemName: "hexagon.fill").font(.system(size: 13)).foregroundStyle(.yellow)
+                        GameSymbol(name: "hexagon.fill", size: 13).foregroundStyle(.yellow)
                         CountingNumber(value: Double(store.balance))
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .animation(.easeOut(duration: 0.9), value: store.balance)
@@ -137,8 +137,7 @@ struct HomeView: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("Mağaza")
                 Button(action: onCoins) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 15)).foregroundStyle(.yellow)
+                    GameSymbol(name: "plus.circle.fill", size: 15).foregroundStyle(.yellow)
                         .padding(.trailing, 9).frame(height: 34)
                         .contentShape(Rectangle())
                 }
@@ -149,8 +148,7 @@ struct HomeView: View {
             .overlay(Capsule().stroke(Color.yellow.opacity(0.16), lineWidth: 1))
             Button(action: onNotifications) {
                 ZStack(alignment: .topTrailing) {
-                    Image(systemName: store.unreadNotificationCount > 0 ? "bell.fill" : "bell")
-                        .font(.system(size: 15, weight: .medium)).foregroundStyle(store.unreadNotificationCount > 0 ? Color.cyan : Color.white)
+                    GameSymbol(name: store.unreadNotificationCount > 0 ? "bell.fill" : "bell", size: 15, weight: .medium).foregroundStyle(store.unreadNotificationCount > 0 ? Color.cyan : Color.white)
                         .frame(width: 38, height: 38).background(.ultraThinMaterial, in: Circle())
                     if store.unreadNotificationCount > 0 {
                         Text(store.unreadNotificationCount > 99 ? "99+" : "\(store.unreadNotificationCount)")
@@ -165,8 +163,7 @@ struct HomeView: View {
             .buttonStyle(.plain)
             .accessibilityLabel("Bildirimler")
             Button(action: onSettings) {
-                Image(systemName: "gearshape.fill")
-                    .font(.system(size: 16, weight: .medium)).foregroundStyle(.white)
+                GameSymbol(name: "gearshape.fill", size: 16, weight: .medium).foregroundStyle(.white)
                     .frame(width: 38, height: 38).background(.ultraThinMaterial, in: Circle())
             }
             .buttonStyle(.plain)
@@ -194,8 +191,7 @@ struct HomeView: View {
                 }
             } label: {
                 HStack(spacing: 12) {
-                    Image(systemName: "gift.fill")
-                        .font(.system(size: 22, weight: .bold)).foregroundStyle(.black)
+                    GameSymbol(name: "gift.fill", size: 22, weight: .bold).foregroundStyle(.black)
                         .frame(width: 46, height: 46)
                         .background(Color.yellow, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     VStack(alignment: .leading, spacing: 2) {
@@ -297,8 +293,7 @@ struct HomeView: View {
                 HStack(spacing: 6) {
                     ForEach(Array(traits.enumerated()), id: \.offset) { index, trait in
                         HStack(spacing: 4) {
-                            Image(systemName: traitIcon(trait, first: index == 0))
-                                .font(.system(size: 9, weight: .bold))
+                            GameSymbol(name: traitIcon(trait, first: index == 0), size: 10)
                                 .foregroundStyle(index == 0 ? glow : Color.white.opacity(0.6))
                             Text(trait)
                                 .font(.system(size: 11, weight: .medium, design: .rounded))
@@ -344,8 +339,7 @@ struct HomeView: View {
                     .allowsHitTesting(false)
             }
             Button(action: action) {
-                Image(systemName: icon)
-                    .font(.system(size: 17, weight: .bold))
+                GameSymbol(name: icon, size: 17, weight: .bold)
                     .foregroundStyle(.white)
                     .frame(width: 44, height: 44)
                     .background(.ultraThinMaterial, in: Circle())
@@ -429,10 +423,13 @@ struct HomeView: View {
         let color = Cosmetic.leagueColor(league)
         return Button(action: onLeaderboard) {
             HStack(spacing: 12) {
-                Image(systemName: "shield.lefthalf.filled")
-                    .font(.system(size: 16, weight: .semibold)).foregroundStyle(color)
-                    .frame(width: 38, height: 38)
-                    .background(color.opacity(0.14), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+                ZStack {
+                    RoundedRectangle(cornerRadius: 13, style: .continuous).fill(RadialGradient(colors: [color.opacity(0.45), color.opacity(0.08)], center: .center, startRadius: 2, endRadius: 30))
+                    Image("GIShield").resizable().scaledToFit().frame(width: 30, height: 30).colorMultiply(color).shadow(color: color.opacity(0.7), radius: 6)
+                    Text(verbatim: "\(league)").font(.system(size: 11, weight: .black, design: .rounded)).foregroundStyle(.black.opacity(0.75)).offset(y: -1)
+                }
+                .frame(width: 46, height: 46)
+                .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).stroke(color.opacity(0.45), lineWidth: 1))
                 VStack(alignment: .leading, spacing: 2) {
                     if let rank = store.league?.rank {
                         Text("\(Cosmetic.leagueName(league)) Ligi • #\(rank)")
@@ -457,20 +454,37 @@ struct HomeView: View {
             }
             .lineLimit(1)
             .minimumScaleFactor(0.8)
-            .padding(.horizontal, 12).frame(height: 62)
-            .background(HomeCardBackground(tint: color))
+            .padding(.horizontal, 12).frame(height: 70)
+            .background(HomeCardBackground(tint: color, strong: true))
         }
         .buttonStyle(.plain)
     }
 
     /// Kapalı gelen bölümlerin başlığı: dokununca açılır; alınabilecek ödül varsa işaret gösterir.
-    private func collapseHeader(_ title: LocalizedStringKey, count: String, ready: Bool, color: Color, isOpen: Binding<Bool>) -> some View {
+    private func collapseHeader(_ title: LocalizedStringKey, icon: String, count: String, ready: Bool, color: Color, isOpen: Binding<Bool>) -> some View {
         Button {
             withAnimation(.easeInOut(duration: 0.2)) { isOpen.wrappedValue.toggle() }
         } label: {
-            HStack(spacing: 8) {
-                Text(title)
-                    .font(.system(size: 15, weight: .semibold, design: .rounded)).foregroundStyle(.white)
+            HStack(spacing: 10) {
+                GameSymbol(name: icon, size: 18)
+                    .frame(width: 40, height: 40)
+                    .background(color.opacity(0.14), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(color.opacity(0.3), lineWidth: 1))
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(title)
+                        .font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(.white)
+                    let parts = count.split(separator: "/").compactMap { Double($0) }
+                    if parts.count == 2, parts[1] > 0 {
+                        GeometryReader { g in
+                            ZStack(alignment: .leading) {
+                                Capsule().fill(Color.white.opacity(0.07))
+                                Capsule().fill(LinearGradient(colors: [color.opacity(0.7), color], startPoint: .leading, endPoint: .trailing))
+                                    .frame(width: max(5, g.size.width * parts[0] / parts[1]))
+                            }
+                        }
+                        .frame(height: 5)
+                    }
+                }
                 if ready {
                     Text("Ödül hazır")
                         .font(.system(size: 11, weight: .semibold, design: .rounded)).foregroundStyle(.black)
@@ -479,7 +493,7 @@ struct HomeView: View {
                 }
                 Spacer(minLength: 4)
                 Text(count)
-                    .font(.system(size: 13, weight: .semibold, design: .rounded)).monospacedDigit().foregroundStyle(color)
+                    .font(.system(size: 14, weight: .heavy, design: .rounded)).monospacedDigit().foregroundStyle(color)
                 Image(systemName: "chevron.down")
                     .font(.system(size: 12, weight: .semibold)).foregroundStyle(.white.opacity(0.4))
                     .rotationEffect(.degrees(isOpen.wrappedValue ? 180 : 0))
@@ -495,8 +509,7 @@ struct HomeView: View {
     private var notificationReminderCard: some View {
         if !reminderHidden, notificationStatus == .denied || notificationStatus == .notDetermined, NotificationManager.shouldShowPermissionReminder {
             HStack(spacing: 12) {
-                Image(systemName: "bell.badge.fill")
-                    .font(.system(size: 19, weight: .bold)).foregroundStyle(.black)
+                GameSymbol(name: "bell.badge.fill", size: 19, weight: .bold).foregroundStyle(.black)
                     .frame(width: 42, height: 42)
                     .background(Color.cyan, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
@@ -703,10 +716,10 @@ struct HomeView: View {
             let noAttempts = daily.attemptsLeft == 0
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 12) {
-                    Image(systemName: "calendar.badge.clock")
-                        .font(.system(size: 19, weight: .bold)).foregroundStyle(.white)
+                    GameSymbol(name: "calendar.badge.clock", size: 19, weight: .bold).foregroundStyle(.white)
                         .frame(width: 44, height: 44)
-                        .background(LinearGradient(colors: [tint, Color(hex: 0x3DDCF0)], startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                        .background(tint.opacity(0.18), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).stroke(tint.opacity(0.4), lineWidth: 1))
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Günün Bölümü").font(.system(size: 16, weight: .bold, design: .rounded)).foregroundStyle(.white)
                         Text("Herkes aynı harita • ilk 3 ödül alır").font(.system(size: 12, weight: .regular, design: .rounded)).foregroundStyle(.white.opacity(0.6))
@@ -747,8 +760,7 @@ struct HomeView: View {
                     .buttonStyle(PressScaleStyle())
                     .disabled(noAttempts || dailyStarting)
                     Button { showDailyBoard = true } label: {
-                        Image(systemName: "list.number")
-                            .font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
+                        GameSymbol(name: "list.number", size: 15, weight: .bold).foregroundStyle(.white)
                             .frame(width: 48, height: 42)
                             .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
                     }
@@ -802,7 +814,7 @@ struct HomeView: View {
         if !visibleAchievements.isEmpty {
             VStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 12) {
-                    collapseHeader("Kariyer hedefleri", count: "\(store.achievements.filter { $0.claimed }.count)/\(store.achievements.count)", ready: store.achievements.contains { $0.completed && !$0.claimed }, color: .yellow, isOpen: $achievementsOpen)
+                    collapseHeader("Kariyer hedefleri", icon: "trophy.fill", count: "\(store.achievements.filter { $0.claimed }.count)/\(store.achievements.count)", ready: store.achievements.contains { $0.completed && !$0.claimed }, color: .yellow, isOpen: $achievementsOpen)
                     if achievementsOpen {
                         ForEach(visibleAchievements) { item in
                             achievementRow(item)
@@ -855,7 +867,7 @@ struct HomeView: View {
                     if claimingAchievement == item.key {
                         ProgressView().tint(.black)
                     } else {
-                        Image(systemName: "hexagon.fill").font(.system(size: 10, weight: .bold))
+                        GameSymbol(name: "hexagon.fill", size: 10, weight: .bold)
                         Text("+\(item.reward)")
                     }
                 }
@@ -889,7 +901,7 @@ struct HomeView: View {
         if !store.quests.isEmpty {
             VStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 12) {
-                    collapseHeader("Günlük görevler", count: "\(store.quests.filter { $0.claimed }.count)/\(store.quests.count)", ready: store.quests.contains { $0.completed && !$0.claimed }, color: .cyan, isOpen: $questsOpen)
+                    collapseHeader("Günlük görevler", icon: "checklist", count: "\(store.quests.filter { $0.claimed }.count)/\(store.quests.count)", ready: store.quests.contains { $0.completed && !$0.claimed }, color: .cyan, isOpen: $questsOpen)
                     if questsOpen {
                         ForEach(store.quests) { quest in
                             questRow(quest)
@@ -924,7 +936,7 @@ struct HomeView: View {
                     .foregroundStyle(.white.opacity(0.5))
             }
             if quest.claimed {
-                Image(systemName: "checkmark.circle.fill").font(.system(size: 22)).foregroundStyle(.mint)
+                GameSymbol(name: "checkmark.circle.fill", size: 22).foregroundStyle(.mint)
                     .frame(width: 74)
             } else {
                 Button {
@@ -943,7 +955,7 @@ struct HomeView: View {
                         if claimingQuest == quest.key {
                             ProgressView().tint(.black)
                         } else {
-                            Image(systemName: "hexagon.fill").font(.system(size: 10, weight: .bold))
+                            GameSymbol(name: "hexagon.fill", size: 10, weight: .bold)
                             Text("+\(quest.reward)")
                         }
                     }
@@ -1013,28 +1025,42 @@ struct HomeView: View {
     }
 
     private var progressCard: some View {
-        VStack(spacing: 0) {
-            VStack(spacing: 12) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("KARİYER").font(.system(size: 11, weight: .bold, design: .rounded)).tracking(1.5).foregroundStyle(.white.opacity(0.38))
-                        Text("RÜTBE \(progression.rank) • \(progression.title)").font(.system(size: 16, weight: .bold, design: .rounded))
+        let xp = store.profile?.lifetimeXp ?? Persistence.shared.lifetimeXP
+        return HStack(spacing: 14) {
+            ZStack {
+                Image("GIMedal").resizable().scaledToFit().frame(width: 54, height: 54)
+                    .shadow(color: Color.orange.opacity(0.5), radius: 8)
+                Text(verbatim: "\(progression.rank)")
+                    .font(.system(size: 13, weight: .black, design: .rounded)).foregroundStyle(.black.opacity(0.8))
+                    .offset(y: -9)
+            }
+            .frame(width: 58, height: 58)
+            VStack(alignment: .leading, spacing: 7) {
+                HStack(alignment: .firstTextBaseline) {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("KARİYER").font(.system(size: 10, weight: .black, design: .rounded)).tracking(1.5).foregroundStyle(.white.opacity(0.4))
+                        Text("Rütbe \(progression.rank) • \(progression.title)").font(.system(size: 16, weight: .heavy, design: .rounded)).lineLimit(1).minimumScaleFactor(0.7)
                     }
-                    Spacer()
-                    Text("\((store.profile?.lifetimeXp ?? Persistence.shared.lifetimeXP).formatted()) XP")
-                        .font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(.cyan)
+                    Spacer(minLength: 4)
+                    HStack(spacing: 3) {
+                        GameSymbol(name: "sparkles", size: 10)
+                        Text(verbatim: xp.formatted()).font(.system(size: 12, weight: .heavy, design: .rounded)).monospacedDigit().foregroundStyle(.cyan)
+                    }
                 }
                 GeometryReader { proxy in
                     ZStack(alignment: .leading) {
                         Capsule().fill(Color.white.opacity(0.07))
-                        Capsule().fill(LinearGradient(colors: [.cyan,.purple,.pink], startPoint: .leading, endPoint: .trailing))
+                        Capsule().fill(LinearGradient(colors: [.cyan, .purple, .pink], startPoint: .leading, endPoint: .trailing))
                             .frame(width: max(8, proxy.size.width * progression.progress))
+                            .shadow(color: .purple.opacity(0.6), radius: 5)
                     }
-                }.frame(height: 7)
+                }.frame(height: 9)
+                Text("\(progression.xpIntoRank.formatted()) / \(progression.xpNeededForRank.formatted()) XP • sonraki rütbe")
+                    .font(.system(size: 10, weight: .semibold, design: .rounded)).monospacedDigit().foregroundStyle(.white.opacity(0.45))
             }
         }
-            .padding(16)
-            .background(HomeCardBackground())
+        .padding(16)
+        .background(HomeCardBackground(tint: .purple, strong: true))
     }
 
     private var quickStats: some View {
@@ -1224,8 +1250,7 @@ struct WheelSheet: View {
     /// Çarkın üstündeki altın ibre.
     private var pointer: some View {
         ZStack(alignment: .top) {
-            Image(systemName: "arrowtriangle.down.fill")
-                .font(.system(size: 38))
+            GameSymbol(name: "arrowtriangle.down.fill", size: 38)
                 .foregroundStyle(LinearGradient(colors: [Color(hex: 0xFFF3B0), Color(hex: 0xFFB000)], startPoint: .top, endPoint: .bottom))
                 .shadow(color: .black.opacity(0.7), radius: 4, y: 2)
             Circle().fill(Color.white).frame(width: 9, height: 9).padding(.top, 5)
@@ -1301,14 +1326,14 @@ struct WheelSheet: View {
     private func label(_ slice: StoreManager.WheelSlice) -> some View {
         if slice.jackpot == true {
             VStack(spacing: 1) {
-                Image(systemName: "crown.fill").font(.system(size: 15, weight: .bold)).foregroundStyle(Color(hex: 0x4A2E00))
+                GameSymbol(name: "crown.fill", size: 15, weight: .bold).foregroundStyle(Color(hex: 0x4A2E00))
                 Text("\(slice.amount)").font(.system(size: 16, weight: .black, design: .rounded)).foregroundStyle(Color(hex: 0x3A2400))
             }
         } else if slice.type == "coins" {
             VStack(spacing: 2) {
                 Text("\(slice.amount)").font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                     .shadow(color: .black.opacity(0.5), radius: 2)
-                Image(systemName: "hexagon.fill").font(.system(size: 11)).foregroundStyle(Color(hex: 0xFFD60A))
+                GameSymbol(name: "hexagon.fill", size: 11).foregroundStyle(Color(hex: 0xFFD60A))
             }
         } else {
             let kind = PowerUpKind.all.first { $0.key == slice.itemKey }
@@ -1513,7 +1538,7 @@ struct DailyBoardSheet: View {
                 } else {
                     Spacer()
                     VStack(spacing: 8) {
-                        Image(systemName: "calendar.badge.clock").font(.system(size: 34, weight: .bold)).foregroundStyle(.white.opacity(0.4))
+                        GameSymbol(name: "calendar.badge.clock", size: 34, weight: .bold).foregroundStyle(.white.opacity(0.4))
                         Text("Bugün henüz kimse skor yapmadı. İlk sen ol!").font(.system(size: 14, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.6)).multilineTextAlignment(.center)
                     }
                     .padding(24)

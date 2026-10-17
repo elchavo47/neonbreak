@@ -555,8 +555,7 @@ private struct TamperAbortView: View {
         ZStack {
             Color.black.opacity(0.9).ignoresSafeArea()
             VStack(spacing: 16) {
-                Image(systemName: "exclamationmark.shield.fill")
-                    .font(.system(size: 54, weight: .bold))
+                GameSymbol(name: "exclamationmark.shield.fill", size: 54, weight: .bold)
                     .foregroundStyle(.red)
                     .shadow(color: .red.opacity(0.6), radius: 18)
                 Text("Oyun iptal edildi")
@@ -591,8 +590,7 @@ private struct GameHUD: View {
     var body: some View {
         HStack(spacing: 12) {
             Button(action: onPause) {
-                Image(systemName: "pause.fill")
-                    .font(.system(size: 14, weight: .black))
+                GameSymbol(name: "pause.fill", size: 14, weight: .black)
                     .foregroundStyle(.white)
                     .frame(width: 40, height: 40)
                     .background(.ultraThinMaterial, in: Circle())
@@ -721,8 +719,7 @@ private struct PowerDock: View {
                     if busyKey == kind.key {
                         ProgressView().tint(kind.color)
                     } else {
-                        Image(systemName: kind.icon)
-                            .font(.system(size: 18, weight: .bold))
+                        GameSymbol(name: kind.icon, size: 18, weight: .bold)
                             .foregroundStyle(kind.color)
                     }
                 }
@@ -730,7 +727,7 @@ private struct PowerDock: View {
                 .overlay(alignment: .topTrailing) {
                     Group {
                         if adReady {
-                            Image(systemName: "play.fill").font(.system(size: 8, weight: .black))
+                            GameSymbol(name: "play.fill", size: 8, weight: .black)
                         } else {
                             Text(active ? L("HAZIR") : "\(quantity)").font(.system(size: 10, weight: .black, design: .rounded))
                         }
@@ -801,8 +798,7 @@ private struct PauseOverlay: View {
             Color.black.opacity(0.78).ignoresSafeArea()
 
             VStack(spacing: 14) {
-                Image(systemName: "pause.circle.fill")
-                    .font(.system(size: 46))
+                GameSymbol(name: "pause.circle.fill", size: 46)
                     .foregroundStyle(accent)
 
                 VStack(spacing: 4) {
@@ -860,8 +856,7 @@ private struct GameOverCard: View {
             Color.black.opacity(0.78).ignoresSafeArea()
 
             VStack(spacing: 14) {
-                Image(systemName: session.isNewRecord ? "crown.fill" : "burst.fill")
-                    .font(.system(size: 44))
+                GameSymbol(name: session.isNewRecord ? "crown.fill" : "burst.fill", size: 44)
                     .foregroundStyle(session.isNewRecord ? Color.yellow : Color.pink)
                     .shadow(color: (session.isNewRecord ? Color.yellow : Color.pink).opacity(0.5), radius: 18)
 
@@ -924,8 +919,7 @@ private struct GameOverCard: View {
 
     @ViewBuilder
     private var shareButton: some View {
-        let icon = Image(systemName: "square.and.arrow.up")
-            .font(.system(size: 17, weight: .bold))
+        let icon = GameSymbol(name: "square.and.arrow.up", size: 17, weight: .bold)
             .foregroundStyle(.white)
             .frame(width: 56, height: 52)
             .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.white.opacity(0.28), lineWidth: 1))

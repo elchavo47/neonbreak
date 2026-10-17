@@ -211,6 +211,8 @@ final class StoreManager: ObservableObject {
         var title: String?
         /// Doğrulanmış e-posta varsa maskeli hali (ö***@gmail.com).
         var emailMasked: String?
+        /// Profil vitrinindeki rozetler (kariyer hedefi anahtarları, en fazla 3).
+        var showcase: [String]? = nil
     }
 
     struct LeagueEntry: Codable, Identifiable, Equatable {
@@ -779,6 +781,7 @@ final class StoreManager: ObservableObject {
         let weeklyScore: Int?
         let frames: Int
         var clan: PlayerClan? = nil
+        var showcase: [String]? = nil
     }
 
     struct PlayerClan: Codable, Equatable {
@@ -1681,6 +1684,17 @@ final class StoreManager: ObservableObject {
     }
 
     /// Kazanılmış bir çerçeveyi ya da unvanı takar. `key` nil ise çıkarır.
+    /// Profil vitrinini kaydeder. Hata yoksa nil döner.
+    func setShowcase(_ keys: [String]) async -> String? {
+        struct Input: Encodable { let keys: [String] }
+        struct Output: Decodable { let success: Bool; let player: RemotePlayer? }
+        do {
+            let out: Output = try await send(try authorizedJSONRequest(path: "/me/showcase", method: "POST", body: Input(keys: keys)))
+            if let player = out.player { apply(player: player) }
+            return nil
+        } catch { return friendly(error) }
+    }
+
     func equipCosmetic(kind: String, key: String?) async -> Bool {
         do {
             struct Input: Encodable { let kind: String; let key: String }

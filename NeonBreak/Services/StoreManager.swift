@@ -510,6 +510,94 @@ final class StoreManager: ObservableObject {
         let createdAt: String?
     }
 
+    // MARK: Klan modelleri
+    struct ClanPerk: Codable, Hashable {
+        let level: Int
+        let key: String
+        let unlocked: Bool?
+    }
+
+    struct Clan: Codable, Identifiable, Hashable {
+        let id: Int
+        let name: String
+        let tag: String
+        let slogan: String
+        let icon: String
+        let color: Int
+        let shape: String
+        let level: Int
+        let xp: Int
+        let levelXp: Int
+        let nextXp: Int
+        let members: Int
+        let maxMembers: Int
+        let joinMode: String
+        let minLevel: Int
+        let weekXp: Int
+        let perks: [ClanPerk]?
+        let description: String?
+        let weekRank: Int?
+    }
+
+    struct ClanMember: Codable, Identifiable, Hashable {
+        var id: Int { userId }
+        let userId: Int
+        let username: String
+        let avatarUrl: String?
+        let role: String
+        let level: Int
+        let weekXp: Int
+        let totalXp: Int
+        let online: Bool
+    }
+
+    struct ClanJoinRequest: Codable, Identifiable, Hashable {
+        var id: Int { userId }
+        let userId: Int
+        let username: String
+        let avatarUrl: String?
+        let level: Int
+    }
+
+    struct ClanGift: Codable, Hashable {
+        let coins: Int
+        let claimed: Bool
+    }
+
+    struct ClanState: Decodable {
+        let clan: Clan?
+        let myRole: String?
+        let members: [ClanMember]?
+        let requests: [ClanJoinRequest]?
+        let gift: ClanGift?
+        let createCost: Int?
+        let requestsSent: [Int]?
+    }
+
+    struct ClanMessage: Codable, Identifiable, Hashable {
+        let id: Int
+        let userId: Int?
+        let username: String?
+        let avatarUrl: String?
+        let role: String?
+        let message: String
+        let system: Bool
+        let mine: Bool
+        let createdAt: String?
+    }
+
+    struct ClanForm: Encodable {
+        var name: String
+        var tag: String
+        var slogan: String
+        var description: String
+        var icon: String
+        var color: Int
+        var shape: String
+        var joinMode: String
+        var minLevel: Int
+    }
+
     struct SupportThread: Codable, Equatable {
         let id: Int
         let subject: String
@@ -696,6 +784,7 @@ final class StoreManager: ObservableObject {
     /// Haftalık ödüller: [1., 2., 3., 4-10].
     @Published private(set) var weeklyPrizes: [Int] = []
     @Published private(set) var supportTickets: [SupportTicket] = []
+    @Published private(set) var clanState: ClanState?
     @Published private(set) var unreadRewards: [RewardNotice] = []
     @Published private(set) var rewardHistory: [RewardNotice] = []
     @Published private(set) var notifications: [NotificationItem] = []
@@ -1011,6 +1100,7 @@ final class StoreManager: ObservableObject {
             try await sync()
             await registerPushTokenIfNeeded()
             await loadSupportTickets()
+            await loadClan()
             await loadRewardHistory()
             await loadNotifications()
             isOnline = true
@@ -1806,6 +1896,99 @@ final class StoreManager: ObservableObject {
             let out: Output = try await send(req)
             rewardHistory = out.rewards
         } catch { }
+    }
+
+    // MARK: Klan
+    /// Hata mesajını kullanıcıya gösterilecek metne çevirir.
+    private func clanError(_ error: Error) -> String {
+        if let api = error as? APIError { return api.description }
+        return L("Bağlantı kurulamadı. Tekrar dene.")
+    }
+
+    func loadClan() async {
+        do { clanState = try await send(try authorizedRequest(path: "/clans/me", method: "GET")) } catch { }
+    }
+
+    func searchClans(query: String, weekly: Bool) async -> [Clan] {
+        struct Out: Decodable { let clans: [Clan] }
+        var comps = URLComponents()
+        comps.queryItems = [URLQueryItem(name: "q", value: query), URLQueryItem(name: "sort", value: weekly ? "week" : "level")]
+        do {
+            let out: Out = try await send(try authorizedRequest(path: "/clans" + (comps.url?.absoluteString ?? ""), method: "GET", treatPathAsRelativeURL: true))
+            return out.clans
+        } catch { return [] }
+    }
+
+    struct ClanDetail: Decodable { let clan: Clan; let members: [ClanMember]; let requested: Bool }
+
+    func clanDetail(id: Int) async -> ClanDetail? {
+        try? await send(try authorizedRequest(path: "/clans/\(id)", method: "GET"))
+    }
+
+    /// Klan kurar; hata varsa mesajını döndürür.
+    func createClan(_ form: ClanForm) async -> String? {
+        struct Out: Decodable { let success: Bool; let balance: Int? }
+        do {
+            let out: Out = try await send(try authorizedJSONRequest(path: "/clans", method: "POST", body: form))
+            if let b = out.balance, var current = profile { current.balance = b; profile = current }
+            await loadClan()
+            return nil
+        } catch { return clanError(error) }
+    }
+
+    func updateClan(_ form: ClanForm) async -> String? {
+        struct Out: Decodable { let success: Bool }
+        do { let _: Out = try await send(try authorizedJSONRequest(path: "/clans/me", method: "PATCH", body: form)); await loadClan(); return nil }
+        catch { return clanError(error) }
+    }
+
+    /// Katılır ya da başvurur. Dönüş: (hata, başvuru beklemede mi)
+    func joinClan(id: Int) async -> (String?, Bool) {
+        struct Out: Decodable { let success: Bool; let pending: Bool }
+        do {
+            let out: Out = try await send(try authorizedRequest(path: "/clans/\(id)/join", method: "POST"))
+            await loadClan()
+            return (nil, out.pending)
+        } catch { return (clanError(error), false) }
+    }
+
+    func cancelClanRequest(id: Int) async {
+        struct Out: Decodable { let success: Bool }
+        let _: Out? = try? await send(try authorizedRequest(path: "/clans/\(id)/join", method: "DELETE"))
+        await loadClan()
+    }
+
+    private func clanPost(_ path: String) async -> String? {
+        struct Out: Decodable { let success: Bool }
+        do { let _: Out = try await send(try authorizedRequest(path: path, method: "POST")); await loadClan(); return nil }
+        catch { return clanError(error) }
+    }
+
+    func leaveClan() async -> String? { await clanPost("/clans/me/leave") }
+    func answerClanRequest(userId: Int, accept: Bool) async -> String? { await clanPost("/clans/me/requests/\(userId)/\(accept ? "accept" : "reject")") }
+    /// action: promote, demote, kick, transfer
+    func clanMemberAction(userId: Int, action: String) async -> String? { await clanPost("/clans/me/members/\(userId)/\(action)") }
+
+    func claimClanGift() async -> String? {
+        struct Out: Decodable { let success: Bool; let balance: Int }
+        do {
+            let out: Out = try await send(try authorizedRequest(path: "/clans/me/gift", method: "POST"))
+            if var current = profile { current.balance = out.balance; profile = current }
+            await loadClan()
+            return nil
+        } catch { return clanError(error) }
+    }
+
+    func clanMessages() async -> [ClanMessage]? {
+        struct Out: Decodable { let messages: [ClanMessage] }
+        do { let out: Out = try await send(try authorizedRequest(path: "/clans/me/chat", method: "GET")); return out.messages } catch { return nil }
+    }
+
+    func sendClanMessage(_ text: String) async -> String? {
+        struct In: Encodable { let message: String }
+        struct Out: Decodable { let success: Bool }
+        do { let _: Out = try await send(try authorizedJSONRequest(path: "/clans/me/chat", method: "POST", body: In(message: text))); return nil }
+        catch { return clanError(error) }
     }
 
     func loadSupportTickets() async {

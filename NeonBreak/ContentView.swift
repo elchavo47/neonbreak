@@ -24,6 +24,7 @@ struct ContentView: View {
         case game
         case shop
         case leaderboard
+        case clan
         case profile
         case support
         case notifications
@@ -66,6 +67,9 @@ struct ContentView: View {
                         .safeAreaInset(edge: .bottom, spacing: 0) { tabBar }
                 case .leaderboard:
                     LeaderboardView(onClose: { transition(to: .home) })
+                        .safeAreaInset(edge: .bottom, spacing: 0) { tabBar }
+                case .clan:
+                    ClanScreen()
                         .safeAreaInset(edge: .bottom, spacing: 0) { tabBar }
                 case .profile:
                     ProfileView(onClose: { transition(to: .home) })
@@ -200,6 +204,7 @@ struct ContentView: View {
             tabItem(.home, "house", "Ana sayfa", tint: .cyan, badge: false)
             tabItem(.shop, "bag", "Mağaza", tint: Color(red: 1.0, green: 0.78, blue: 0.25), badge: store.hasAffordableNewItem)
             tabItem(.leaderboard, "trophy", "Sıralama", tint: Color(red: 1.0, green: 0.45, blue: 0.75), badge: false)
+            tabItem(.clan, "person.3", "Klan", tint: Color(red: 0.29, green: 0.87, blue: 0.50), badge: !(store.clanState?.requests ?? []).isEmpty)
             tabItem(.profile, "person.crop.circle", "Profil", tint: Color(red: 0.62, green: 0.52, blue: 1.0), badge: store.supportTickets.contains { store.isSupportTicketUnread($0) })
         }
         .padding(6)

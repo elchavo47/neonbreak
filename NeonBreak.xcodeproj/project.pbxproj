@@ -12,6 +12,7 @@
 		1FFB803EBCD369764C3D74B7 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E2283D1E39D52C19F77F919 /* GameScene.swift */; };
 		A4D35B2BE6709BFA88994B1A /* GameSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C7A4F3B46E4D5ACDA3B61E /* GameSession.swift */; };
 		7A11C0DE5EC0AA0100000001 /* Integrity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A11C0DE5EC0AA0100000002 /* Integrity.swift */; };
+		7A11C0DE5EC0AA0100000003 /* ClanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A11C0DE5EC0AA0100000004 /* ClanView.swift */; };
 		CFFBDE00FAFBFAD0C411B834 /* Catalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 618FE77A9C8EF5D15574CCC6 /* Catalog.swift */; };
 		C61C790E6E0AACB9FAD4271F /* NeonBreakApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E3732D3BF6FF217F72D51C4 /* NeonBreakApp.swift */; };
 		96C73F5D3F695D76AFB477B8 /* HapticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38415A20537A96834711DF2D /* HapticsManager.swift */; };
@@ -43,6 +44,7 @@
 		2E2283D1E39D52C19F77F919 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Game/GameScene.swift"; sourceTree = "<group>"; };
 		F0C7A4F3B46E4D5ACDA3B61E /* GameSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Game/GameSession.swift"; sourceTree = "<group>"; };
 		7A11C0DE5EC0AA0100000002 /* Integrity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/Integrity.swift"; sourceTree = "<group>"; };
+		7A11C0DE5EC0AA0100000004 /* ClanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/ClanView.swift"; sourceTree = "<group>"; };
 		618FE77A9C8EF5D15574CCC6 /* Catalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Catalog.swift"; sourceTree = "<group>"; };
 		5E3732D3BF6FF217F72D51C4 /* NeonBreakApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NeonBreakApp.swift"; sourceTree = "<group>"; };
 		38415A20537A96834711DF2D /* HapticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/HapticsManager.swift"; sourceTree = "<group>"; };
@@ -115,6 +117,7 @@
 				2E2283D1E39D52C19F77F919 /* GameScene.swift */,
 				F0C7A4F3B46E4D5ACDA3B61E /* GameSession.swift */,
 				7A11C0DE5EC0AA0100000002 /* Integrity.swift */,
+				7A11C0DE5EC0AA0100000004 /* ClanView.swift */,
 				618FE77A9C8EF5D15574CCC6 /* Catalog.swift */,
 				5E3732D3BF6FF217F72D51C4 /* NeonBreakApp.swift */,
 				38415A20537A96834711DF2D /* HapticsManager.swift */,
@@ -232,6 +235,7 @@
 				1FFB803EBCD369764C3D74B7 /* GameScene.swift in Sources */,
 				A4D35B2BE6709BFA88994B1A /* GameSession.swift in Sources */,
 				7A11C0DE5EC0AA0100000001 /* Integrity.swift in Sources */,
+				7A11C0DE5EC0AA0100000003 /* ClanView.swift in Sources */,
 				CFFBDE00FAFBFAD0C411B834 /* Catalog.swift in Sources */,
 				C61C790E6E0AACB9FAD4271F /* NeonBreakApp.swift in Sources */,
 				96C73F5D3F695D76AFB477B8 /* HapticsManager.swift in Sources */,

@@ -720,7 +720,8 @@ private struct ClanHomeView: View {
                 tabBar
                 Group {
                     switch tab {
-                    case .overview, .chat: overview
+                    case .overview: overview
+                    case .chat: ClanChatView(clan: clan, embedded: true).frame(height: 540)
                     case .members: membersList
                     case .treasury: ClanTreasuryView(clan: clan, role: role, onMessage: show)
                     case .requests: requestsList
@@ -734,7 +735,6 @@ private struct ClanHomeView: View {
         }
         .refreshable { await store.loadClan() }
         .sheet(isPresented: $showEdit) { ClanEditorView(existing: clan).environmentObject(store) }
-        .fullScreenCover(isPresented: $showChat) { ClanChatView(clan: clan).environmentObject(store) }
         .confirmationDialog(Text("Klandan ayrılmak istiyor musun?"), isPresented: $confirmLeave, titleVisibility: .visible) {
             Button(role: .destructive) {
                 Task { @MainActor in if let e = await store.leaveClan() { show(e, true) } }
@@ -903,10 +903,10 @@ private struct ClanHomeView: View {
     }
 
     private func tabButton(_ value: Tab, _ title: LocalizedStringKey, _ icon: String, badge: Int) -> some View {
-        let selected = tab == value && value != .chat
+        let selected = tab == value
         return Button {
             // Sohbet sekmesi ara ekran olmadan doğrudan sohbeti açar.
-            if value == .chat { showChat = true } else { withAnimation(.easeInOut(duration: 0.18)) { tab = value } }
+            withAnimation(.easeInOut(duration: 0.18)) { tab = value }
         } label: {
             VStack(spacing: 3) {
                 Image(systemName: icon).font(.system(size: 15, weight: .bold))
@@ -1700,6 +1700,8 @@ private struct ClanChatView: View {
     @EnvironmentObject var store: StoreManager
     @Environment(\.dismiss) private var dismiss
     let clan: StoreManager.Clan
+    /// true: klan ekranının içinde, sekmede gösterilir (tam ekran değil).
+    var embedded = false
     @State private var messages: [StoreManager.ClanMessage] = []
     @State private var text = ""
     @State private var sending = false
@@ -1707,11 +1709,18 @@ private struct ClanChatView: View {
     @FocusState private var focused: Bool
 
     var body: some View {
-        NavigationStack { content.toolbar(.hidden, for: .navigationBar) }
+        if embedded {
+            content
+                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(Color.white.opacity(0.08), lineWidth: 1))
+        } else {
+            NavigationStack { content.toolbar(.hidden, for: .navigationBar) }
+        }
     }
 
     private var content: some View {
         VStack(spacing: 0) {
+            if !embedded {
             HStack(spacing: 12) {
                 Button { dismiss() } label: {
                     Image(systemName: "chevron.down").font(.system(size: 15, weight: .bold))
@@ -1728,6 +1737,7 @@ private struct ClanChatView: View {
             .padding(.horizontal, 14).padding(.vertical, 10)
             .background(Color(red: 0.05, green: 0.06, blue: 0.11))
             .overlay(alignment: .bottom) { Rectangle().fill(Color.white.opacity(0.07)).frame(height: 1) }
+            }
 
             ScrollViewReader { proxy in
                 ScrollView {
@@ -1772,9 +1782,9 @@ private struct ClanChatView: View {
                 .disabled(sending || text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
             .padding(.horizontal, 12).padding(.vertical, 8)
-            .background(Color(red: 0.05, green: 0.06, blue: 0.11).ignoresSafeArea(edges: .bottom))
+            .background(Color(red: 0.05, green: 0.06, blue: 0.11).ignoresSafeArea(edges: embedded ? [] : .bottom))
         }
-        .background(Color(red: 0.03, green: 0.04, blue: 0.08).ignoresSafeArea())
+        .background(Color(red: 0.03, green: 0.04, blue: 0.08).ignoresSafeArea(edges: embedded ? [] : .all))
         .preferredColorScheme(.dark)
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {

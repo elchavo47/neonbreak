@@ -10,6 +10,7 @@ struct ContentView: View {
     @State private var supportStartsOnTickets = false
     @State private var showWhatsNew = false
     @State private var route: Route = .home
+    @Namespace private var tabNamespace
     /// Coin Kasası kapanınca dönülecek ekran (ana ekran ya da mağaza).
     @State private var coinsReturnRoute: Route = .home
     @State private var showSettings = false
@@ -193,42 +194,66 @@ struct ContentView: View {
         }
     }
 
-    /// Alt menü: Ana sayfa, Mağaza, Sıralama, Profil. Oyun, destek ve bildirim ekranlarında görünmez.
+    /// Alt menü: Ana sayfa, Mağaza, Sıralama, Profil. Yüzen cam kapsül; seçili sekme parlayan bir hapın içinde.
     private var tabBar: some View {
-        HStack(spacing: 0) {
-            tabItem(.home, "house.fill", "Ana sayfa", badge: false)
-            tabItem(.shop, "bag.fill", "Mağaza", badge: store.hasAffordableNewItem)
-            tabItem(.leaderboard, "trophy.fill", "Sıralama", badge: false)
-            tabItem(.profile, "person.crop.circle.fill", "Profil", badge: store.supportTickets.contains { store.isSupportTicketUnread($0) })
+        HStack(spacing: 4) {
+            tabItem(.home, "house", "Ana sayfa", tint: .cyan, badge: false)
+            tabItem(.shop, "bag", "Mağaza", tint: Color(red: 1.0, green: 0.78, blue: 0.25), badge: store.hasAffordableNewItem)
+            tabItem(.leaderboard, "trophy", "Sıralama", tint: Color(red: 1.0, green: 0.45, blue: 0.75), badge: false)
+            tabItem(.profile, "person.crop.circle", "Profil", tint: Color(red: 0.62, green: 0.52, blue: 1.0), badge: store.supportTickets.contains { store.isSupportTicketUnread($0) })
         }
-        .padding(.top, 8)
-        .padding(.bottom, 2)
-        .background(.ultraThinMaterial)
-        .overlay(alignment: .top) { Rectangle().fill(Color.white.opacity(0.08)).frame(height: 1) }
+        .padding(6)
+        .background {
+            Capsule()
+                .fill(.ultraThinMaterial)
+                .overlay(Capsule().fill(Color(red: 0.04, green: 0.05, blue: 0.12).opacity(0.55)))
+                .overlay(Capsule().strokeBorder(LinearGradient(colors: [Color.white.opacity(0.22), Color.white.opacity(0.04)], startPoint: .top, endPoint: .bottom), lineWidth: 1))
+                .shadow(color: .black.opacity(0.45), radius: 18, y: 8)
+        }
+        .padding(.horizontal, 14)
+        .padding(.bottom, 4)
     }
 
-    private func tabItem(_ target: Route, _ icon: String, _ title: LocalizedStringKey, badge: Bool) -> some View {
+    private func tabItem(_ target: Route, _ icon: String, _ title: LocalizedStringKey, tint: Color, badge: Bool) -> some View {
         let active = route == target
         return Button {
-            if route != target { transition(to: target) }
+            if route != target {
+                HapticsManager.shared.launcherSnap()
+                withAnimation(.spring(response: 0.32, dampingFraction: 0.78)) { route = target }
+            }
         } label: {
-            VStack(spacing: 3) {
-                Image(systemName: icon)
-                    .font(.system(size: 19, weight: .medium))
+            VStack(spacing: 2) {
+                Image(systemName: active ? icon + ".fill" : icon)
+                    .font(.system(size: 20, weight: active ? .bold : .medium))
+                    .foregroundStyle(active ? AnyShapeStyle(LinearGradient(colors: [tint, tint.opacity(0.7)], startPoint: .top, endPoint: .bottom)) : AnyShapeStyle(Color.white.opacity(0.55)))
+                    .shadow(color: active ? tint.opacity(0.7) : .clear, radius: 8)
+                    .scaleEffect(active ? 1.08 : 1)
                     .overlay(alignment: .topTrailing) {
                         if badge {
-                            Circle().fill(Color.yellow).frame(width: 8, height: 8).offset(x: 6, y: -3)
+                            Circle().fill(Color.yellow).frame(width: 9, height: 9)
+                                .overlay(Circle().stroke(Color.black.opacity(0.6), lineWidth: 1.5))
+                                .offset(x: 7, y: -3)
                         }
                     }
                 Text(title)
-                    .font(.system(size: 10, weight: .medium, design: .rounded))
+                    .font(.system(size: 10, weight: active ? .bold : .semibold, design: .rounded))
+                    .foregroundStyle(active ? Color.white : Color.white.opacity(0.5))
+                    .lineLimit(1).minimumScaleFactor(0.8)
             }
-            .foregroundStyle(active ? Color.cyan : Color.white.opacity(0.5))
             .frame(maxWidth: .infinity)
-            .frame(height: 46)
+            .frame(height: 50)
+            .background {
+                if active {
+                    Capsule()
+                        .fill(LinearGradient(colors: [tint.opacity(0.30), tint.opacity(0.10)], startPoint: .top, endPoint: .bottom))
+                        .overlay(Capsule().stroke(tint.opacity(0.45), lineWidth: 1))
+                        .matchedGeometryEffect(id: "tabPill", in: tabNamespace)
+                }
+            }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(active ? .isSelected : [])
     }
 
     /// Bildirime dokununca ilgili ekranı açar. Oyun sürerken ekran değiştirilmez.
@@ -2711,30 +2736,40 @@ private struct SupportStatusBadge: View {
     }
 }
 
-/// Destek ekibinin yuvarlak simgesi (stüdyo logosu).
+/// Destek ekibinin simgesi: kulaklıklı, mavi-mor degrade daire (oyun logosundan ayrı).
 private struct SupportAvatar: View {
     var size: CGFloat = 32
     var body: some View {
-        Image("GameLogo")
-            .resizable()
-            .scaledToFill()
-            .frame(width: size, height: size)
-            .clipShape(Circle())
-            .overlay(Circle().stroke(Color.white.opacity(0.12), lineWidth: 1))
+        ZStack {
+            Circle().fill(LinearGradient(colors: [Color(red: 0.33, green: 0.58, blue: 1.0), Color(red: 0.55, green: 0.38, blue: 1.0)], startPoint: .topLeading, endPoint: .bottomTrailing))
+            Image(systemName: "headphones")
+                .font(.system(size: size * 0.46, weight: .semibold))
+                .foregroundStyle(.white)
+        }
+        .frame(width: size, height: size)
+        .overlay(alignment: .bottomTrailing) {
+            Circle().fill(Color(red: 0.30, green: 0.85, blue: 0.55))
+                .frame(width: size * 0.28, height: size * 0.28)
+                .overlay(Circle().stroke(SupportStyle.bg, lineWidth: max(1.5, size * 0.05)))
+        }
     }
 }
 
-private struct SupportCenterScreen: View {
-    @EnvironmentObject private var appState: AppState
-    @EnvironmentObject private var store: StoreManager
-    let onClose: () -> Void
-    var startOnTickets = false
-
-    var body: some View {
-        SupportCenterView(embedded: true, startOnTickets: startOnTickets, onClose: onClose)
-            .environmentObject(store)
-            .environmentObject(appState)
-    }
+/// "iPhone15,3" gibi kodu satıştaki adına çevirir (bilinmiyorsa kodu döndürür).
+private func supportDeviceName(_ code: String) -> String {
+    let map: [String: String] = [
+        "iPhone11,8": "iPhone XR", "iPhone11,2": "iPhone XS", "iPhone11,6": "iPhone XS Max",
+        "iPhone12,1": "iPhone 11", "iPhone12,3": "iPhone 11 Pro", "iPhone12,5": "iPhone 11 Pro Max", "iPhone12,8": "iPhone SE (2. nesil)",
+        "iPhone13,1": "iPhone 12 mini", "iPhone13,2": "iPhone 12", "iPhone13,3": "iPhone 12 Pro", "iPhone13,4": "iPhone 12 Pro Max",
+        "iPhone14,4": "iPhone 13 mini", "iPhone14,5": "iPhone 13", "iPhone14,2": "iPhone 13 Pro", "iPhone14,3": "iPhone 13 Pro Max", "iPhone14,6": "iPhone SE (3. nesil)",
+        "iPhone14,7": "iPhone 14", "iPhone14,8": "iPhone 14 Plus", "iPhone15,2": "iPhone 14 Pro", "iPhone15,3": "iPhone 14 Pro Max",
+        "iPhone15,4": "iPhone 15", "iPhone15,5": "iPhone 15 Plus", "iPhone16,1": "iPhone 15 Pro", "iPhone16,2": "iPhone 15 Pro Max",
+        "iPhone17,3": "iPhone 16", "iPhone17,4": "iPhone 16 Plus", "iPhone17,1": "iPhone 16 Pro", "iPhone17,2": "iPhone 16 Pro Max", "iPhone17,5": "iPhone 16e",
+        "iPhone18,3": "iPhone 17", "iPhone18,1": "iPhone 17 Pro", "iPhone18,2": "iPhone 17 Pro Max", "iPhone18,4": "iPhone Air"
+    ]
+    if let name = map[code] { return name }
+    if code.hasPrefix("iPad") { return "iPad (\(code))" }
+    return code
 }
 
 /// Destek merkezi: arama, sık sorulan sorular, talepler ve yeni talep. Oyunun neon ekranlarından farklı olarak
@@ -3380,7 +3415,7 @@ private struct SupportComposeView: View {
                         Divider().overlay(SupportStyle.line).padding(.leading, 14)
                         infoRow("Uygulama", appVersion)
                         Divider().overlay(SupportStyle.line).padding(.leading, 14)
-                        infoRow("Cihaz", "\(NetworkGuard.deviceModel) · iOS \(UIDevice.current.systemVersion)")
+                        infoRow("Cihaz", "\(supportDeviceName(NetworkGuard.deviceModel)) · iOS \(UIDevice.current.systemVersion)")
                     }
                     .background(SupportStyle.card, in: SupportStyle.shape)
                     .overlay(SupportStyle.shape.stroke(SupportStyle.line, lineWidth: 1))

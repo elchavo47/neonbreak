@@ -2777,6 +2777,19 @@ private func supportDeviceName(_ code: String) -> String {
     return code
 }
 
+private struct SupportCenterScreen: View {
+    @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var store: StoreManager
+    let onClose: () -> Void
+    var startOnTickets = false
+
+    var body: some View {
+        SupportCenterView(embedded: true, startOnTickets: startOnTickets, onClose: onClose)
+            .environmentObject(store)
+            .environmentObject(appState)
+    }
+}
+
 /// Destek merkezi: arama, sık sorulan sorular, talepler ve yeni talep. Oyunun neon ekranlarından farklı olarak
 /// tanıdık bir yardım merkezi gibi görünür (sade zemin, sistem yazı tipi, gezinme çubuğu).
 private struct SupportCenterView: View {

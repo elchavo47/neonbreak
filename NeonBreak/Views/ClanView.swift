@@ -1702,7 +1702,22 @@ private struct ClanChatView: View {
     let clan: StoreManager.Clan
     /// true: klan ekranının içinde, sekmede gösterilir (tam ekran değil).
     var embedded = false
+    @EnvironmentObject var appState: AppState
     @State private var messages: [StoreManager.ClanMessage] = []
+    @State private var cardTarget: PlayerCardSheet.Target?
+    @State private var reportTarget: StoreManager.ClanMessage?
+    @State private var hiddenIds: Set<Int> = []
+    @State private var notice: String?
+
+    private var visible: [StoreManager.ClanMessage] {
+        let blocked = Set(store.blocked.map(\.userId))
+        return messages.filter { !hiddenIds.contains($0.id) && !($0.userId.map { blocked.contains($0) } ?? false) }
+    }
+
+    private func openProfile(_ m: StoreManager.ClanMessage) {
+        guard let id = m.userId else { return }
+        cardTarget = PlayerCardSheet.Target(id: id, username: m.username ?? "?", avatarUrl: m.avatarUrl, frame: nil, title: nil)
+    }
     @State private var text = ""
     @State private var sending = false
     @State private var error: String?
@@ -1749,8 +1764,8 @@ private struct ClanChatView: View {
                             }
                             .padding(.top, 80)
                         }
-                        ForEach(Array(messages.enumerated()), id: \.element.id) { i, m in
-                            bubble(m, grouped: i > 0 && !messages[i - 1].system && messages[i - 1].userId == m.userId).id(m.id)
+                        ForEach(Array(visible.enumerated()), id: \.element.id) { i, m in
+                            bubble(m, grouped: i > 0 && !visible[i - 1].system && visible[i - 1].userId == m.userId).id(m.id)
                         }
                         Color.clear.frame(height: 4).id("bottom")
                     }
@@ -1764,6 +1779,7 @@ private struct ClanChatView: View {
             }
 
             if let error { ClanBanner(text: error).padding(.horizontal, 12).padding(.bottom, 6) }
+            if let notice { ClanBanner(text: notice, isError: false).padding(.horizontal, 12).padding(.bottom, 6) }
             HStack(alignment: .bottom, spacing: 8) {
                 TextField(L("Klana mesaj yaz…"), text: $text, axis: .vertical)
                     .focused($focused)
@@ -1792,6 +1808,16 @@ private struct ClanChatView: View {
                 Button { focused = false } label: { Text("Kapat") }
             }
         }
+        .sheet(item: $cardTarget) { target in PlayerCardSheet(target: target).environmentObject(store).environmentObject(appState) }
+        .sheet(item: $reportTarget) { m in
+            ClanReportSheet(message: m) { hidden in
+                hiddenIds.insert(m.id)
+                notice = L("Şikayetin alındı. Ekibimiz inceleyecek.")
+            }
+            .environmentObject(store)
+            .presentationDetents([.height(520)])
+            .presentationDragIndicator(.visible)
+        }
         .task {
             while !Task.isCancelled {
                 if let list = await store.clanMessages() { messages = list }
@@ -1814,7 +1840,7 @@ private struct ClanChatView: View {
             HStack(alignment: .bottom, spacing: 8) {
                 if m.mine { Spacer(minLength: 60) }
                 else if grouped { Color.clear.frame(width: 30, height: 1) }
-                else { ClanAvatar(url: m.avatarUrl, name: m.username ?? "?", size: 30) }
+                else { ClanAvatar(url: m.avatarUrl, name: m.username ?? "?", size: 30).onTapGesture { openProfile(m) } }
                 VStack(alignment: m.mine ? .trailing : .leading, spacing: 3) {
                     if !m.mine && !grouped {
                         HStack(spacing: 4) {
@@ -1824,6 +1850,8 @@ private struct ClanChatView: View {
                             if m.role == "officer" { Image(systemName: "star.fill").font(.system(size: 9)).foregroundStyle(.purple) }
                         }
                         .padding(.leading, 4)
+                        .contentShape(Rectangle())
+                        .onTapGesture { openProfile(m) }
                     }
                     VStack(alignment: .trailing, spacing: 2) {
                         Text(verbatim: m.message)
@@ -1837,6 +1865,14 @@ private struct ClanChatView: View {
                     .padding(.horizontal, 12).padding(.vertical, 8)
                     .background(m.mine ? AnyShapeStyle(LinearGradient(colors: [ClanStyle.color(clan.color).opacity(0.55), ClanStyle.color(clan.color).opacity(0.35)], startPoint: .topLeading, endPoint: .bottomTrailing)) : AnyShapeStyle(Color.white.opacity(0.09)),
                                 in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .contextMenu {
+                        Button { UIPasteboard.general.string = m.message } label: { Label { Text("Kopyala") } icon: { Image(systemName: "doc.on.doc") } }
+                        if !m.mine {
+                            Button { openProfile(m) } label: { Label { Text("Profili gör") } icon: { Image(systemName: "person.crop.circle") } }
+                            Button(role: .destructive) { reportTarget = m } label: { Label { Text("Mesajı şikayet et") } icon: { Image(systemName: "exclamationmark.bubble") } }
+                        }
+                    }
                 }
                 if !m.mine { Spacer(minLength: 50) }
             }
@@ -1860,6 +1896,85 @@ private struct ClanChatView: View {
             error = await store.sendClanMessage(t)
             sending = false
             if error == nil { text = ""; if let list = await store.clanMessages() { messages = list } }
+        }
+    }
+}
+
+/// Klan sohbeti mesaj şikayeti.
+private struct ClanReportSheet: View {
+    @EnvironmentObject var store: StoreManager
+    @Environment(\.dismiss) private var dismiss
+    let message: StoreManager.ClanMessage
+    let onDone: (Bool) -> Void
+    @State private var reason = "abuse"
+    @State private var block = false
+    @State private var busy = false
+    @State private var error: String?
+
+    private let reasons: [(String, String, LocalizedStringKey)] = [
+        ("abuse", "hand.raised.slash.fill", "Hakaret / küfür"),
+        ("spam", "megaphone.fill", "Spam / reklam"),
+        ("other", "ellipsis.circle.fill", "Diğer")
+    ]
+
+    var body: some View {
+        ZStack {
+            Color(red: 0.04, green: 0.05, blue: 0.10).ignoresSafeArea()
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(spacing: 10) {
+                    Image(systemName: "exclamationmark.bubble.fill").font(.system(size: 20)).foregroundStyle(.black)
+                        .frame(width: 44, height: 44).background(Color.orange, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Mesajı şikayet et").font(.system(size: 19, weight: .black, design: .rounded))
+                        Text(verbatim: message.username ?? "?").font(.system(size: 13, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.55))
+                    }
+                }
+                .padding(.top, 20)
+                Text(verbatim: "“\(message.message)”")
+                    .font(.system(size: 14, design: .rounded)).foregroundStyle(.white.opacity(0.8)).lineLimit(3)
+                    .padding(12).frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                VStack(spacing: 8) {
+                    ForEach(reasons, id: \.0) { r in
+                        Button { reason = r.0 } label: {
+                            HStack(spacing: 10) {
+                                Image(systemName: r.1).frame(width: 22).foregroundStyle(reason == r.0 ? .orange : .white.opacity(0.5))
+                                Text(r.2).font(.system(size: 15, weight: .bold, design: .rounded))
+                                Spacer()
+                                Image(systemName: reason == r.0 ? "checkmark.circle.fill" : "circle").foregroundStyle(reason == r.0 ? .orange : .white.opacity(0.3))
+                            }
+                            .padding(.horizontal, 12).frame(height: 46)
+                            .background(reason == r.0 ? Color.orange.opacity(0.12) : Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                Toggle(isOn: $block) { Text("Bu oyuncuyu engelle").font(.system(size: 14, weight: .semibold, design: .rounded)) }
+                    .tint(.orange)
+                if let error { ClanBanner(text: error) }
+                Spacer(minLength: 0)
+                Button(action: send) {
+                    HStack(spacing: 8) {
+                        if busy { ProgressView().tint(.black) }
+                        Text("Şikayeti gönder")
+                    }
+                    .font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.black)
+                    .frame(maxWidth: .infinity).frame(height: 52)
+                    .background(Color.orange, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+                .buttonStyle(.plain).disabled(busy)
+            }
+            .padding(.horizontal, 20).padding(.bottom, 14)
+        }
+        .preferredColorScheme(.dark)
+    }
+
+    private func send() {
+        busy = true; error = nil
+        Task { @MainActor in
+            let e = await store.reportClanMessage(id: message.id, reason: reason, block: block)
+            busy = false
+            if let e { error = e } else { onDone(block); dismiss() }
         }
     }
 }

@@ -2062,6 +2062,16 @@ final class StoreManager: ObservableObject {
         catch { return clanError(error) }
     }
 
+    /// Klan sohbetindeki mesajı şikayet eder (isteğe bağlı olarak yazanı engeller). Hata yoksa nil.
+    func reportClanMessage(id: Int, reason: String, block: Bool) async -> String? {
+        struct In: Encodable { let reason: String; let block: Bool }
+        do {
+            let out: BlockOutput = try await send(try authorizedJSONRequest(path: "/clans/me/chat/\(id)/report", method: "POST", body: In(reason: reason, block: block)))
+            if block { applyBlocked(out.blocked) }
+            return nil
+        } catch { return clanError(error) }
+    }
+
     func clanMessages() async -> [ClanMessage]? {
         struct Out: Decodable { let messages: [ClanMessage] }
         do { let out: Out = try await send(try authorizedRequest(path: "/clans/me/chat", method: "GET")); return out.messages } catch { return nil }

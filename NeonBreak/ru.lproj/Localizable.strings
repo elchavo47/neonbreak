@@ -1031,3 +1031,10 @@
 "%@ coin bağışla" = "Внести %@ монет";
 "En az 10 coin bağışlayabilirsin." = "Минимальный взнос — 10 монет.";
 "Bakiyen yetersiz." = "Недостаточно монет.";
+"Profili gör" = "Профиль";
+"Mesajı şikayet et" = "Пожаловаться";
+"Şikayetin alındı. Ekibimiz inceleyecek." = "Жалоба получена. Мы её рассмотрим.";
+"Hakaret / küfür" = "Оскорбления / мат";
+"Spam / reklam" = "Спам / реклама";
+"Bu oyuncuyu engelle" = "Заблокировать игрока";
+"Şikayeti gönder" = "Отправить жалобу";

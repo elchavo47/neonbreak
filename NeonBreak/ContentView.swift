@@ -679,7 +679,7 @@ private struct ReportPlayerSheet: View {
 }
 
 /// Sıralamada dokunulan oyuncunun kartı.
-private struct PlayerCardSheet: View {
+struct PlayerCardSheet: View {
     struct Target: Identifiable { let id: Int; let username: String; let avatarUrl: String?; let frame: String?; let title: String? }
     let target: Target
     @EnvironmentObject private var store: StoreManager

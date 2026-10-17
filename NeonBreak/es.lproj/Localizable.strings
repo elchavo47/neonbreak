@@ -1031,3 +1031,10 @@
 "%@ coin bağışla" = "Donar %@ monedas";
 "En az 10 coin bağışlayabilirsin." = "Puedes donar al menos 10 monedas.";
 "Bakiyen yetersiz." = "No tienes suficientes monedas.";
+"Profili gör" = "Ver perfil";
+"Mesajı şikayet et" = "Denunciar mensaje";
+"Şikayetin alındı. Ekibimiz inceleyecek." = "Denuncia recibida. Nuestro equipo la revisará.";
+"Hakaret / küfür" = "Insulto / groserías";
+"Spam / reklam" = "Spam / publicidad";
+"Bu oyuncuyu engelle" = "Bloquear a este jugador";
+"Şikayeti gönder" = "Enviar denuncia";

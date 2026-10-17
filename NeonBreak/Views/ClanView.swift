@@ -4,7 +4,9 @@ import SwiftUI
 
 /// Klan amblemi: şekil + renk + simge. Sunucu anahtarları (icon, color, shape) burada çizilir.
 enum ClanStyle {
-    static let icons = ["bolt", "flame", "star", "crown", "shield", "skull", "diamond", "rocket", "moon", "sun", "leaf", "paw", "eye", "heart", "snowflake", "atom"]
+    /// Amblem çizimleri: game-icons.net (CC BY 3.0, Lorc, Delapouite, Sbed).
+    static let icons = ["wolf", "dragon", "lion", "tiger", "bear", "fox", "eagle", "raven", "owl", "griffin", "unicorn", "cobra", "scorpion", "shark", "kraken", "skull", "horned", "ghost", "ninja", "samurai", "spartan", "viking", "crown", "swords", "trident", "fire", "lightning", "rocket"]
+    static func isArt(_ key: String) -> Bool { icons.contains(key) }
     static let shapes = ["shield", "circle", "hexagon", "diamond"]
     static let colors: [Color] = [
         Color(red: 0.13, green: 0.83, blue: 0.93), Color(red: 0.65, green: 0.55, blue: 0.98), Color(red: 0.96, green: 0.45, blue: 0.71),
@@ -128,18 +130,42 @@ struct ClanEmblem: View {
         }
     }
 
+    private var inset: CGFloat { size * 0.09 }
+
     var body: some View {
         ZStack {
-            outline.fill(RadialGradient(colors: [tint.opacity(0.95), tint.opacity(0.55), Color.black.opacity(0.65)], center: .init(x: 0.35, y: 0.3), startRadius: 1, endRadius: size * 0.9))
-            outline.stroke(LinearGradient(colors: [Color.white.opacity(0.85), tint.opacity(0.5)], startPoint: .top, endPoint: .bottom), lineWidth: max(1.5, size * 0.04))
-            Image(systemName: ClanStyle.symbol(icon))
-                .font(.system(size: size * (shape == "diamond" ? 0.34 : 0.42), weight: .bold))
-                .foregroundStyle(.white)
-                .shadow(color: .black.opacity(0.45), radius: 2, y: 1)
-                .offset(y: shape == "shield" ? -size * 0.04 : 0)
+            // Dış çerçeve: metalik halka
+            outline.fill(LinearGradient(colors: [Color.white.opacity(0.95), tint, tint.opacity(0.55), Color.white.opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing))
+            // İç plaka: koyu, renkli derinlik
+            outline
+                .fill(RadialGradient(colors: [tint.opacity(0.9), tint.opacity(0.35), Color(red: 0.03, green: 0.04, blue: 0.10)], center: .init(x: 0.5, y: 0.32), startRadius: 1, endRadius: size * 0.75))
+                .padding(inset)
+            outline
+                .stroke(Color.black.opacity(0.45), lineWidth: max(1, size * 0.02))
+                .padding(inset)
+            // Üst parlama
+            outline
+                .fill(LinearGradient(colors: [Color.white.opacity(0.28), .clear], startPoint: .top, endPoint: .center))
+                .padding(inset)
+                .mask(Rectangle().frame(height: size * 0.5).frame(maxHeight: .infinity, alignment: .top))
+            art
+                .frame(width: size * (shape == "diamond" ? 0.42 : 0.56), height: size * (shape == "diamond" ? 0.42 : 0.56))
+                .foregroundStyle(LinearGradient(colors: [.white, Color.white.opacity(0.78)], startPoint: .top, endPoint: .bottom))
+                .shadow(color: tint, radius: size * 0.08)
+                .shadow(color: .black.opacity(0.5), radius: 1.5, y: 1)
+                .offset(y: shape == "shield" ? -size * 0.03 : 0)
         }
         .frame(width: size, height: size * (shape == "shield" ? 1.12 : 1))
-        .shadow(color: tint.opacity(0.55), radius: size * 0.22)
+        .shadow(color: tint.opacity(0.6), radius: size * 0.2)
+    }
+
+    @ViewBuilder
+    private var art: some View {
+        if ClanStyle.isArt(icon) {
+            Image("Clan" + icon.prefix(1).uppercased() + icon.dropFirst()).resizable().renderingMode(.template).scaledToFit()
+        } else {
+            Image(systemName: ClanStyle.symbol(icon)).resizable().scaledToFit().fontWeight(.bold)
+        }
     }
 }
 
@@ -327,7 +353,7 @@ private struct ClanDiscoverView: View {
     private var createCard: some View {
         Button { showCreate = true } label: {
             HStack(spacing: 14) {
-                ClanEmblem(icon: "crown", color: 4, shape: "shield", size: 46)
+                ClanEmblem(icon: "lion", color: 4, shape: "shield", size: 46)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Kendi klanını kur").font(.system(size: 16, weight: .bold, design: .rounded))
                     Text(LS("Kurma ücreti: \(store.clanState?.createCost ?? 1000) coin"))
@@ -539,7 +565,7 @@ private struct ClanHomeView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
                 .padding(.bottom, tab == .chat ? 0 : 24)
-                if tab == .chat { ClanChatView().frame(minHeight: 420) }
+                if tab == .chat { chatEntry.padding(.horizontal, 16).padding(.bottom, 24) }
             }
             .refreshable { await store.loadClan() }
         }
@@ -551,6 +577,29 @@ private struct ClanHomeView: View {
         } message: {
             if role == "leader" { Text("Liderlik en aktif yöneticiye devredilir.") } else { Text("İstediğin zaman yeniden katılabilirsin.") }
         }
+    }
+
+    @State private var showChat = false
+
+    private var chatEntry: some View {
+        Button { showChat = true } label: {
+            HStack(spacing: 14) {
+                Image(systemName: "bubble.left.and.bubble.right.fill").font(.system(size: 22))
+                    .foregroundStyle(.black).frame(width: 52, height: 52)
+                    .background(ClanStyle.color(clan.color), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Klan sohbeti").font(.system(size: 17, weight: .heavy, design: .rounded))
+                    Text("Üyelerle konuş, plan yap.").font(.system(size: 12, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.6))
+                }
+                Spacer()
+                Image(systemName: "chevron.right").font(.system(size: 14, weight: .bold)).foregroundStyle(.white.opacity(0.4))
+            }
+            .padding(14)
+            .background(ClanUI.card, in: ClanUI.shape())
+            .overlay(ClanUI.shape().stroke(ClanStyle.color(clan.color).opacity(0.4), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .fullScreenCover(isPresented: $showChat) { ClanChatView(clan: clan).environmentObject(store) }
     }
 
     private var header: some View {
@@ -852,50 +901,100 @@ private struct ClanPerksCard: View {
 
 private struct ClanChatView: View {
     @EnvironmentObject var store: StoreManager
+    @Environment(\.dismiss) private var dismiss
+    let clan: StoreManager.Clan
     @State private var messages: [StoreManager.ClanMessage] = []
     @State private var text = ""
     @State private var sending = false
     @State private var error: String?
+    @FocusState private var focused: Bool
 
     var body: some View {
+        NavigationStack { content.toolbar(.hidden, for: .navigationBar) }
+    }
+
+    private var content: some View {
         VStack(spacing: 0) {
-            ScrollViewReader { proxy in
-                LazyVStack(spacing: 8) {
-                    if messages.isEmpty {
-                        Text("Henüz mesaj yok. İlk mesajı sen yaz!").font(.system(size: 13, design: .rounded)).foregroundStyle(.white.opacity(0.5)).padding(.vertical, 30)
-                    }
-                    ForEach(messages) { m in bubble(m).id(m.id) }
+            HStack(spacing: 12) {
+                Button { dismiss() } label: {
+                    Image(systemName: "chevron.down").font(.system(size: 15, weight: .bold))
+                        .frame(width: 40, height: 40).background(Color.white.opacity(0.08), in: Circle())
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .onChange(of: messages.count) { _ in if let last = messages.last { withAnimation { proxy.scrollTo(last.id, anchor: .bottom) } } }
+                .buttonStyle(.plain)
+                ClanEmblem(icon: clan.icon, color: clan.color, shape: clan.shape, size: 34)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(verbatim: clan.name).font(.system(size: 16, weight: .heavy, design: .rounded)).lineLimit(1)
+                    Text(LS("\(clan.members) üye")).font(.system(size: 11, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.5))
+                }
+                Spacer()
             }
-            if let error { ClanBanner(text: error).padding(.horizontal, 16) }
-            HStack(spacing: 10) {
+            .padding(.horizontal, 14).padding(.vertical, 10)
+            .background(Color(red: 0.05, green: 0.06, blue: 0.11))
+            .overlay(alignment: .bottom) { Rectangle().fill(Color.white.opacity(0.07)).frame(height: 1) }
+
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: 6) {
+                        if messages.isEmpty {
+                            VStack(spacing: 8) {
+                                Image(systemName: "bubble.left.and.bubble.right").font(.system(size: 34)).foregroundStyle(.white.opacity(0.3))
+                                Text("Henüz mesaj yok. İlk mesajı sen yaz!").font(.system(size: 14, design: .rounded)).foregroundStyle(.white.opacity(0.5))
+                            }
+                            .padding(.top, 80)
+                        }
+                        ForEach(Array(messages.enumerated()), id: \.element.id) { i, m in
+                            bubble(m, grouped: i > 0 && !messages[i - 1].system && messages[i - 1].userId == m.userId).id(m.id)
+                        }
+                        Color.clear.frame(height: 4).id("bottom")
+                    }
+                    .padding(.horizontal, 12).padding(.vertical, 12)
+                }
+                .scrollDismissesKeyboard(.interactively)
+                .contentShape(Rectangle())
+                .onTapGesture { focused = false }
+                .onChange(of: messages.count) { _ in withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo("bottom", anchor: .bottom) } }
+                .onChange(of: focused) { f in if f { DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { withAnimation { proxy.scrollTo("bottom", anchor: .bottom) } } } }
+            }
+
+            if let error { ClanBanner(text: error).padding(.horizontal, 12).padding(.bottom, 6) }
+            HStack(alignment: .bottom, spacing: 8) {
                 TextField(L("Klana mesaj yaz…"), text: $text, axis: .vertical)
-                    .lineLimit(1...4)
-                    .font(.system(size: 15, weight: .medium, design: .rounded))
+                    .focused($focused)
+                    .lineLimit(1...5)
+                    .submitLabel(.send)
+                    .onSubmit(send)
+                    .font(.system(size: 16, design: .rounded))
                     .padding(.horizontal, 14).padding(.vertical, 10)
                     .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                 Button(action: send) {
-                    Group { if sending { ProgressView().tint(.black) } else { Image(systemName: "paperplane.fill").font(.system(size: 15, weight: .bold)) } }
-                        .foregroundStyle(.black).frame(width: 42, height: 42).background(ClanUI.accent, in: Circle())
+                    Group { if sending { ProgressView().tint(.black) } else { Image(systemName: "arrow.up").font(.system(size: 16, weight: .heavy)) } }
+                        .foregroundStyle(.black).frame(width: 40, height: 40)
+                        .background(ClanStyle.color(clan.color).opacity(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.35 : 1), in: Circle())
                 }
                 .buttonStyle(.plain)
                 .disabled(sending || text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
-            .padding(.horizontal, 16).padding(.vertical, 10)
+            .padding(.horizontal, 12).padding(.vertical, 8)
+            .background(Color(red: 0.05, green: 0.06, blue: 0.11).ignoresSafeArea(edges: .bottom))
+        }
+        .background(Color(red: 0.03, green: 0.04, blue: 0.08).ignoresSafeArea())
+        .preferredColorScheme(.dark)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button { focused = false } label: { Text("Kapat") }
+            }
         }
         .task {
             while !Task.isCancelled {
                 if let list = await store.clanMessages() { messages = list }
-                try? await Task.sleep(nanoseconds: 6_000_000_000)
+                try? await Task.sleep(nanoseconds: 4_000_000_000)
             }
         }
     }
 
     @ViewBuilder
-    private func bubble(_ m: StoreManager.ClanMessage) -> some View {
+    private func bubble(_ m: StoreManager.ClanMessage, grouped: Bool) -> some View {
         if m.system {
             Text(verbatim: LM(m.message))
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
@@ -903,27 +1002,47 @@ private struct ClanChatView: View {
                 .padding(.horizontal, 12).padding(.vertical, 6)
                 .background(Color.white.opacity(0.06), in: Capsule())
                 .frame(maxWidth: .infinity)
+                .padding(.vertical, 6)
         } else {
             HStack(alignment: .bottom, spacing: 8) {
-                if m.mine { Spacer(minLength: 50) } else { ClanAvatar(url: m.avatarUrl, name: m.username ?? "?", size: 30) }
+                if m.mine { Spacer(minLength: 60) }
+                else if grouped { Color.clear.frame(width: 30, height: 1) }
+                else { ClanAvatar(url: m.avatarUrl, name: m.username ?? "?", size: 30) }
                 VStack(alignment: m.mine ? .trailing : .leading, spacing: 3) {
-                    if !m.mine {
+                    if !m.mine && !grouped {
                         HStack(spacing: 4) {
-                            Text(verbatim: m.username ?? "?").font(.system(size: 11, weight: .bold, design: .rounded))
+                            Text(verbatim: m.username ?? "?").font(.system(size: 12, weight: .bold, design: .rounded))
+                                .foregroundStyle(m.role == "leader" ? Color.yellow : (m.role == "officer" ? Color.purple : ClanStyle.color(clan.color)))
                             if m.role == "leader" { Image(systemName: "crown.fill").font(.system(size: 9)).foregroundStyle(.yellow) }
                             if m.role == "officer" { Image(systemName: "star.fill").font(.system(size: 9)).foregroundStyle(.purple) }
                         }
-                        .foregroundStyle(.white.opacity(0.7))
+                        .padding(.leading, 4)
                     }
-                    Text(verbatim: m.message)
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
-                        .foregroundStyle(m.mine ? .black : .white)
-                        .padding(.horizontal, 12).padding(.vertical, 8)
-                        .background(m.mine ? ClanUI.accent : Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(verbatim: m.message)
+                            .font(.system(size: 16, design: .rounded))
+                            .foregroundStyle(.white)
+                            .fixedSize(horizontal: false, vertical: true)
+                        if let t = clanTime(m.createdAt) {
+                            Text(verbatim: t).font(.system(size: 10, weight: .medium)).foregroundStyle(.white.opacity(0.5))
+                        }
+                    }
+                    .padding(.horizontal, 12).padding(.vertical, 8)
+                    .background(m.mine ? AnyShapeStyle(LinearGradient(colors: [ClanStyle.color(clan.color).opacity(0.55), ClanStyle.color(clan.color).opacity(0.35)], startPoint: .topLeading, endPoint: .bottomTrailing)) : AnyShapeStyle(Color.white.opacity(0.09)),
+                                in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                 }
-                if !m.mine { Spacer(minLength: 40) }
+                if !m.mine { Spacer(minLength: 50) }
             }
+            .padding(.top, grouped ? 0 : 6)
         }
+    }
+
+    private func clanTime(_ raw: String?) -> String? {
+        guard let raw else { return nil }
+        let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.timeZone = TimeZone(identifier: "Europe/Istanbul"); f.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        guard let d = f.date(from: raw) else { return nil }
+        let o = DateFormatter(); o.dateFormat = Calendar.current.isDateInToday(d) ? "HH:mm" : "d MMM HH:mm"; o.locale = Locale(identifier: AppLanguage.effectiveCode)
+        return o.string(from: d)
     }
 
     private func send() {
@@ -952,7 +1071,7 @@ private struct ClanEditorView: View {
         self.existing = existing
         _form = State(initialValue: StoreManager.ClanForm(
             name: existing?.name ?? "", tag: existing?.tag ?? "", slogan: existing?.slogan ?? "", description: existing?.description ?? "",
-            icon: existing?.icon ?? "bolt", color: existing?.color ?? 0, shape: existing?.shape ?? "shield",
+            icon: existing?.icon ?? "wolf", color: existing?.color ?? 0, shape: existing?.shape ?? "shield",
             joinMode: existing?.joinMode ?? "open", minLevel: existing?.minLevel ?? 0))
     }
 
@@ -970,11 +1089,11 @@ private struct ClanEditorView: View {
                         if isLeader {
                             ClanCard {
                                 sectionTitle("Amblem")
-                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 8), spacing: 8) {
+                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 6), spacing: 6) {
                                     ForEach(ClanStyle.icons, id: \.self) { key in
                                         Button { form.icon = key } label: {
-                                            Image(systemName: ClanStyle.symbol(key)).font(.system(size: 16, weight: .bold))
-                                                .frame(maxWidth: .infinity).frame(height: 38)
+                                            ClanEmblem(icon: key, color: form.color, shape: "circle", size: 34)
+                                                .frame(maxWidth: .infinity).frame(height: 46)
                                                 .background(form.icon == key ? ClanStyle.color(form.color).opacity(0.35) : Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                                                 .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(form.icon == key ? ClanStyle.color(form.color) : .clear, lineWidth: 1.5))
                                         }.buttonStyle(.plain)
@@ -1046,6 +1165,8 @@ private struct ClanEditorView: View {
                         }
                         .buttonStyle(.plain)
                         .disabled(!valid || busy)
+                        Text(verbatim: "Emblem art: game-icons.net (Lorc, Delapouite, Sbed) • CC BY 3.0")
+                            .font(.system(size: 10, design: .rounded)).foregroundStyle(.white.opacity(0.35))
                     }
                     .padding(16)
                 }

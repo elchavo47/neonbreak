@@ -1026,3 +1026,8 @@
 "Üyeler kasaya coin bağışlar; lider kasadan bütün klana takviye açar ya da üyelere coin gönderir." = "Les membres donnent des pièces au trésor ; le chef active des boosts pour tout le clan ou envoie des pièces aux membres.";
 "Üyeye coin gönder" = "Envoyer des pièces à un membre";
 "İstekler" = "Demandes";
+"Kasaya bağış yap" = "Donner au trésor";
+"Tümünü bağışla" = "Tout donner";
+"%@ coin bağışla" = "Donner %@ pièces";
+"En az 10 coin bağışlayabilirsin." = "Tu peux donner au moins 10 pièces.";
+"Bakiyen yetersiz." = "Pas assez de pièces.";

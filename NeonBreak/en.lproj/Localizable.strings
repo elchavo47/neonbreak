@@ -1026,3 +1026,8 @@
 "Üyeler kasaya coin bağışlar; lider kasadan bütün klana takviye açar ya da üyelere coin gönderir." = "Members donate coins to the treasury; the leader uses it to activate clan-wide boosts or send coins to members.";
 "Üyeye coin gönder" = "Send coins to a member";
 "İstekler" = "Requests";
+"Kasaya bağış yap" = "Donate to treasury";
+"Tümünü bağışla" = "Donate all";
+"%@ coin bağışla" = "Donate %@ coins";
+"En az 10 coin bağışlayabilirsin." = "You can donate at least 10 coins.";
+"Bakiyen yetersiz." = "Not enough coins.";

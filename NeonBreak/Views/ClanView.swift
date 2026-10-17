@@ -1162,18 +1162,11 @@ private struct ClanTreasuryView: View {
             if let top = treasury?.top, !top.isEmpty { donorsCard(top) }
             historyCard
         }
-        .confirmationDialog(Text(LS("Kasaya \(ClanUI.number(pendingDonation ?? 0)) coin bağışlansın mı?")), isPresented: Binding(get: { pendingDonation != nil }, set: { if !$0 { pendingDonation = nil } }), titleVisibility: .visible) {
-            Button { if let a = pendingDonation { donate(a) } } label: { Text("Bağışla") }
-            Button(role: .cancel) { pendingDonation = nil } label: { Text("Vazgeç") }
-        } message: {
-            Text("Bağışlanan coin geri alınamaz; klanın ortak kasasına geçer.")
-        }
-        .alert(Text("Bağış miktarı"), isPresented: $customOpen) {
-            TextField(L("Coin"), text: $customText).keyboardType(.numberPad)
-            Button(role: .cancel) { customText = "" } label: { Text("Vazgeç") }
-            Button { if let v = Int(customText.filter(\.isNumber)), v > 0 { pendingDonation = v }; customText = "" } label: { Text("Devam") }
-        } message: {
-            Text(LS("Bakiyen: \(ClanUI.number(balance)) coin"))
+        .sheet(isPresented: $customOpen) {
+            ClanDonateSheet(initial: pendingDonation ?? 500, onDone: { text, isError in onMessage(text, isError) })
+                .environmentObject(store)
+                .presentationDetents([.height(560), .large])
+                .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showGive) {
             ClanGiveSheet(clan: clan, onDone: { text in onMessage(text, false) }).environmentObject(store)
@@ -1198,7 +1191,7 @@ private struct ClanTreasuryView: View {
                 .font(.system(size: 12, design: .rounded)).foregroundStyle(.white.opacity(0.6))
             HStack(spacing: 8) {
                 ForEach([100, 500, 1000], id: \.self) { amount in
-                    Button { pendingDonation = amount } label: {
+                    Button { pendingDonation = amount; customOpen = true } label: {
                         Text(verbatim: "+\(ClanUI.number(amount))").font(.system(size: 14, weight: .heavy, design: .rounded))
                             .foregroundStyle(balance >= amount ? .black : .white.opacity(0.4))
                             .frame(maxWidth: .infinity).frame(height: 42)
@@ -1206,7 +1199,7 @@ private struct ClanTreasuryView: View {
                     }
                     .buttonStyle(.plain).disabled(balance < amount || busy)
                 }
-                Button { customOpen = true } label: {
+                Button { pendingDonation = nil; customOpen = true } label: {
                     Text("Diğer").font(.system(size: 14, weight: .heavy, design: .rounded))
                         .frame(maxWidth: .infinity).frame(height: 42)
                         .background(Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -1351,6 +1344,110 @@ private struct ClanTreasuryView: View {
             let e = await store.buyClanBoost(type: b.type)
             busy = false
             onMessage(e ?? L("Takviye açıldı! Bütün üyelere bildirim gönderildi."), e != nil)
+        }
+    }
+}
+
+/// Kasaya bağış penceresi: hazır miktarlar, elle miktar, bakiye kontrolü ve onay tek ekranda.
+private struct ClanDonateSheet: View {
+    @EnvironmentObject var store: StoreManager
+    @Environment(\.dismiss) private var dismiss
+    let initial: Int
+    let onDone: (String, Bool) -> Void
+    @State private var text = ""
+    @State private var busy = false
+    @State private var error: String?
+    @FocusState private var focused: Bool
+
+    private var balance: Int { store.profile?.balance ?? 0 }
+    private var amount: Int { Int(text.filter(\.isNumber).prefix(9)) ?? 0 }
+    private var problem: String? {
+        if amount < 10 { return L("En az 10 coin bağışlayabilirsin.") }
+        if amount > balance { return L("Bakiyen yetersiz.") }
+        return nil
+    }
+
+    var body: some View {
+        ZStack {
+            Color(red: 0.04, green: 0.05, blue: 0.10).ignoresSafeArea()
+            VStack(spacing: 18) {
+                VStack(spacing: 8) {
+                    Image(systemName: "building.columns.fill").font(.system(size: 28)).foregroundStyle(.black)
+                        .frame(width: 64, height: 64).background(ClanUI.gold, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .shadow(color: ClanUI.gold.opacity(0.5), radius: 14)
+                    Text("Kasaya bağış yap").font(.system(size: 22, weight: .black, design: .rounded))
+                    Text(LS("Bakiyen: \(ClanUI.number(balance)) coin")).font(.system(size: 13, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.6))
+                }
+                .padding(.top, 22)
+
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    TextField("0", text: $text)
+                        .keyboardType(.numberPad)
+                        .focused($focused)
+                        .multilineTextAlignment(.center)
+                        .font(.system(size: 44, weight: .black, design: .rounded))
+                        .monospacedDigit()
+                        .fixedSize()
+                        .onChange(of: text) { v in let c = String(v.filter(\.isNumber).prefix(9)); if c != v { text = c } }
+                    Text("coin").font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(ClanUI.gold)
+                }
+                .frame(maxWidth: .infinity).frame(height: 76)
+                .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(ClanUI.gold.opacity(focused ? 0.7 : 0.25), lineWidth: 1.5))
+                .onTapGesture { focused = true }
+
+                HStack(spacing: 8) {
+                    ForEach([100, 500, 1000, 5000], id: \.self) { v in
+                        Button { text = String(v); focused = false } label: {
+                            Text(verbatim: ClanUI.number(v)).font(.system(size: 14, weight: .heavy, design: .rounded))
+                                .foregroundStyle(amount == v ? .black : .white)
+                                .frame(maxWidth: .infinity).frame(height: 40)
+                                .background(amount == v ? AnyShapeStyle(ClanUI.gold) : AnyShapeStyle(Color.white.opacity(0.08)), in: Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(v > balance).opacity(v > balance ? 0.35 : 1)
+                    }
+                }
+                Button { text = String(balance); focused = false } label: {
+                    Text("Tümünü bağışla").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.6))
+                }
+                .buttonStyle(.plain).disabled(balance < 10)
+
+                if let error { ClanBanner(text: error) }
+                else if !text.isEmpty, let problem { Text(verbatim: problem).font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(.orange) }
+
+                Spacer(minLength: 0)
+
+                Text("Bağışlanan coin geri alınamaz; klanın ortak kasasına geçer.")
+                    .font(.system(size: 11, design: .rounded)).foregroundStyle(.white.opacity(0.45)).multilineTextAlignment(.center)
+                Button(action: donate) {
+                    HStack(spacing: 8) {
+                        if busy { ProgressView().tint(.black) } else { Image(systemName: "heart.fill") }
+                        Text(amount >= 10 ? LS("\(ClanUI.number(amount)) coin bağışla") : L("Bağışla"))
+                    }
+                    .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.black)
+                    .frame(maxWidth: .infinity).frame(height: 56)
+                    .background(ClanUI.gold.opacity(problem == nil ? 1 : 0.35), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .disabled(problem != nil || busy)
+                Button { dismiss() } label: { Text("Vazgeç").font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.6)).frame(maxWidth: .infinity).frame(height: 40) }
+                    .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 20).padding(.bottom, 12)
+        }
+        .preferredColorScheme(.dark)
+        .onAppear { if initial > 0 { text = String(min(initial, max(balance, 0)) >= 10 ? min(initial, balance) : initial) } }
+    }
+
+    private func donate() {
+        guard problem == nil else { return }
+        let value = amount
+        busy = true; error = nil; focused = false
+        Task { @MainActor in
+            let e = await store.donateToClan(amount: value)
+            busy = false
+            if let e { error = e } else { onDone(LS("Kasaya \(ClanUI.number(value)) coin bağışladın. Teşekkürler!"), false); dismiss() }
         }
     }
 }

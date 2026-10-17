@@ -1026,3 +1026,8 @@
 "Üyeler kasaya coin bağışlar; lider kasadan bütün klana takviye açar ya da üyelere coin gönderir." = "Os membros doam moedas ao cofre; o líder ativa bônus para todo o clã ou envia moedas aos membros.";
 "Üyeye coin gönder" = "Enviar moedas a um membro";
 "İstekler" = "Pedidos";
+"Kasaya bağış yap" = "Doar ao cofre";
+"Tümünü bağışla" = "Doar tudo";
+"%@ coin bağışla" = "Doar %@ moedas";
+"En az 10 coin bağışlayabilirsin." = "Você pode doar no mínimo 10 moedas.";
+"Bakiyen yetersiz." = "Moedas insuficientes.";

@@ -1026,3 +1026,8 @@
 "Üyeler kasaya coin bağışlar; lider kasadan bütün klana takviye açar ya da üyelere coin gönderir." = "Mitglieder spenden Münzen in die Kasse; der Anführer aktiviert damit Boosts für alle oder sendet Münzen an Mitglieder.";
 "Üyeye coin gönder" = "Münzen an Mitglied senden";
 "İstekler" = "Anfragen";
+"Kasaya bağış yap" = "In die Kasse spenden";
+"Tümünü bağışla" = "Alles spenden";
+"%@ coin bağışla" = "%@ Münzen spenden";
+"En az 10 coin bağışlayabilirsin." = "Du kannst mindestens 10 Münzen spenden.";
+"Bakiyen yetersiz." = "Nicht genug Münzen.";

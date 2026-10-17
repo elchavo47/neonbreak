@@ -1026,3 +1026,8 @@
 "Üyeler kasaya coin bağışlar; lider kasadan bütün klana takviye açar ya da üyelere coin gönderir." = "Участники вносят монеты в казну; лидер включает бонусы для всего клана или отправляет монеты участникам.";
 "Üyeye coin gönder" = "Отправить монеты участнику";
 "İstekler" = "Заявки";
+"Kasaya bağış yap" = "Внести в казну";
+"Tümünü bağışla" = "Внести всё";
+"%@ coin bağışla" = "Внести %@ монет";
+"En az 10 coin bağışlayabilirsin." = "Минимальный взнос — 10 монет.";
+"Bakiyen yetersiz." = "Недостаточно монет.";

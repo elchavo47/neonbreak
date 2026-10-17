@@ -495,7 +495,7 @@ final class StoreManager: ObservableObject {
         let rewardCoins: Int
     }
 
-    struct SupportTicket: Codable, Identifiable, Equatable {
+    struct SupportTicket: Codable, Identifiable, Hashable {
         let id: Int
         let subject: String
         let status: String
@@ -1817,15 +1817,16 @@ final class StoreManager: ObservableObject {
         } catch { }
     }
 
-    func createSupportTicket(subject: String, message: String) async -> Bool {
+    /// Yeni destek talebi açar; başarılıysa talep numarasını döndürür.
+    func createSupportTicket(subject: String, message: String) async -> Int? {
         do {
             struct Input: Encodable { let subject: String; let message: String }
-            struct Output: Decodable { let success: Bool }
+            struct Output: Decodable { let success: Bool; let ticketId: Int? }
             let req = try authorizedJSONRequest(path: "/support/tickets", method: "POST", body: Input(subject: subject, message: message))
             let out: Output = try await send(req)
             await loadSupportTickets()
-            return out.success
-        } catch { errorMessage = L("Destek talebi gönderilemedi."); return false }
+            return out.success ? (out.ticketId ?? 0) : nil
+        } catch { errorMessage = L("Destek talebi gönderilemedi."); return nil }
     }
 
     func loadSupportThread(ticketId: Int) async -> SupportThread? {

@@ -2596,81 +2596,131 @@ private struct AvatarCropEditor: View {
     }
 }
 
+// MARK: - Destek merkezi
+
+/// Destek ekranlarının renkleri: oyunun neon görünümünden ayrı, sade ve tanıdık bir yardım merkezi görünümü.
+private enum SupportStyle {
+    static let bg = Color(red: 0.043, green: 0.051, blue: 0.075)
+    static let card = Color(red: 0.090, green: 0.102, blue: 0.137)
+    static let cardRaised = Color(red: 0.125, green: 0.141, blue: 0.188)
+    static let line = Color.white.opacity(0.07)
+    static let accent = Color(red: 0.33, green: 0.58, blue: 1.0)
+    static let text2 = Color.white.opacity(0.64)
+    static let text3 = Color.white.opacity(0.40)
+    static let radius: CGFloat = 14
+    static var shape: RoundedRectangle { RoundedRectangle(cornerRadius: radius, style: .continuous) }
+}
+
+private struct SupportArticle: Identifiable, Hashable {
+    let id: String
+    let question: String
+    let answer: String
+}
+
 private struct SupportTopic: Identifiable, Hashable {
     let id: String
     let title: String
     let icon: String
     let tint: Color
-    let tips: [String]
+    let articles: [SupportArticle]
 
-    static var all: [SupportTopic] { LocalizedCatalog.cached("supportTopics") { [
-        .init(id: "account", title: "Hesap ve Profil", icon: "person.crop.circle", tint: .cyan, tips: [
-            L("Profil fotoğrafını yeniden seçip kırpma ekranında Kullan'a dokun."),
-            L("Oyuncu adı haftada yalnızca bir kez değiştirilebilir; kalan süre profil ekranında görünür."),
-            L("Bağlantı koptuysa uygulamayı kapatıp açmana gerek yok; hesap arka planda yeniden eşitlenir.")
+    static var all: [SupportTopic] { LocalizedCatalog.cached("supportTopics.v2") { [
+        .init(id: "account", title: L("Hesap ve Profil"), icon: "person.crop.circle.fill", tint: Color(red: 0.33, green: 0.58, blue: 1.0), articles: [
+            .init(id: "account.photo", question: L("Profil fotoğrafım değişmiyor"), answer: L("Profil fotoğrafını yeniden seçip kırpma ekranında Kullan'a dokun.")),
+            .init(id: "account.name", question: L("Oyuncu adımı neden değiştiremiyorum?"), answer: L("Oyuncu adı haftada yalnızca bir kez değiştirilebilir; kalan süre profil ekranında görünür.")),
+            .init(id: "account.sync", question: L("Bağlantı koptu, ilerlemem kaybolur mu?"), answer: L("Bağlantı koptuysa uygulamayı kapatıp açmana gerek yok; hesap arka planda yeniden eşitlenir."))
         ]),
-        .init(id: "purchase", title: "Mağaza ve Coin", icon: "bag.fill", tint: .yellow, tips: [
-            L("Satın aldığın güçler oyun ekranının altındaki güç rafında görünür."),
-            L("Coin bakiyesi satın alma sonrası birkaç saniye içinde otomatik güncellenir."),
-            L("Eksik envanter görürsen ana ekrana dönüp oyuna yeniden gir; tekrar satın alma yapma.")
+        .init(id: "purchase", title: L("Mağaza ve Coin"), icon: "bag.fill", tint: Color(red: 0.98, green: 0.72, blue: 0.20), articles: [
+            .init(id: "purchase.power", question: L("Satın aldığım güç nerede?"), answer: L("Satın aldığın güçler oyun ekranının altındaki güç rafında görünür.")),
+            .init(id: "purchase.coins", question: L("Coin bakiyem güncellenmedi"), answer: L("Coin bakiyesi satın alma sonrası birkaç saniye içinde otomatik güncellenir.")),
+            .init(id: "purchase.missing", question: L("Envanterimde ürün eksik"), answer: L("Eksik envanter görürsen ana ekrana dönüp oyuna yeniden gir; tekrar satın alma yapma."))
         ]),
-        .init(id: "game", title: "Oyun ve Kontroller", icon: "gamecontroller.fill", tint: .pink, tips: [
-            L("Nişan almak için parmağını hedefe doğru sürükle ve bırak; parmağını aşağı çekersen atış iptal olur."),
-            L("Güçler oyun ekranının altındaki rafta durur; dokununca kullanılır."),
-            L("Bloklar alt bariyere ulaştığında oyun sona erer; kalkan varsa bir kez kurtarır.")
+        .init(id: "game", title: L("Oyun ve Kontroller"), icon: "gamecontroller.fill", tint: Color(red: 0.96, green: 0.36, blue: 0.55), articles: [
+            .init(id: "game.aim", question: L("Nasıl nişan alırım?"), answer: L("Nişan almak için parmağını hedefe doğru sürükle ve bırak; parmağını aşağı çekersen atış iptal olur.")),
+            .init(id: "game.powers", question: L("Güçleri nasıl kullanırım?"), answer: L("Güçler oyun ekranının altındaki rafta durur; dokununca kullanılır.")),
+            .init(id: "game.over", question: L("Oyun ne zaman biter?"), answer: L("Bloklar alt bariyere ulaştığında oyun sona erer; kalkan varsa bir kez kurtarır."))
         ]),
-        .init(id: "performance", title: "Kasma / Ses / Haptic", icon: "waveform.path.ecg", tint: .orange, tips: [
-            L("Ayarlar > Haptic Feedback üzerinden titreşim şiddetini test edebilirsin."),
-            L("Cihaz ısındıysa kısa süre beklemek performansı toparlayabilir."),
-            L("Sorun devam ederse cihaz modeli ve hangi seviyede olduğunu destek mesajına ekle.")
+        .init(id: "performance", title: L("Kasma / Ses / Haptic"), icon: "waveform.path.ecg", tint: Color(red: 1.0, green: 0.55, blue: 0.25), articles: [
+            .init(id: "perf.haptic", question: L("Titreşim çalışmıyor"), answer: L("Ayarlar > Haptic Feedback üzerinden titreşim şiddetini test edebilirsin.")),
+            .init(id: "perf.heat", question: L("Oyun kasıyor ya da telefon ısınıyor"), answer: L("Cihaz ısındıysa kısa süre beklemek performansı toparlayabilir.")),
+            .init(id: "perf.still", question: L("Sorunum hâlâ devam ediyor"), answer: L("Sorun devam ederse cihaz modeli ve hangi seviyede olduğunu destek mesajına ekle."))
         ]),
-        .init(id: "other", title: "Diğer", icon: "ellipsis.bubble.fill", tint: .purple, tips: [
-            L("Önce aşağıdaki hızlı çözümleri kontrol et."),
-            L("Çözülmezse destek ekibine doğrudan kayıt açabilirsin.")
-        ])
+        .init(id: "other", title: L("Diğer"), icon: "ellipsis.bubble.fill", tint: Color(red: 0.62, green: 0.48, blue: 1.0), articles: [])
     ] as [SupportTopic] } }
+
+    static func byId(_ id: String) -> SupportTopic? { all.first { $0.id == id } }
 }
 
-private func supportTimeText(_ raw: String?) -> String? {
+private func supportDate(_ raw: String?) -> Date? {
     guard let raw, !raw.isEmpty else { return nil }
     let plain = DateFormatter()
     plain.locale = Locale(identifier: "en_US_POSIX")
     plain.timeZone = TimeZone(identifier: "Europe/Istanbul")
     plain.dateFormat = "yyyy-MM-dd HH:mm:ss"
-    guard let date = ISO8601DateFormatter().date(from: raw) ?? plain.date(from: raw) else { return raw }
+    return ISO8601DateFormatter().date(from: raw) ?? plain.date(from: raw)
+}
+
+private func supportTimeText(_ raw: String?) -> String? {
+    guard let raw, !raw.isEmpty else { return nil }
+    guard let date = supportDate(raw) else { return raw }
     let output = DateFormatter()
     output.locale = Locale(identifier: AppLanguage.effectiveCode)
     output.dateFormat = Calendar.current.isDateInToday(date) ? "HH:mm" : "d MMM • HH:mm"
     return output.string(from: date)
 }
 
-/// Talep durumu rozeti: bekliyor / yanıtlandı / kapalı.
+/// Sohbetteki gün ayırıcısı: "Bugün", "Dün" ya da "12 Ekim".
+private func supportDayText(_ date: Date) -> String {
+    let f = DateFormatter()
+    f.locale = Locale(identifier: AppLanguage.effectiveCode)
+    f.dateStyle = .medium
+    f.timeStyle = .none
+    f.doesRelativeDateFormatting = true
+    return f.string(from: date)
+}
+
+/// Talep durumu: yanıt bekliyor / yanıtlandı / kapandı.
 private struct SupportStatusBadge: View {
     let status: String
 
     private var color: Color {
         switch status.lowercased() {
-        case "answered": return .mint
-        case "closed": return .gray
-        default: return .orange
+        case "answered": return Color(red: 0.30, green: 0.85, blue: 0.55)
+        case "closed": return Color.white.opacity(0.45)
+        default: return Color(red: 1.0, green: 0.66, blue: 0.25)
         }
     }
 
     private var label: LocalizedStringKey {
         switch status.lowercased() {
-        case "answered": return "YANITLANDI"
-        case "closed": return "KAPALI"
-        default: return "BEKLİYOR"
+        case "answered": return "Yanıtlandı"
+        case "closed": return "Kapandı"
+        default: return "Yanıt bekliyor"
         }
     }
 
     var body: some View {
-        Text(label)
-            .font(.system(size: 10, weight: .bold, design: .rounded))
-            .tracking(0.6)
-            .foregroundStyle(color)
-            .padding(.horizontal, 8).padding(.vertical, 4)
-            .background(color.opacity(0.14), in: Capsule())
+        HStack(spacing: 5) {
+            Circle().fill(color).frame(width: 6, height: 6)
+            Text(label)
+        }
+        .font(.system(size: 12, weight: .semibold))
+        .foregroundStyle(color)
+        .padding(.horizontal, 8).padding(.vertical, 4)
+        .background(color.opacity(0.12), in: Capsule())
+    }
+}
+
+/// Destek ekibinin yuvarlak simgesi (stüdyo logosu).
+private struct SupportAvatar: View {
+    var size: CGFloat = 32
+    var body: some View {
+        Image("GameLogo")
+            .resizable()
+            .scaledToFill()
+            .frame(width: size, height: size)
+            .clipShape(Circle())
+            .overlay(Circle().stroke(Color.white.opacity(0.12), lineWidth: 1))
     }
 }
 
@@ -2687,8 +2737,8 @@ private struct SupportCenterScreen: View {
     }
 }
 
-/// Destek merkezi: "Yardım" sekmesinde konuya göre hızlı çözümler ve mesaj yazma,
-/// "Taleplerim" sekmesinde açılmış talepler. Her talep sohbet görünümünde açılır.
+/// Destek merkezi: arama, sık sorulan sorular, talepler ve yeni talep. Oyunun neon ekranlarından farklı olarak
+/// tanıdık bir yardım merkezi gibi görünür (sade zemin, sistem yazı tipi, gezinme çubuğu).
 private struct SupportCenterView: View {
     @EnvironmentObject var store: StoreManager
     @EnvironmentObject var appState: AppState
@@ -2697,357 +2747,746 @@ private struct SupportCenterView: View {
     var startOnTickets: Bool = false
     var onClose: (() -> Void)? = nil
 
-    private enum Tab { case help, tickets }
+    enum Route: Hashable {
+        case tickets
+        case ticket(StoreManager.SupportTicket)
+        case topic(String)
+        case article(topic: String, article: String)
+    }
 
-    @State private var tab: Tab = .help
-    @State private var expandedTopic: String?
-    @State private var composingTopic: String?
-    @State private var message = ""
-    @State private var sending = false
-    @State private var notice: String?
-    @State private var noticeIsError = false
-    @FocusState private var composerFocused: Bool
+    @State private var path = NavigationPath()
+    @State private var query = ""
+    @State private var composeTopic: String?
+    @State private var showCompose = false
+    @State private var didStart = false
+    @FocusState private var searchFocused: Bool
 
-    private var unreadCount: Int { store.supportTickets.filter { store.isSupportTicketUnread($0) }.count }
+    private var openTickets: [StoreManager.SupportTicket] { store.supportTickets.filter { $0.status.lowercased() != "closed" } }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                NeonBackground(theme: appState.selectedBackground)
-                VStack(spacing: 0) {
-                    header
-                    tabPicker
-                    ScrollView(showsIndicators: false) {
-                        VStack(spacing: 10) {
-                            if let notice { noticeBanner(notice) }
-                            if tab == .help { helpContent } else { ticketsContent }
+        NavigationStack(path: $path) {
+            home
+                .navigationTitle(Text("Destek"))
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button {
+                            if let onClose { onClose() } else { dismiss() }
+                        } label: {
+                            Image(systemName: embedded ? "chevron.left" : "xmark")
+                                .font(.system(size: 15, weight: .semibold))
+                                .frame(width: 34, height: 34)
+                                .background(Color.white.opacity(0.08), in: Circle())
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 10)
-                        .padding(.bottom, 28)
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text("Kapat"))
                     }
-                    .scrollDismissesKeyboard(.interactively)
-                    .refreshable { await store.loadSupportTickets() }
                 }
-            }
-            .toolbar(.hidden, for: .navigationBar)
+                .navigationDestination(for: Route.self) { route in
+                    switch route {
+                    case .tickets:
+                        SupportTicketsList(onNewTicket: { openCompose(nil) })
+                    case .ticket(let ticket):
+                        SupportTicketView(ticket: ticket, onNewTicket: { openCompose(nil) })
+                    case .topic(let id):
+                        if let topic = SupportTopic.byId(id) { SupportTopicPage(topic: topic, onContact: { openCompose(id) }) }
+                    case .article(let topicId, let articleId):
+                        if let topic = SupportTopic.byId(topicId), let article = topic.articles.first(where: { $0.id == articleId }) {
+                            SupportArticlePage(topic: topic, article: article, onContact: { openCompose(topicId) })
+                        }
+                    }
+                }
+                .toolbarBackground(SupportStyle.bg, for: .navigationBar)
+                .background(SupportStyle.bg.ignoresSafeArea())
         }
+        .tint(SupportStyle.accent)
         .preferredColorScheme(.dark)
+        .sheet(isPresented: $showCompose) {
+            SupportComposeView(initialTopic: composeTopic) { ticketId, subject, message in
+                let ticket = store.supportTickets.first { $0.id == ticketId }
+                    ?? StoreManager.SupportTicket(id: ticketId, subject: subject, status: "open", updatedAt: nil, lastMessage: message)
+                path = NavigationPath()
+                path.append(Route.ticket(ticket))
+            }
+            .environmentObject(store)
+        }
         .task {
-            if startOnTickets { tab = .tickets }
+            if startOnTickets && !didStart { didStart = true; path.append(Route.tickets) }
             await store.loadSupportTickets()
         }
     }
 
-    private var header: some View {
-        HStack(spacing: 12) {
-            Button {
-                if let onClose { onClose() } else { dismiss() }
-            } label: {
-                Image(systemName: embedded ? "chevron.left" : "xmark")
-                    .font(.system(size: 15, weight: .bold))
-                    .frame(width: 42, height: 42)
-                    .background(.ultraThinMaterial, in: Circle())
-            }
-            .buttonStyle(.plain)
-            VStack(alignment: .leading, spacing: 2) {
-                Text("DESTEK MERKEZİ")
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                HStack(spacing: 5) {
-                    Circle().fill(Color.mint).frame(width: 6, height: 6)
-                    Text("Genellikle aynı gün içinde yanıtlıyoruz")
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.55))
+    private func openCompose(_ topic: String?) {
+        composeTopic = topic
+        showCompose = true
+    }
+
+    // MARK: Ana sayfa
+
+    private var home: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 22) {
+                greeting
+                if query.trimmingCharacters(in: .whitespaces).isEmpty {
+                    contactCard
+                    if !store.supportTickets.isEmpty { recentTickets }
+                    faq
+                    footer
+                } else {
+                    searchResults
                 }
             }
-            Spacer(minLength: 0)
+            .padding(.horizontal, 16)
+            .padding(.top, 4)
+            .padding(.bottom, 32)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
+        .scrollDismissesKeyboard(.interactively)
+        .refreshable { await store.loadSupportTickets() }
     }
 
-    private var tabPicker: some View {
-        HStack(spacing: 6) {
-            tabButton(.help, title: "YARDIM", badge: 0)
-            tabButton(.tickets, title: "TALEPLERİM", badge: unreadCount)
-        }
-        .padding(4)
-        .background(Color.black.opacity(0.3), in: Capsule())
-        .padding(.horizontal, 16)
-    }
-
-    private func tabButton(_ value: Tab, title: LocalizedStringKey, badge: Int) -> some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.18)) { tab = value }
-            composerFocused = false
-        } label: {
-            HStack(spacing: 6) {
-                Text(title)
-                if badge > 0 {
-                    Text("\(badge)")
-                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                        .foregroundStyle(.black)
-                        .padding(.horizontal, 5).frame(minWidth: 17, minHeight: 17)
-                        .background(Color.cyan, in: Capsule())
-                }
+    private var greeting: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if let name = store.profile?.username, !name.isEmpty {
+                Text(LS("Merhaba \(name)"))
+                    .font(.subheadline)
+                    .foregroundStyle(SupportStyle.text2)
             }
-            .font(.system(size: 12, weight: .bold, design: .rounded))
-            .foregroundStyle(tab == value ? Color.black : Color.white.opacity(0.6))
-            .frame(maxWidth: .infinity).frame(height: 36)
-            .background(tab == value ? Color.cyan : Color.clear, in: Capsule())
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func noticeBanner(_ text: String) -> some View {
-        HStack(spacing: 9) {
-            Image(systemName: noticeIsError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
-            Text(text).multilineTextAlignment(.leading)
-            Spacer(minLength: 0)
-        }
-        .font(.system(size: 13, weight: .bold, design: .rounded))
-        .foregroundStyle(noticeIsError ? Color.orange : Color.mint)
-        .padding(12)
-        .background((noticeIsError ? Color.orange : Color.mint).opacity(0.10), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-    }
-
-    private var cardShape: RoundedRectangle { RoundedRectangle(cornerRadius: 18, style: .continuous) }
-
-    // MARK: Yardım
-
-    @ViewBuilder
-    private var helpContent: some View {
-        ForEach(SupportTopic.all) { topic in
-            topicCard(topic)
-        }
-    }
-
-    private func topicCard(_ topic: SupportTopic) -> some View {
-        let isOpen = expandedTopic == topic.id
-        return VStack(alignment: .leading, spacing: 0) {
-            Button {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    expandedTopic = isOpen ? nil : topic.id
-                    composingTopic = nil
-                }
-                composerFocused = false
-            } label: {
-                HStack(spacing: 12) {
-                    Image(systemName: topic.icon)
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundStyle(topic.tint)
-                        .frame(width: 36, height: 36)
-                        .background(topic.tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
-                    Text(LocalizedStringKey(topic.title))
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
-                    Spacer(minLength: 4)
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(.white.opacity(0.4))
-                        .rotationEffect(.degrees(isOpen ? 180 : 0))
-                }
-                .padding(12)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-
-            if isOpen {
-                VStack(alignment: .leading, spacing: 10) {
-                    ForEach(Array(topic.tips.enumerated()), id: \.offset) { index, tip in
-                        HStack(alignment: .top, spacing: 10) {
-                            Text("\(index + 1)")
-                                .font(.system(size: 11, weight: .bold, design: .rounded))
-                                .foregroundStyle(topic.tint)
-                                .frame(width: 20, height: 20)
-                                .background(topic.tint.opacity(0.14), in: Circle())
-                            Text(tip)
-                                .font(.system(size: 13, weight: .medium, design: .rounded))
-                                .foregroundStyle(.white.opacity(0.78))
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                    if composingTopic == topic.id {
-                        composer(for: topic)
-                    } else {
-                        Button {
-                            withAnimation(.easeInOut(duration: 0.2)) { composingTopic = topic.id }
-                            composerFocused = true
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "bubble.left.and.text.bubble.right.fill")
-                                Text("Sorunum çözülmedi • Destek ekibine yaz")
-                            }
-                            .font(.system(size: 13, weight: .semibold, design: .rounded))
-                            .foregroundStyle(topic.tint)
-                            .frame(maxWidth: .infinity).frame(height: 42)
-                            .background(topic.tint.opacity(0.10), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-                            .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).stroke(topic.tint.opacity(0.3), lineWidth: 1))
-                        }
+            Text("Sana nasıl yardımcı olabiliriz?")
+                .font(.system(size: 22, weight: .bold))
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass").foregroundStyle(SupportStyle.text3)
+                TextField(L("Yardım makalelerinde ara"), text: $query)
+                    .focused($searchFocused)
+                    .submitLabel(.search)
+                    .autocorrectionDisabled()
+                if !query.isEmpty {
+                    Button { query = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(SupportStyle.text3) }
                         .buttonStyle(.plain)
-                    }
                 }
-                .padding(.horizontal, 12)
-                .padding(.bottom, 12)
-                .transition(.opacity)
             }
+            .font(.body)
+            .padding(.horizontal, 12)
+            .frame(height: 44)
+            .background(SupportStyle.card, in: SupportStyle.shape)
+            .overlay(SupportStyle.shape.stroke(searchFocused ? SupportStyle.accent.opacity(0.6) : SupportStyle.line, lineWidth: 1))
         }
-        .background(Color.black.opacity(0.28), in: cardShape)
-        .overlay(cardShape.stroke(isOpen ? topic.tint.opacity(0.35) : Color.white.opacity(0.08), lineWidth: 1))
     }
 
-    private func composer(for topic: SupportTopic) -> some View {
-        let trimmed = message.trimmingCharacters(in: .whitespacesAndNewlines)
-        return VStack(alignment: .trailing, spacing: 8) {
-            ZStack(alignment: .topLeading) {
-                TextEditor(text: $message)
-                    .focused($composerFocused)
-                    .scrollContentBackground(.hidden)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .frame(minHeight: 96, maxHeight: 150)
-                    .padding(8)
-                if message.isEmpty {
-                    Text("Sorununu kısaca anlat. Cihaz modelini ve seviyeni eklersen daha hızlı çözeriz.")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.3))
-                        .padding(.horizontal, 13).padding(.vertical, 16)
-                        .allowsHitTesting(false)
-                }
-            }
-            .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).stroke(Color.white.opacity(0.1), lineWidth: 1))
-
-            HStack(spacing: 10) {
-                Text("\(message.count)/1000")
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(message.count > 1000 ? Color.orange : Color.white.opacity(0.35))
-                Spacer()
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) { composingTopic = nil }
-                    composerFocused = false
-                } label: {
-                    Text("Vazgeç")
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.6))
-                        .padding(.horizontal, 12).frame(height: 38)
-                }
-                .buttonStyle(.plain)
-                Button {
-                    send(topic: topic, text: trimmed)
-                } label: {
+    private var contactCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 12) {
+                SupportAvatar(size: 44)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Destek ekibine yaz")
+                        .font(.headline)
                     HStack(spacing: 6) {
-                        if sending { ProgressView().tint(.black) } else { Image(systemName: "paperplane.fill") }
-                        Text("GÖNDER")
+                        Circle().fill(Color(red: 0.30, green: 0.85, blue: 0.55)).frame(width: 7, height: 7)
+                        Text("Genellikle aynı gün içinde yanıtlıyoruz")
+                            .font(.footnote)
+                            .foregroundStyle(SupportStyle.text2)
                     }
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 16).frame(height: 38)
-                    .background(topic.tint, in: Capsule())
+                }
+                Spacer(minLength: 0)
+            }
+            Button { openCompose(nil) } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "square.and.pencil")
+                    Text("Yeni talep oluştur")
+                }
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .background(SupportStyle.accent, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(16)
+        .background(SupportStyle.card, in: SupportStyle.shape)
+        .overlay(SupportStyle.shape.stroke(SupportStyle.line, lineWidth: 1))
+    }
+
+    private var recentTickets: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                sectionTitle("Taleplerim")
+                Spacer()
+                Button { path.append(Route.tickets) } label: {
+                    Text("Tümünü gör").font(.subheadline.weight(.semibold))
                 }
                 .buttonStyle(.plain)
-                .disabled(sending || trimmed.count < 5 || message.count > 1000)
-                .opacity(trimmed.count < 5 || message.count > 1000 ? 0.45 : 1)
+                .foregroundStyle(SupportStyle.accent)
             }
+            let shown = Array((openTickets.isEmpty ? store.supportTickets : openTickets).prefix(3))
+            VStack(spacing: 0) {
+                ForEach(Array(shown.enumerated()), id: \.element.id) { index, ticket in
+                    Button { path.append(Route.ticket(ticket)) } label: { SupportTicketRow(ticket: ticket) }
+                        .buttonStyle(.plain)
+                    if index < shown.count - 1 { Divider().overlay(SupportStyle.line).padding(.leading, 16) }
+                }
+            }
+            .background(SupportStyle.card, in: SupportStyle.shape)
+            .overlay(SupportStyle.shape.stroke(SupportStyle.line, lineWidth: 1))
         }
     }
 
-    private func send(topic: SupportTopic, text: String) {
-        guard !sending, text.count >= 5 else { return }
-        sending = true
-        composerFocused = false
-        Task { @MainActor in
-            let ok = await store.createSupportTicket(subject: L(topic.title), message: text)
-            sending = false
-            noticeIsError = !ok
-            if ok {
-                message = ""
-                composingTopic = nil
-                expandedTopic = nil
-                notice = L("Talebin alındı. Yanıt gelince bildirim göndereceğiz.")
-                withAnimation(.easeInOut(duration: 0.2)) { tab = .tickets }
-                NotificationManager.requestPermissionIfNeeded()
-            } else {
-                notice = L("Talep gönderilemedi. Bağlantını kontrol edip tekrar dene.")
+    private var faq: some View {
+        let topics = SupportTopic.all.filter { !$0.articles.isEmpty }
+        return VStack(alignment: .leading, spacing: 8) {
+            sectionTitle("Sık sorulan sorular")
+            VStack(spacing: 0) {
+                ForEach(Array(topics.enumerated()), id: \.element.id) { index, topic in
+                    Button { path.append(Route.topic(topic.id)) } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: topic.icon)
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 32, height: 32)
+                                .background(topic.tint, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(verbatim: topic.title).font(.body).foregroundStyle(.white)
+                                Text(LS("\(topic.articles.count) makale")).font(.footnote).foregroundStyle(SupportStyle.text3)
+                            }
+                            Spacer(minLength: 4)
+                            Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(SupportStyle.text3)
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 11)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    if index < topics.count - 1 { Divider().overlay(SupportStyle.line).padding(.leading, 58) }
+                }
             }
+            .background(SupportStyle.card, in: SupportStyle.shape)
+            .overlay(SupportStyle.shape.stroke(SupportStyle.line, lineWidth: 1))
         }
     }
-
-    // MARK: Taleplerim
 
     @ViewBuilder
-    private var ticketsContent: some View {
-        if store.supportTickets.isEmpty {
+    private var searchResults: some View {
+        let q = query.trimmingCharacters(in: .whitespaces).lowercased(with: Locale(identifier: AppLanguage.effectiveCode))
+        let hits: [(SupportTopic, SupportArticle)] = SupportTopic.all.flatMap { t in t.articles.map { (t, $0) } }
+            .filter { pair in
+                let hay = (pair.1.question + " " + pair.1.answer + " " + pair.0.title).lowercased(with: Locale(identifier: AppLanguage.effectiveCode))
+                return hay.contains(q)
+            }
+        if hits.isEmpty {
             VStack(spacing: 10) {
-                Image(systemName: "tray")
-                    .font(.system(size: 30, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.35))
-                Text("Henüz destek talebin yok")
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                Text("Bir sorun yaşarsan Yardım sekmesinden bize yazabilirsin.")
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.5))
-                    .multilineTextAlignment(.center)
+                Image(systemName: "text.magnifyingglass").font(.system(size: 30)).foregroundStyle(SupportStyle.text3)
+                Text("Sonuç bulunamadı").font(.headline)
+                Text("Ekibimiz sana yardımcı olsun.").font(.subheadline).foregroundStyle(SupportStyle.text2)
+                Button { openCompose(nil) } label: {
+                    Text("Destek ekibine yaz").font(.subheadline.weight(.semibold))
+                        .padding(.horizontal, 18).frame(height: 40)
+                        .background(SupportStyle.accent.opacity(0.15), in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(SupportStyle.accent)
+                .padding(.top, 4)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 44)
+            .padding(.vertical, 36)
         } else {
-            ForEach(store.supportTickets) { ticket in
-                NavigationLink {
-                    SupportTicketView(ticket: ticket)
-                        .environmentObject(store)
-                        .environmentObject(appState)
-                } label: {
-                    ticketRow(ticket)
+            VStack(spacing: 0) {
+                ForEach(Array(hits.enumerated()), id: \.element.1.id) { index, pair in
+                    Button { path.append(Route.article(topic: pair.0.id, article: pair.1.id)) } label: {
+                        HStack(spacing: 10) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(verbatim: pair.1.question).font(.body).foregroundStyle(.white).multilineTextAlignment(.leading)
+                                Text(verbatim: pair.0.title).font(.footnote).foregroundStyle(pair.0.tint)
+                            }
+                            Spacer(minLength: 4)
+                            Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(SupportStyle.text3)
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 11)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    if index < hits.count - 1 { Divider().overlay(SupportStyle.line).padding(.leading, 14) }
                 }
-                .buttonStyle(.plain)
             }
+            .background(SupportStyle.card, in: SupportStyle.shape)
+            .overlay(SupportStyle.shape.stroke(SupportStyle.line, lineWidth: 1))
         }
     }
 
-    private func ticketRow(_ ticket: StoreManager.SupportTicket) -> some View {
-        let unread = store.isSupportTicketUnread(ticket)
-        return HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 5) {
-                HStack(spacing: 8) {
-                    if unread { Circle().fill(Color.cyan).frame(width: 8, height: 8) }
-                    Text(ticket.subject)
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
-                }
-                if let last = ticket.lastMessage, !last.isEmpty {
-                    Text(last)
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundStyle(.white.opacity(unread ? 0.8 : 0.5))
-                        .lineLimit(1)
-                }
-                HStack(spacing: 8) {
-                    SupportStatusBadge(status: ticket.status)
-                    if let time = supportTimeText(ticket.updatedAt) {
-                        Text(time)
-                            .font(.system(size: 11, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.4))
-                    }
-                }
-            }
-            Spacer(minLength: 4)
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(.white.opacity(0.3))
+    private var footer: some View {
+        let info = Bundle.main.infoDictionary
+        let version = (info?["CFBundleShortVersionString"] as? String) ?? "1.0"
+        let build = (info?["CFBundleVersion"] as? String) ?? "1"
+        return VStack(spacing: 4) {
+            Text(verbatim: "Neon Break \(version) (\(build))")
+            if let id = store.profile?.id { Text(verbatim: "ID #\(id)") }
         }
-        .padding(13)
-        .background(Color.black.opacity(0.28), in: cardShape)
-        .overlay(cardShape.stroke(unread ? Color.cyan.opacity(0.4) : Color.white.opacity(0.08), lineWidth: 1))
+        .font(.caption)
+        .foregroundStyle(SupportStyle.text3)
+        .frame(maxWidth: .infinity)
+        .padding(.top, 6)
+    }
+
+    private func sectionTitle(_ key: LocalizedStringKey) -> some View {
+        Text(key)
+            .font(.system(size: 20, weight: .bold))
+            .foregroundStyle(.white)
     }
 }
 
-/// Tek bir destek talebinin sohbet görünümü.
+/// Talep satırı: konu, son mesaj, durum ve zaman.
+private struct SupportTicketRow: View {
+    @EnvironmentObject var store: StoreManager
+    let ticket: StoreManager.SupportTicket
+
+    var body: some View {
+        let unread = store.isSupportTicketUnread(ticket)
+        HStack(alignment: .top, spacing: 12) {
+            Circle()
+                .fill(unread ? SupportStyle.accent : Color.clear)
+                .frame(width: 8, height: 8)
+                .padding(.top, 7)
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(verbatim: ticket.subject)
+                        .font(.system(size: 16, weight: unread ? .bold : .semibold))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                    Spacer(minLength: 6)
+                    if let time = supportTimeText(ticket.updatedAt) {
+                        Text(verbatim: time).font(.footnote).foregroundStyle(SupportStyle.text3)
+                    }
+                }
+                if let last = ticket.lastMessage, !last.isEmpty {
+                    Text(verbatim: LM(last))
+                        .font(.subheadline)
+                        .foregroundStyle(unread ? Color.white.opacity(0.85) : SupportStyle.text2)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                }
+                HStack(spacing: 8) {
+                    SupportStatusBadge(status: ticket.status)
+                    Text(verbatim: "#\(ticket.id)").font(.caption).foregroundStyle(SupportStyle.text3)
+                }
+            }
+        }
+        .padding(.horizontal, 14).padding(.vertical, 12)
+        .contentShape(Rectangle())
+    }
+}
+
+/// Bir konudaki sık sorulan sorular.
+private struct SupportTopicPage: View {
+    let topic: SupportTopic
+    let onContact: () -> Void
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                VStack(spacing: 0) {
+                    ForEach(Array(topic.articles.enumerated()), id: \.element.id) { index, article in
+                        NavigationLink(value: SupportCenterView.Route.article(topic: topic.id, article: article.id)) {
+                            HStack(spacing: 10) {
+                                Text(verbatim: article.question).font(.body).foregroundStyle(.white).multilineTextAlignment(.leading)
+                                Spacer(minLength: 4)
+                                Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(SupportStyle.text3)
+                            }
+                            .padding(.horizontal, 14).padding(.vertical, 14)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        if index < topic.articles.count - 1 { Divider().overlay(SupportStyle.line).padding(.leading, 14) }
+                    }
+                }
+                .background(SupportStyle.card, in: SupportStyle.shape)
+                .overlay(SupportStyle.shape.stroke(SupportStyle.line, lineWidth: 1))
+                SupportContactPrompt(onContact: onContact)
+            }
+            .padding(16)
+        }
+        .background(SupportStyle.bg.ignoresSafeArea())
+        .navigationTitle(Text(verbatim: topic.title))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(SupportStyle.bg, for: .navigationBar)
+    }
+}
+
+/// "Aradığını bulamadın mı?" kutusu.
+private struct SupportContactPrompt: View {
+    let onContact: () -> Void
+    var body: some View {
+        VStack(spacing: 10) {
+            Text("Aradığını bulamadın mı?").font(.headline)
+            Text("Ekibimiz sana yardımcı olsun.").font(.subheadline).foregroundStyle(SupportStyle.text2)
+            Button(action: onContact) {
+                Text("Destek ekibine yaz")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity).frame(height: 44)
+                    .background(SupportStyle.accent, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity)
+        .background(SupportStyle.card, in: SupportStyle.shape)
+        .overlay(SupportStyle.shape.stroke(SupportStyle.line, lineWidth: 1))
+    }
+}
+
+/// Tek bir yardım makalesi ve "işine yaradı mı?" geri bildirimi.
+private struct SupportArticlePage: View {
+    let topic: SupportTopic
+    let article: SupportArticle
+    let onContact: () -> Void
+    @State private var helpful: Bool?
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(spacing: 6) {
+                    Image(systemName: topic.icon)
+                    Text(verbatim: topic.title)
+                }
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(topic.tint)
+                Text(verbatim: article.question)
+                    .font(.system(size: 24, weight: .bold))
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(verbatim: article.answer)
+                    .font(.body)
+                    .foregroundStyle(Color.white.opacity(0.86))
+                    .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
+                Divider().overlay(SupportStyle.line).padding(.vertical, 6)
+                VStack(spacing: 12) {
+                    Text("Bu yanıt işine yaradı mı?").font(.subheadline.weight(.semibold))
+                    if let helpful {
+                        (helpful ? Text("Teşekkürler! Geri bildirimin bize yardımcı oluyor.") : Text("Üzgünüz. Destek ekibimiz sana yardımcı olsun."))
+                            .font(.subheadline)
+                            .foregroundStyle(SupportStyle.text2)
+                            .multilineTextAlignment(.center)
+                        if !helpful {
+                            Button(action: onContact) {
+                                Text("Destek ekibine yaz")
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 22).frame(height: 44)
+                                    .background(SupportStyle.accent, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    } else {
+                        HStack(spacing: 10) {
+                            feedbackButton(true)
+                            feedbackButton(false)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(16)
+                .background(SupportStyle.card, in: SupportStyle.shape)
+            }
+            .padding(16)
+        }
+        .background(SupportStyle.bg.ignoresSafeArea())
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(SupportStyle.bg, for: .navigationBar)
+    }
+
+    private func feedbackButton(_ yes: Bool) -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) { helpful = yes }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: yes ? "hand.thumbsup" : "hand.thumbsdown")
+                (yes ? Text("Evet") : Text("Hayır"))
+            }
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity).frame(height: 42)
+            .background(SupportStyle.cardRaised, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(SupportStyle.line, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+/// Bütün talepler: açık olanlar üstte, kapananlar altta.
+private struct SupportTicketsList: View {
+    @EnvironmentObject var store: StoreManager
+    let onNewTicket: () -> Void
+
+    var body: some View {
+        let open = store.supportTickets.filter { $0.status.lowercased() != "closed" }
+        let closed = store.supportTickets.filter { $0.status.lowercased() == "closed" }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                if store.supportTickets.isEmpty {
+                    VStack(spacing: 10) {
+                        Image(systemName: "tray").font(.system(size: 32)).foregroundStyle(SupportStyle.text3)
+                        Text("Henüz destek talebin yok").font(.headline)
+                        Text("Bir sorun yaşarsan buradan bize yazabilirsin.").font(.subheadline).foregroundStyle(SupportStyle.text2).multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 48)
+                }
+                if !open.isEmpty { section("Açık talepler", open) }
+                if !closed.isEmpty { section("Kapanan talepler", closed) }
+                Button(action: onNewTicket) {
+                    HStack(spacing: 8) { Image(systemName: "square.and.pencil"); Text("Yeni talep oluştur") }
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity).frame(height: 48)
+                        .background(SupportStyle.accent, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(16)
+        }
+        .refreshable { await store.loadSupportTickets() }
+        .background(SupportStyle.bg.ignoresSafeArea())
+        .navigationTitle(Text("Taleplerim"))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(SupportStyle.bg, for: .navigationBar)
+        .task { await store.loadSupportTickets() }
+    }
+
+    private func section(_ title: LocalizedStringKey, _ items: [StoreManager.SupportTicket]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title).font(.footnote.weight(.semibold)).foregroundStyle(SupportStyle.text3).textCase(.uppercase)
+            VStack(spacing: 0) {
+                ForEach(Array(items.enumerated()), id: \.element.id) { index, ticket in
+                    NavigationLink(value: SupportCenterView.Route.ticket(ticket)) { SupportTicketRow(ticket: ticket) }
+                        .buttonStyle(.plain)
+                    if index < items.count - 1 { Divider().overlay(SupportStyle.line).padding(.leading, 34) }
+                }
+            }
+            .background(SupportStyle.card, in: SupportStyle.shape)
+            .overlay(SupportStyle.shape.stroke(SupportStyle.line, lineWidth: 1))
+        }
+    }
+}
+
+/// Yeni talep formu: konu, mesaj ve talebe otomatik eklenen bilgiler. Gönderince numarasıyla onay ekranı.
+private struct SupportComposeView: View {
+    @EnvironmentObject var store: StoreManager
+    @Environment(\.dismiss) private var dismiss
+    let initialTopic: String?
+    let onOpenTicket: (Int, String, String) -> Void
+
+    @State private var topicId: String?
+    @State private var message = ""
+    @State private var sending = false
+    @State private var failed = false
+    @State private var createdId: Int?
+    @FocusState private var focused: Bool
+
+    init(initialTopic: String?, onOpenTicket: @escaping (Int, String, String) -> Void) {
+        self.initialTopic = initialTopic
+        self.onOpenTicket = onOpenTicket
+        _topicId = State(initialValue: initialTopic)
+    }
+
+    private var trimmed: String { message.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var canSend: Bool { topicId != nil && trimmed.count >= 5 && message.count <= 1000 && !sending }
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if let createdId { success(createdId) } else { form }
+            }
+            .background(SupportStyle.bg.ignoresSafeArea())
+            .navigationTitle(createdId == nil ? Text("Yeni talep") : Text(verbatim: ""))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(SupportStyle.bg, for: .navigationBar)
+            .toolbar {
+                if createdId == nil {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button { dismiss() } label: { Text("Vazgeç") }
+                    }
+                }
+            }
+        }
+        .tint(SupportStyle.accent)
+        .preferredColorScheme(.dark)
+        .interactiveDismissDisabled(sending)
+    }
+
+    private var form: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 22) {
+                VStack(alignment: .leading, spacing: 8) {
+                    label("Konu")
+                    VStack(spacing: 0) {
+                        let topics = SupportTopic.all
+                        ForEach(Array(topics.enumerated()), id: \.element.id) { index, topic in
+                            Button { topicId = topic.id } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: topic.icon)
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundStyle(.white)
+                                        .frame(width: 28, height: 28)
+                                        .background(topic.tint, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                                    Text(verbatim: topic.title).font(.body).foregroundStyle(.white)
+                                    Spacer()
+                                    if topicId == topic.id {
+                                        Image(systemName: "checkmark").font(.system(size: 15, weight: .bold)).foregroundStyle(SupportStyle.accent)
+                                    }
+                                }
+                                .padding(.horizontal, 14).padding(.vertical, 10)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            if index < topics.count - 1 { Divider().overlay(SupportStyle.line).padding(.leading, 54) }
+                        }
+                    }
+                    .background(SupportStyle.card, in: SupportStyle.shape)
+                    .overlay(SupportStyle.shape.stroke(SupportStyle.line, lineWidth: 1))
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    label("Mesajın")
+                    ZStack(alignment: .topLeading) {
+                        TextEditor(text: $message)
+                            .focused($focused)
+                            .scrollContentBackground(.hidden)
+                            .font(.body)
+                            .frame(minHeight: 150)
+                            .padding(10)
+                        if message.isEmpty {
+                            Text("Sorununu kısaca anlat. Cihaz modelini ve seviyeni eklersen daha hızlı çözeriz.")
+                                .font(.body)
+                                .foregroundStyle(SupportStyle.text3)
+                                .padding(.horizontal, 15).padding(.vertical, 18)
+                                .allowsHitTesting(false)
+                        }
+                    }
+                    .background(SupportStyle.card, in: SupportStyle.shape)
+                    .overlay(SupportStyle.shape.stroke(focused ? SupportStyle.accent.opacity(0.6) : SupportStyle.line, lineWidth: 1))
+                    HStack {
+                        if failed {
+                            Text("Talep gönderilemedi. Bağlantını kontrol edip tekrar dene.")
+                                .font(.footnote).foregroundStyle(.orange)
+                        }
+                        Spacer()
+                        Text(verbatim: "\(message.count)/1000")
+                            .font(.caption).monospacedDigit()
+                            .foregroundStyle(message.count > 1000 ? Color.orange : SupportStyle.text3)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    label("Talebine eklenecek bilgiler")
+                    VStack(spacing: 0) {
+                        infoRow("Oyuncu", store.profile.map { "\($0.username) · #\($0.id)" } ?? "—")
+                        Divider().overlay(SupportStyle.line).padding(.leading, 14)
+                        infoRow("Uygulama", appVersion)
+                        Divider().overlay(SupportStyle.line).padding(.leading, 14)
+                        infoRow("Cihaz", "\(NetworkGuard.deviceModel) · iOS \(UIDevice.current.systemVersion)")
+                    }
+                    .background(SupportStyle.card, in: SupportStyle.shape)
+                    .overlay(SupportStyle.shape.stroke(SupportStyle.line, lineWidth: 1))
+                    Text("Bu bilgiler sorunu daha hızlı çözmemize yardımcı olur.")
+                        .font(.footnote).foregroundStyle(SupportStyle.text3)
+                }
+
+                Button(action: send) {
+                    HStack(spacing: 8) {
+                        if sending { ProgressView().tint(.white) } else { Image(systemName: "paperplane.fill") }
+                        Text("Talebi gönder")
+                    }
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity).frame(height: 50)
+                    .background(SupportStyle.accent.opacity(canSend ? 1 : 0.35), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .disabled(!canSend)
+            }
+            .padding(16)
+        }
+        .scrollDismissesKeyboard(.interactively)
+    }
+
+    private var appVersion: String {
+        let info = Bundle.main.infoDictionary
+        return "\((info?["CFBundleShortVersionString"] as? String) ?? "1.0") (\((info?["CFBundleVersion"] as? String) ?? "1"))"
+    }
+
+    private func label(_ key: LocalizedStringKey) -> some View {
+        Text(key).font(.footnote.weight(.semibold)).foregroundStyle(SupportStyle.text3).textCase(.uppercase)
+    }
+
+    private func infoRow(_ key: LocalizedStringKey, _ value: String) -> some View {
+        HStack {
+            Text(key).font(.subheadline).foregroundStyle(SupportStyle.text2)
+            Spacer(minLength: 10)
+            Text(verbatim: value).font(.subheadline).foregroundStyle(.white).lineLimit(1).truncationMode(.middle)
+        }
+        .padding(.horizontal, 14).padding(.vertical, 11)
+    }
+
+    private func success(_ id: Int) -> some View {
+        VStack(spacing: 14) {
+            Spacer()
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 64))
+                .foregroundStyle(Color(red: 0.30, green: 0.85, blue: 0.55))
+            Text("Talebin alındı").font(.system(size: 24, weight: .bold))
+            if id > 0 {
+                Text(LS("Talep numaran: #\(id)")).font(.headline).foregroundStyle(SupportStyle.text2)
+            }
+            Text("Yanıt geldiğinde bildirim göndereceğiz.")
+                .font(.subheadline).foregroundStyle(SupportStyle.text2).multilineTextAlignment(.center)
+            Text("Genellikle aynı gün içinde yanıtlıyoruz")
+                .font(.footnote).foregroundStyle(SupportStyle.text3)
+            Spacer()
+            if id > 0 {
+                Button {
+                    let subject = SupportTopic.byId(topicId ?? "")?.title ?? ""
+                    let text = trimmed
+                    dismiss()
+                    onOpenTicket(id, subject, text)
+                } label: {
+                    Text("Talebi görüntüle")
+                        .font(.system(size: 16, weight: .semibold)).foregroundStyle(.white)
+                        .frame(maxWidth: .infinity).frame(height: 50)
+                        .background(SupportStyle.accent, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .buttonStyle(.plain)
+            }
+            Button { dismiss() } label: {
+                Text("Kapat")
+                    .font(.system(size: 16, weight: .semibold)).foregroundStyle(.white)
+                    .frame(maxWidth: .infinity).frame(height: 50)
+                    .background(SupportStyle.cardRaised, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(20)
+    }
+
+    private func send() {
+        guard canSend, let topic = SupportTopic.byId(topicId ?? "") else { return }
+        sending = true
+        failed = false
+        focused = false
+        Task { @MainActor in
+            let id = await store.createSupportTicket(subject: topic.title, message: trimmed)
+            sending = false
+            if let id {
+                withAnimation(.easeInOut(duration: 0.25)) { createdId = id }
+                NotificationManager.requestPermissionIfNeeded()
+            } else {
+                failed = true
+            }
+        }
+    }
+}
+
+/// Tek bir talebin yazışması: destek ekibi solda (logolu), oyuncu sağda; gün ayırıcıları ve durum bilgisi.
 private struct SupportTicketView: View {
     @EnvironmentObject var store: StoreManager
-    @EnvironmentObject var appState: AppState
-    @Environment(\.dismiss) private var dismiss
     let ticket: StoreManager.SupportTicket
+    var onNewTicket: (() -> Void)? = nil
     @State private var messages: [StoreManager.SupportMessage] = []
     @State private var status: String
     @State private var reply = ""
@@ -3056,73 +3495,49 @@ private struct SupportTicketView: View {
     @State private var sendFailed = false
     @FocusState private var replyFocused: Bool
 
-    init(ticket: StoreManager.SupportTicket) {
+    init(ticket: StoreManager.SupportTicket, onNewTicket: (() -> Void)? = nil) {
         self.ticket = ticket
+        self.onNewTicket = onNewTicket
         _status = State(initialValue: ticket.status)
     }
 
     private var isClosed: Bool { status.lowercased() == "closed" }
 
     var body: some View {
-        ZStack {
-            NeonBackground(theme: appState.selectedBackground)
-            VStack(spacing: 0) {
-                HStack(spacing: 12) {
-                    Button { dismiss() } label: {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 15, weight: .bold))
-                            .frame(width: 42, height: 42)
-                            .background(.ultraThinMaterial, in: Circle())
-                    }
-                    .buttonStyle(.plain)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(ticket.subject)
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .lineLimit(1)
-                        SupportStatusBadge(status: status)
-                    }
-                    Spacer(minLength: 0)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-
-                ScrollViewReader { proxy in
-                    ScrollView(showsIndicators: false) {
-                        LazyVStack(spacing: 8) {
-                            if isLoading && messages.isEmpty {
-                                ProgressView().tint(.cyan).padding(.top, 40)
-                            }
-                            ForEach(messages) { item in
-                                bubble(item).id(item.id)
-                            }
+        VStack(spacing: 0) {
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 10) {
+                        headerCard
+                        if isLoading && messages.isEmpty {
+                            ProgressView().frame(maxWidth: .infinity).padding(.top, 30)
                         }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
+                        ForEach(Array(messages.enumerated()), id: \.element.id) { index, item in
+                            if let day = dayChange(at: index) {
+                                Text(verbatim: day)
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(SupportStyle.text3)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.top, 8)
+                            }
+                            bubble(item).id(item.id)
+                        }
                     }
-                    .scrollDismissesKeyboard(.interactively)
-                    .onChange(of: messages.count) { _ in
-                        guard let last = messages.last else { return }
-                        withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(last.id, anchor: .bottom) }
-                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
                 }
-
-                if isClosed {
-                    HStack(spacing: 8) {
-                        Image(systemName: "lock.fill")
-                        Text("Bu talep kapatıldı. Yeni bir sorun için yeni talep açabilirsin.")
-                    }
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.55))
-                    .frame(maxWidth: .infinity)
-                    .padding(14)
-                    .background(Color.black.opacity(0.5))
-                } else {
-                    replyBar
+                .scrollDismissesKeyboard(.interactively)
+                .onChange(of: messages.count) { _ in
+                    guard let last = messages.last else { return }
+                    withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(last.id, anchor: .bottom) }
                 }
             }
+            if isClosed { closedFooter } else { replyBar }
         }
-        .toolbar(.hidden, for: .navigationBar)
-        .preferredColorScheme(.dark)
+        .background(SupportStyle.bg.ignoresSafeArea())
+        .navigationTitle(Text(LS("Talep #\(ticket.id)")))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(SupportStyle.bg, for: .navigationBar)
         .task {
             store.markSupportTicketRead(ticket)
             // Sohbet açıkken yeni yanıtlar kendiliğinden görünsün diye 15 saniyede bir yenilenir.
@@ -3133,50 +3548,110 @@ private struct SupportTicketView: View {
         }
     }
 
+    private var headerCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(verbatim: ticket.subject).font(.headline)
+            SupportStatusBadge(status: status)
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: isClosed ? "lock.fill" : (status.lowercased() == "answered" ? "checkmark.bubble.fill" : "clock.fill"))
+                    .foregroundStyle(SupportStyle.text3)
+                (isClosed ? Text("Bu talep kapatıldı.") : (status.lowercased() == "answered" ? Text("Destek ekibi yanıt verdi.") : Text("Talebin ekibimize ulaştı. Genellikle aynı gün içinde yanıtlıyoruz.")))
+                    .font(.footnote)
+                    .foregroundStyle(SupportStyle.text2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(SupportStyle.card, in: SupportStyle.shape)
+        .overlay(SupportStyle.shape.stroke(SupportStyle.line, lineWidth: 1))
+        .padding(.bottom, 4)
+    }
+
+    private func dayChange(at index: Int) -> String? {
+        guard let date = supportDate(messages[index].createdAt) else { return nil }
+        if index > 0, let prev = supportDate(messages[index - 1].createdAt), Calendar.current.isDate(prev, inSameDayAs: date) { return nil }
+        return supportDayText(date)
+    }
+
+    @ViewBuilder
     private func bubble(_ item: StoreManager.SupportMessage) -> some View {
         let fromPlayer = item.senderRole == "player"
-        let shape = RoundedRectangle(cornerRadius: 16, style: .continuous)
-        return HStack {
-            if fromPlayer { Spacer(minLength: 44) }
-            VStack(alignment: fromPlayer ? .trailing : .leading, spacing: 4) {
-                if !fromPlayer {
-                    Text("DESTEK")
-                        .font(.system(size: 10, weight: .bold, design: .rounded)).tracking(0.8)
-                        .foregroundStyle(.mint)
-                }
-                Text(LM(item.message))
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white)
-                    .fixedSize(horizontal: false, vertical: true)
-                if let time = supportTimeText(item.createdAt) {
-                    Text(time)
-                        .font(.system(size: 10, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.4))
+        let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+        if fromPlayer {
+            HStack {
+                Spacer(minLength: 56)
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(verbatim: item.message)
+                        .font(.body)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 13).padding(.vertical, 9)
+                        .background(SupportStyle.accent, in: shape)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if let time = supportTimeText(item.createdAt) {
+                        Text(verbatim: time).font(.caption2).foregroundStyle(SupportStyle.text3)
+                    }
                 }
             }
-            .padding(.horizontal, 12).padding(.vertical, 9)
-            .background(fromPlayer ? Color.cyan.opacity(0.22) : Color.white.opacity(0.08), in: shape)
-            .overlay(shape.stroke(fromPlayer ? Color.cyan.opacity(0.35) : Color.white.opacity(0.1), lineWidth: 1))
-            if !fromPlayer { Spacer(minLength: 44) }
+        } else {
+            HStack(alignment: .bottom, spacing: 8) {
+                SupportAvatar(size: 28)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Destek Ekibi").font(.caption.weight(.semibold)).foregroundStyle(SupportStyle.text2)
+                    Text(verbatim: LM(item.message))
+                        .font(.body)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 13).padding(.vertical, 9)
+                        .background(SupportStyle.cardRaised, in: shape)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if let time = supportTimeText(item.createdAt) {
+                        Text(verbatim: time).font(.caption2).foregroundStyle(SupportStyle.text3)
+                    }
+                }
+                Spacer(minLength: 40)
+            }
         }
+    }
+
+    private var closedFooter: some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 6) {
+                Image(systemName: "lock.fill")
+                Text("Bu talep kapatıldı.")
+            }
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(SupportStyle.text2)
+            Text("Sorun devam ediyorsa yeni bir talep oluşturabilirsin.")
+                .font(.footnote).foregroundStyle(SupportStyle.text3).multilineTextAlignment(.center)
+            if let onNewTicket {
+                Button(action: onNewTicket) {
+                    Text("Yeni talep oluştur")
+                        .font(.system(size: 15, weight: .semibold)).foregroundStyle(.white)
+                        .frame(maxWidth: .infinity).frame(height: 44)
+                        .background(SupportStyle.accent, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity)
+        .background(SupportStyle.card.ignoresSafeArea(edges: .bottom))
+        .overlay(alignment: .top) { Rectangle().fill(SupportStyle.line).frame(height: 1) }
     }
 
     private var replyBar: some View {
         let trimmed = reply.trimmingCharacters(in: .whitespacesAndNewlines)
         return VStack(spacing: 6) {
             if sendFailed {
-                Text("Mesaj gönderilemedi.")
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .foregroundStyle(.orange)
+                Text("Mesaj gönderilemedi.").font(.footnote.weight(.semibold)).foregroundStyle(.orange)
             }
             HStack(alignment: .bottom, spacing: 10) {
-                TextField("Mesajını yaz…", text: $reply, axis: .vertical)
-                    .lineLimit(1...4)
+                TextField(L("Mesajını yaz…"), text: $reply, axis: .vertical)
+                    .lineLimit(1...5)
                     .focused($replyFocused)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .font(.body)
                     .padding(.horizontal, 14).padding(.vertical, 10)
-                    .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                    .background(SupportStyle.cardRaised, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                 Button {
                     guard !isSending, !trimmed.isEmpty else { return }
                     isSending = true
@@ -3192,20 +3667,20 @@ private struct SupportTicketView: View {
                     }
                 } label: {
                     Group {
-                        if isSending { ProgressView().tint(.black) } else { Image(systemName: "paperplane.fill").font(.system(size: 15, weight: .bold)) }
+                        if isSending { ProgressView().tint(.white) } else { Image(systemName: "arrow.up").font(.system(size: 16, weight: .bold)) }
                     }
-                    .foregroundStyle(.black)
-                    .frame(width: 42, height: 42)
-                    .background(Color.cyan, in: Circle())
+                    .foregroundStyle(.white)
+                    .frame(width: 38, height: 38)
+                    .background(SupportStyle.accent.opacity(trimmed.isEmpty ? 0.35 : 1), in: Circle())
                 }
                 .buttonStyle(.plain)
                 .disabled(isSending || trimmed.isEmpty)
-                .opacity(trimmed.isEmpty ? 0.45 : 1)
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(Color.black.opacity(0.55))
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(SupportStyle.card.ignoresSafeArea(edges: .bottom))
+        .overlay(alignment: .top) { Rectangle().fill(SupportStyle.line).frame(height: 1) }
     }
 
     private func refreshThread() async {

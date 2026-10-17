@@ -1042,3 +1042,5 @@
 "KLAN" = "CLAN";
 "LİG" = "LIGA";
 "BU HAFTA" = "ESTA SEMANA";
+"Tek seferde en fazla %@ coin bağışlayabilirsin." = "Puedes donar hasta %@ monedas de una vez.";
+"En fazla: %@ coin" = "Máximo: %@ monedas";

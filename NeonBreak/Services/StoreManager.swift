@@ -578,6 +578,7 @@ final class StoreManager: ObservableObject {
         let boosts: [ClanBoost]
         let giveDaily: Int
         let giveLeft: Int
+        var donateMax: Int? = nil
         let log: [ClanTreasuryEntry]
         let top: [ClanDonor]
     }

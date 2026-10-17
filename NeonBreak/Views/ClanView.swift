@@ -1370,10 +1370,15 @@ private struct ClanDonateSheet: View {
     @FocusState private var focused: Bool
 
     private var balance: Int { store.profile?.balance ?? 0 }
+    /// Tek seferde bağışlanabilecek en yüksek miktar (panelden ayarlanır).
+    private var limit: Int { store.clanState?.treasury?.donateMax ?? 50000 }
+    /// Bakiye ve sınırdan küçük olanı: "En fazla" tuşu bunu yazar.
+    private var maxDonation: Int { max(0, min(balance, limit)) }
     private var amount: Int { Int(text.filter(\.isNumber).prefix(9)) ?? 0 }
     private var problem: String? {
         if amount < 10 { return L("En az 10 coin bağışlayabilirsin.") }
         if amount > balance { return L("Bakiyen yetersiz.") }
+        if amount > limit { return LS("Tek seferde en fazla \(ClanUI.number(limit)) coin bağışlayabilirsin.") }
         return nil
     }
 
@@ -1418,10 +1423,11 @@ private struct ClanDonateSheet: View {
                         .disabled(v > balance).opacity(v > balance ? 0.35 : 1)
                     }
                 }
-                Button { text = String(balance); focused = false } label: {
-                    Text("Tümünü bağışla").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.6))
+                Button { text = String(maxDonation); focused = false } label: {
+                    Text(LS("En fazla: \(ClanUI.number(maxDonation)) coin")).font(.system(size: 13, weight: .bold, design: .rounded)).foregroundStyle(ClanUI.gold.opacity(0.9))
+                        .padding(.horizontal, 14).frame(height: 32).background(ClanUI.gold.opacity(0.12), in: Capsule())
                 }
-                .buttonStyle(.plain).disabled(balance < 10)
+                .buttonStyle(.plain).disabled(maxDonation < 10)
 
                 if let error { ClanBanner(text: error) }
                 else if !text.isEmpty, let problem { Text(verbatim: problem).font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(.orange) }
@@ -1447,7 +1453,7 @@ private struct ClanDonateSheet: View {
             .padding(.horizontal, 20).padding(.bottom, 12)
         }
         .preferredColorScheme(.dark)
-        .onAppear { if initial > 0 { text = String(min(initial, max(balance, 0)) >= 10 ? min(initial, balance) : initial) } }
+        .onAppear { if initial > 0 { text = String(maxDonation >= 10 ? min(initial, maxDonation) : initial) } }
     }
 
     private func donate() {

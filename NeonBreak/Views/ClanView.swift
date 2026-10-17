@@ -318,8 +318,8 @@ private struct ClanSectionHeader: View {
     var body: some View {
         HStack(spacing: 8) {
             if let icon {
-                Image(systemName: icon).font(.system(size: 13, weight: .bold)).foregroundStyle(tint)
-                    .frame(width: 28, height: 28).background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                GameSymbol(name: icon, size: 15, color: tint)
+                    .frame(width: 30, height: 30).background(tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
             }
             Text(title).font(.system(size: 16, weight: .heavy, design: .rounded))
             Spacer(minLength: 4)
@@ -838,7 +838,7 @@ private struct ClanHomeView: View {
 
     private func statTile(_ icon: String, _ value: Text, _ label: LocalizedStringKey, _ color: Color) -> some View {
         VStack(spacing: 5) {
-            Image(systemName: icon).font(.system(size: 13, weight: .bold)).foregroundStyle(color)
+            GameSymbol(name: icon, size: 15, color: color).frame(height: 22)
             value.font(.system(size: 15, weight: .black, design: .rounded)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
             Text(label).font(.system(size: 9, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.5)).lineLimit(1).minimumScaleFactor(0.7)
         }
@@ -874,8 +874,8 @@ private struct ClanHomeView: View {
     private var giftCard: some View {
         if let gift = store.clanState?.gift, gift.coins > 0, !gift.claimed {
             HStack(spacing: 12) {
-                Image(systemName: "gift.fill").font(.system(size: 20)).foregroundStyle(.black)
-                    .frame(width: 42, height: 42).background(ClanUI.gold, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                GameSymbol(name: "gift.fill", size: 22)
+                    .frame(width: 42, height: 42).background(ClanUI.gold.opacity(0.18), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Günlük klan hediyen hazır").font(.system(size: 14, weight: .heavy, design: .rounded))
                     Text(LS("\(gift.coins) coin")).font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(ClanUI.gold)
@@ -919,7 +919,8 @@ private struct ClanHomeView: View {
             withAnimation(.easeInOut(duration: 0.18)) { tab = value }
         } label: {
             VStack(spacing: 3) {
-                Image(systemName: icon).font(.system(size: 15, weight: .bold))
+                GameSymbol(name: icon, size: 15, color: selected ? .black : .white.opacity(0.6))
+                    .frame(height: 22)
                     .overlay(alignment: .topTrailing) {
                         if badge > 0 {
                             Text(verbatim: "\(badge)").font(.system(size: 9, weight: .black)).foregroundStyle(.black)
@@ -1089,7 +1090,7 @@ private struct ClanQuestCard: View {
     }
 
     private func rewardChip(_ icon: String, _ text: String, _ color: Color) -> some View {
-        HStack(spacing: 5) { Image(systemName: icon); Text(verbatim: text) }
+        HStack(spacing: 5) { GameSymbol(name: icon, size: 12, color: color); Text(verbatim: text) }
             .font(.system(size: 11, weight: .heavy, design: .rounded))
             .foregroundStyle(color)
             .padding(.horizontal, 10).frame(height: 28)
@@ -1194,7 +1195,7 @@ private struct ClanTreasuryView: View {
                     }
                 }
                 Spacer()
-                Image(systemName: "building.columns.fill").font(.system(size: 26)).foregroundStyle(ClanUI.gold)
+                GameSymbol(name: "building.columns.fill", size: 28)
                     .frame(width: 56, height: 56).background(ClanUI.gold.opacity(0.14), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             Text("Üyeler kasaya coin bağışlar; lider kasadan bütün klana takviye açar ya da üyelere coin gönderir.")
@@ -1238,7 +1239,7 @@ private struct ClanTreasuryView: View {
         let left = ClanUI.remaining(b.activeUntil)
         let affordable = (treasury?.balance ?? 0) >= b.cost
         return HStack(spacing: 12) {
-            Image(systemName: isCoin ? "dollarsign.circle.fill" : "bolt.fill").font(.system(size: 20, weight: .bold)).foregroundStyle(color)
+            GameSymbol(name: isCoin ? "dollarsign.circle.fill" : "bolt.fill", size: 22, color: color)
                 .frame(width: 46, height: 46).background(color.opacity(0.15), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
                 Text(isCoin ? LS("+\(ClanUI.percent(b.value)) coin takviyesi") : LS("+\(ClanUI.percent(b.value)) klan XP takviyesi")).font(.system(size: 14, weight: .heavy, design: .rounded))
@@ -1274,8 +1275,8 @@ private struct ClanTreasuryView: View {
     private var giveCard: some View {
         Button { showGive = true } label: {
             HStack(spacing: 12) {
-                Image(systemName: "paperplane.fill").font(.system(size: 18, weight: .bold)).foregroundStyle(.black)
-                    .frame(width: 46, height: 46).background(ClanUI.accent, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                GameSymbol(name: "paperplane.fill", size: 21)
+                    .frame(width: 46, height: 46).background(ClanUI.accent.opacity(0.16), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Üyeye coin gönder").font(.system(size: 15, weight: .heavy, design: .rounded))
                     Text(LS("Bugün kalan: \(ClanUI.number(treasury?.giveLeft ?? 0)) / \(ClanUI.number(treasury?.giveDaily ?? 0)) coin"))
@@ -1387,8 +1388,8 @@ private struct ClanDonateSheet: View {
             Color(red: 0.04, green: 0.05, blue: 0.10).ignoresSafeArea()
             VStack(spacing: 18) {
                 VStack(spacing: 8) {
-                    Image(systemName: "building.columns.fill").font(.system(size: 28)).foregroundStyle(.black)
-                        .frame(width: 64, height: 64).background(ClanUI.gold, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    GameSymbol(name: "building.columns.fill", size: 32)
+                        .frame(width: 64, height: 64).background(ClanUI.gold.opacity(0.18), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                         .shadow(color: ClanUI.gold.opacity(0.5), radius: 14)
                     Text("Kasaya bağış yap").font(.system(size: 22, weight: .black, design: .rounded))
                     Text(LS("Bakiyen: \(ClanUI.number(balance)) coin")).font(.system(size: 13, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.6))
@@ -1679,10 +1680,10 @@ private struct ClanPerksCard: View {
                     HStack(alignment: .top, spacing: 12) {
                         VStack(spacing: 0) {
                             ZStack {
-                                Circle().fill(open ? ClanUI.accent : Color.white.opacity(0.08))
-                                Image(systemName: open ? ClanStyle.perkIcon(p.key) : "lock.fill")
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundStyle(open ? .black : .white.opacity(0.4))
+                                Circle().fill(open ? ClanUI.accent.opacity(0.18) : Color.white.opacity(0.08))
+                                    .overlay(Circle().stroke(open ? ClanUI.accent.opacity(0.6) : .clear, lineWidth: 1.2))
+                                if open { GameSymbol(name: ClanStyle.perkIcon(p.key), size: 15, color: .black) }
+                                else { Image(systemName: "lock.fill").font(.system(size: 13, weight: .bold)).foregroundStyle(.white.opacity(0.4)) }
                             }
                             .frame(width: 34, height: 34)
                             if i < perks.count - 1 {

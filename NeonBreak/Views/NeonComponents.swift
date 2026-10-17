@@ -1,5 +1,42 @@
 import SwiftUI
 
+/// Oyun ikonları: game-icons.net çizimleri (CC BY 3.0), renk geçişi ve gölgeyle hazırlanmış görseller (Assets: GI*).
+/// Sistem simgesi adı verilir; karşılığı varsa oyun ikonu, yoksa sistem simgesi çizilir.
+enum GameIcons {
+    static let map: [String: String] = [
+        "trophy": "GITrophy", "trophy.fill": "GITrophy", "flag.checkered": "GIFlag", "gamecontroller.fill": "GIGamepad",
+        "square.grid.3x3.fill": "GIBlocks", "flame.fill": "GIFlame", "flame": "GIFlame", "person.crop.circle.badge.checkmark": "GILaurel",
+        "dollarsign.circle.fill": "GICoins", "gift.fill": "GIGift", "gift": "GIGift", "target": "GITarget", "bolt.fill": "GIBolt",
+        "person.3.fill": "GITeam", "person.3": "GITeam", "person.2.fill": "GITeam", "star.fill": "GIStar", "seal.fill": "GIMedal",
+        "bubble.left.and.bubble.right.fill": "GIChat", "message.fill": "GIChat", "banknote.fill": "GIChest", "building.columns.fill": "GIChest",
+        "shield.lefthalf.filled": "GIShield", "shield.lefthalf.filled.fill": "GIShield", "hourglass": "GIHourglass", "envelope.fill": "GIEnvelope",
+        "bell.fill": "GIBell", "bell": "GIBell", "bell.badge.fill": "GIBell", "house": "GIHouse", "house.fill": "GIHouse",
+        "bag": "GIBag", "bag.fill": "GIBag", "crown.fill": "GICrown", "heart.fill": "GIHearts", "paperplane.fill": "GIPlane",
+        "calendar.badge.clock": "GICalendar", "sparkles": "GISparkles", "person.crop.circle": "GIPerson", "person.crop.circle.fill": "GIPerson",
+        "megaphone.fill": "GIMegaphone", "play.rectangle.fill": "GIClapper", "chart.pie.fill": "GIWheel", "list.number": "GIPodium",
+        "gearshape.fill": "GICog", "headphones": "GIHeadphones", "square.grid.2x2.fill": "GIChecklist", "clock.arrow.circlepath": "GIStopwatch",
+        "shield.lefthalf.filled.badge.checkmark": "GIShield", "medal.fill": "GIMedal", "arrow.up.circle.fill": "GIUpgrade", "checklist": "GIChecklist"
+    ]
+    static func asset(_ systemName: String) -> String? { map[systemName] }
+}
+
+/// Oyun ikonu ya da (karşılığı yoksa) sistem simgesi. `size` sistem simgesinin punto boyutudur; oyun ikonu biraz daha büyük çizilir.
+struct GameSymbol: View {
+    let name: String
+    var size: CGFloat = 18
+    var color: Color = .white
+    var dimmed = false
+    var body: some View {
+        if let asset = GameIcons.asset(name) {
+            Image(asset).resizable().interpolation(.high).scaledToFit()
+                .frame(width: size * 1.45, height: size * 1.45)
+                .saturation(dimmed ? 0 : 1).opacity(dimmed ? 0.5 : 1)
+        } else {
+            Image(systemName: name).font(.system(size: size, weight: .bold)).foregroundStyle(dimmed ? Color.white.opacity(0.5) : color)
+        }
+    }
+}
+
 struct NeonBackground: View {
     let theme: BackgroundTheme
 

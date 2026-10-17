@@ -599,10 +599,9 @@ struct HomeView: View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .top) {
-                    Image(systemName: icon)
-                        .font(.system(size: 17, weight: .bold)).foregroundStyle(.black)
-                        .frame(width: 38, height: 38)
-                        .background(iconFill, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+                    GameSymbol(name: icon, size: 21, color: .black)
+                        .frame(width: 40, height: 40)
+                        .background(GameIcons.asset(icon) != nil ? AnyShapeStyle(tint.opacity(0.16)) : iconFill, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                     Spacer(minLength: 4)
                     if busy {
                         ProgressView().tint(tint)
@@ -979,11 +978,9 @@ struct HomeView: View {
         let shape = RoundedRectangle(cornerRadius: 20, style: .continuous)
         return Button(action: action) {
             HStack(spacing: 11) {
-                Image(systemName: icon)
-                    .font(.system(size: 19, weight: .bold))
-                    .foregroundStyle(.black)
-                    .frame(width: 42, height: 42)
-                    .background(color, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                GameSymbol(name: icon, size: 22, color: .black)
+                    .frame(width: 44, height: 44)
+                    .background(GameIcons.asset(icon) != nil ? color.opacity(0.16) : color, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .shadow(color: color.opacity(0.55), radius: 9, y: 3)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title)
@@ -1057,9 +1054,7 @@ struct HomeView: View {
                         .frame(width: 34, height: 34)
                         .overlay(Circle().stroke(color.opacity(0.45), lineWidth: 1))
                         .shadow(color: color.opacity(0.35), radius: 9)
-                    Image(systemName: icon)
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(color)
+                    GameSymbol(name: icon, size: 15, color: color)
                 }
                 Spacer(minLength: 2)
                 Text(LocalizedStringKey(title))
@@ -1318,7 +1313,7 @@ struct WheelSheet: View {
         } else {
             let kind = PowerUpKind.all.first { $0.key == slice.itemKey }
             VStack(spacing: 2) {
-                Image(systemName: kind?.icon ?? "bolt.fill").font(.system(size: 18, weight: .bold)).foregroundStyle(kind?.color ?? .white)
+                GameSymbol(name: kind?.icon ?? "bolt.fill", size: 18, color: kind?.color ?? .white)
                     .shadow(color: .black.opacity(0.5), radius: 2)
                 Text("x\(slice.amount)").font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(.white.opacity(0.9))
             }
@@ -1422,9 +1417,7 @@ struct PlayButton: View {
             action()
         } label: {
             HStack(spacing: 12) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 15, weight: .black))
-                    .foregroundStyle(.white)
+                GameSymbol(name: systemImage, size: 17)
                     .frame(width: 36, height: 36)
                     .background(Color.black.opacity(0.35), in: Circle())
                 Text(LocalizedStringKey(title))

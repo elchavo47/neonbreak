@@ -228,9 +228,8 @@ struct ContentView: View {
             }
         } label: {
             VStack(spacing: 2) {
-                Image(systemName: active ? icon + ".fill" : icon)
-                    .font(.system(size: 20, weight: active ? .bold : .medium))
-                    .foregroundStyle(active ? AnyShapeStyle(LinearGradient(colors: [tint, tint.opacity(0.7)], startPoint: .top, endPoint: .bottom)) : AnyShapeStyle(Color.white.opacity(0.55)))
+                GameSymbol(name: icon, size: 19, dimmed: !active)
+                    .frame(height: 28)
                     .shadow(color: active ? tint.opacity(0.7) : .clear, radius: 8)
                     .scaleEffect(active ? 1.08 : 1)
                     .overlay(alignment: .topTrailing) {
@@ -888,7 +887,8 @@ struct PlayerCardSheet: View {
     private func leagueStrip(_ card: StoreManager.PlayerCard) -> some View {
         let color = Cosmetic.leagueColor(card.league)
         return HStack(spacing: 12) {
-            Image(systemName: "shield.lefthalf.filled").font(.system(size: 20, weight: .bold)).foregroundStyle(color)
+            Image("GIShield").resizable().scaledToFit().frame(width: 30, height: 30)
+                .colorMultiply(color.opacity(0.9))
                 .frame(width: 42, height: 42).background(color.opacity(0.16), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
                 Text("LİG").font(.system(size: 10, weight: .black, design: .rounded)).tracking(1.4).foregroundStyle(.white.opacity(0.45))
@@ -940,8 +940,8 @@ struct PlayerCardSheet: View {
 
     private func stat(_ icon: String, _ color: Color, _ label: String, _ value: String) -> some View {
         VStack(spacing: 6) {
-            Image(systemName: icon).font(.system(size: 14, weight: .bold)).foregroundStyle(color)
-                .frame(width: 30, height: 30).background(color.opacity(0.15), in: Circle())
+            GameSymbol(name: icon, size: 22, color: color)
+                .frame(width: 34, height: 34)
             Text(value).font(.system(size: 17, weight: .black, design: .rounded)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.5)
             Text(label).font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.5)).lineLimit(1).minimumScaleFactor(0.7)
         }

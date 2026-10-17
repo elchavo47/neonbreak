@@ -572,6 +572,16 @@ private struct ClanDiscoverView: View {
 
 // MARK: - Klan önizleme (katılmadan önce)
 
+/// Oyuncu kartından açılan klan sayfası (sheet içinde).
+struct ClanPreviewScreen: View {
+    struct ID: Identifiable { let id: Int }
+    let clanId: Int
+    var body: some View {
+        NavigationStack { ClanDetailView(clanId: clanId) }
+            .preferredColorScheme(.dark)
+    }
+}
+
 private struct ClanDetailView: View {
     @EnvironmentObject var store: StoreManager
     @EnvironmentObject var appState: AppState

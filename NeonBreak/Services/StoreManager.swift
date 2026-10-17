@@ -777,6 +777,20 @@ final class StoreManager: ObservableObject {
         let weeklyRank: Int?
         let weeklyScore: Int?
         let frames: Int
+        var clan: PlayerClan? = nil
+    }
+
+    struct PlayerClan: Codable, Equatable {
+        let id: Int
+        let name: String
+        let tag: String
+        let icon: String
+        let color: Int
+        let shape: String
+        let level: Int
+        var frame: Int? = nil
+        let members: Int
+        var role: String? = nil
     }
 
     private struct CachedState: Codable {

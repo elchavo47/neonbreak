@@ -697,96 +697,26 @@ struct PlayerCardSheet: View {
     private var title: String? { card?.title ?? target.title }
     private var avatar: String? { card?.avatarUrl ?? target.avatarUrl }
 
+    @State private var openClan: Int?
+
+    private var accent: Color { card.map { Cosmetic.leagueColor($0.league) } ?? .cyan }
+
     var body: some View {
         ZStack {
             NeonBackground(theme: appState.selectedBackground)
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 16) {
-                    HStack {
-                        Text("OYUNCU KARTI").font(.system(size: 12, weight: .black, design: .rounded)).tracking(2).foregroundStyle(.white.opacity(0.5))
-                        Spacer()
-                        if !isMe {
-                            Menu {
-                                Button { showReport = true } label: { Label("Şikayet et", systemImage: "exclamationmark.bubble") }
-                                if isBlocked {
-                                    Button { toggleBlock(false) } label: { Label("Engeli kaldır", systemImage: "person.crop.circle.badge.checkmark") }
-                                } else {
-                                    Button(role: .destructive) { confirmBlock = true } label: { Label("Oyuncuyu engelle", systemImage: "hand.raised.fill") }
-                                }
-                            } label: {
-                                Image(systemName: "ellipsis").font(.system(size: 15, weight: .bold))
-                                    .frame(width: 36, height: 36).background(Color.white.opacity(0.1), in: Circle())
-                            }
-                            .accessibilityLabel(Text("Şikayet et ya da engelle"))
-                        }
-                        Button { dismiss() } label: {
-                            Image(systemName: "xmark").font(.system(size: 14, weight: .bold))
-                                .frame(width: 36, height: 36).background(Color.white.opacity(0.1), in: Circle())
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    ZStack {
-                        Circle().fill(Color.white.opacity(0.08))
-                        if let text = avatar, let url = URL(string: text) {
-                            AsyncImage(url: url) { image in image.resizable().scaledToFill() } placeholder: { Color.clear }
-                                .clipShape(Circle())
-                        } else {
-                            Text(String(target.username.prefix(1)).uppercased()).font(.system(size: 46, weight: .bold, design: .rounded))
-                        }
-                        AvatarFrameRing(frame: frame, lineWidth: 6)
-                    }
-                    .frame(width: 132, height: 132)
-                    .padding(.top, 14).padding(.bottom, 6)
-                    VStack(spacing: 6) {
-                        Text(target.username).font(.system(size: 26, weight: .heavy, design: .rounded)).lineLimit(1).minimumScaleFactor(0.6)
-                        if let title {
-                            Text(Cosmetic.titleName(title))
-                                .font(.system(size: 12, weight: .heavy, design: .rounded)).foregroundStyle(.black)
-                                .padding(.horizontal, 12).padding(.vertical, 5).background(Color.yellow, in: Capsule())
-                        }
-                        if let frame {
-                            Text(Cosmetic.frameName(frame)).font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.55))
-                        }
-                    }
+                VStack(spacing: 14) {
+                    header
                     if let notice {
                         Label(notice, systemImage: "checkmark.seal.fill")
                             .font(.system(size: 13, weight: .semibold, design: .rounded)).foregroundStyle(.mint)
                             .padding(12).frame(maxWidth: .infinity, alignment: .leading)
                             .background(Color.mint.opacity(0.10), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     }
-                    if !isMe {
-                        HStack(spacing: 10) {
-                            Button { showReport = true } label: {
-                                Label("Şikayet et", systemImage: "exclamationmark.bubble.fill")
-                                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                                    .frame(maxWidth: .infinity).frame(height: 42)
-                                    .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-                            }
-                            .buttonStyle(.plain)
-                            Button { if isBlocked { toggleBlock(false) } else { confirmBlock = true } } label: {
-                                Label(isBlocked ? L("Engeli kaldır") : L("Engelle"), systemImage: isBlocked ? "person.crop.circle.badge.checkmark" : "hand.raised.fill")
-                                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                                    .foregroundStyle(isBlocked ? Color.white : Color(hex: 0xFF6B81))
-                                    .frame(maxWidth: .infinity).frame(height: 42)
-                                    .background((isBlocked ? Color.white : Color(hex: 0xFF6B81)).opacity(0.10), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
                     if let card {
-                        let color = Cosmetic.leagueColor(card.league)
-                        HStack(spacing: 10) {
-                            Image(systemName: "shield.lefthalf.filled").font(.system(size: 18, weight: .bold)).foregroundStyle(color)
-                            Text("\(Cosmetic.leagueName(card.league)) Ligi").font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(color)
-                            Spacer()
-                            if let rank = card.weeklyRank {
-                                Text("Bu hafta #\(rank)").font(.system(size: 13, weight: .bold, design: .rounded)).foregroundStyle(.cyan)
-                            }
-                        }
-                        .padding(14)
-                        .background(color.opacity(0.10), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(color.opacity(0.3), lineWidth: 1))
-                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                        if let clan = card.clan { clanCard(clan) }
+                        leagueStrip(card)
+                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
                             stat("trophy.fill", .yellow, L("Rekor skor"), card.bestScore.formatted())
                             stat("flag.checkered", .mint, L("En iyi seviye"), "\(card.bestLevel)")
                             stat("gamecontroller.fill", .cyan, L("Oynanan oyun"), card.gamesPlayed.formatted())
@@ -795,30 +725,38 @@ struct PlayerCardSheet: View {
                             stat("person.crop.circle.badge.checkmark", .purple, L("Çerçeve sayısı"), "\(card.frames)")
                         }
                         if let skin = BallSkin.all.first(where: { "ball.\($0.id)" == card.ball }) {
-                            HStack(spacing: 12) {
-                                Image(skin.textureName).resizable().scaledToFit().frame(width: 54, height: 54)
-                                    .shadow(color: Color(hex: skin.glowHex).opacity(0.6), radius: 10)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("TAKTIĞI TOP").font(.system(size: 10, weight: .bold, design: .rounded)).tracking(1.2).foregroundStyle(.white.opacity(0.45))
-                                    Text(skin.name).font(.system(size: 17, weight: .bold, design: .rounded))
+                            HStack(spacing: 14) {
+                                ZStack {
+                                    Circle().fill(RadialGradient(colors: [Color(hex: skin.glowHex).opacity(0.45), .clear], center: .center, startRadius: 2, endRadius: 40))
+                                    Image(skin.textureName).resizable().scaledToFit().frame(width: 50, height: 50)
+                                        .shadow(color: Color(hex: skin.glowHex).opacity(0.7), radius: 10)
+                                }
+                                .frame(width: 64, height: 64)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("TAKTIĞI TOP").font(.system(size: 10, weight: .black, design: .rounded)).tracking(1.4).foregroundStyle(.white.opacity(0.45))
+                                    Text(skin.name).font(.system(size: 18, weight: .heavy, design: .rounded))
                                 }
                                 Spacer()
-                                Text(skin.rarity).font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(Color(hex: skin.coreHex))
-                                    .padding(.horizontal, 8).padding(.vertical, 4).background(Color(hex: skin.coreHex).opacity(0.14), in: Capsule())
+                                Text(skin.rarity).font(.system(size: 10, weight: .black, design: .rounded)).foregroundStyle(Color(hex: skin.coreHex))
+                                    .padding(.horizontal, 9).padding(.vertical, 5).background(Color(hex: skin.coreHex).opacity(0.16), in: Capsule())
+                                    .overlay(Capsule().stroke(Color(hex: skin.coreHex).opacity(0.4), lineWidth: 1))
                             }
                             .padding(14)
-                            .background(Color.black.opacity(0.26), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .background(LinearGradient(colors: [Color(hex: skin.glowHex).opacity(0.14), Color.black.opacity(0.35)], startPoint: .leading, endPoint: .trailing), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color(hex: skin.glowHex).opacity(0.25), lineWidth: 1))
                         }
+                        if !isMe { actions }
                         if let joined = card.joined {
                             Text("Katılım: \(joined)").font(.system(size: 11, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.4))
                         }
                     } else if failed {
                         Text("Oyuncu bilgisi alınamadı.").font(.system(size: 13, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.6)).padding(.top, 20)
+                        if !isMe { actions }
                     } else {
                         ProgressView().tint(.cyan).padding(.top, 24)
                     }
                 }
-                .padding(20)
+                .padding(.horizontal, 18).padding(.bottom, 24)
             }
         }
         .preferredColorScheme(.dark)
@@ -832,11 +770,160 @@ struct PlayerCardSheet: View {
             }
             .environmentObject(store).environmentObject(appState)
         }
+        .sheet(item: Binding(get: { openClan.map { ClanPreviewScreen.ID(id: $0) } }, set: { openClan = $0?.id })) { item in
+            ClanPreviewScreen(clanId: item.id).environmentObject(store).environmentObject(appState)
+        }
         .alert("Oyuncu engellensin mi?", isPresented: $confirmBlock) {
             Button("Vazgeç", role: .cancel) { }
             Button("Engelle", role: .destructive) { toggleBlock(true) }
         } message: {
             Text("Bu oyuncuyu sıralamada ve lig grubunda artık görmezsin. Ayarlar > Gizlilik bölümünden engeli kaldırabilirsin.")
+        }
+    }
+
+    // Üst bölüm: lige göre renkli kapak, ortada çerçeveli fotoğraf, ad, unvan ve klan etiketi.
+    private var header: some View {
+        VStack(spacing: 0) {
+            ZStack(alignment: .top) {
+                LinearGradient(colors: [accent.opacity(0.55), accent.opacity(0.12), .clear], startPoint: .top, endPoint: .bottom)
+                    .frame(height: 150)
+                    .overlay(
+                        RadialGradient(colors: [Color.white.opacity(0.18), .clear], center: .topTrailing, startRadius: 0, endRadius: 220)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                HStack {
+                    Text("OYUNCU KARTI").font(.system(size: 11, weight: .black, design: .rounded)).tracking(2.2).foregroundStyle(.white.opacity(0.7))
+                    Spacer()
+                    if !isMe {
+                        Menu {
+                            Button { showReport = true } label: { Label("Şikayet et", systemImage: "exclamationmark.bubble") }
+                            if isBlocked {
+                                Button { toggleBlock(false) } label: { Label("Engeli kaldır", systemImage: "person.crop.circle.badge.checkmark") }
+                            } else {
+                                Button(role: .destructive) { confirmBlock = true } label: { Label("Oyuncuyu engelle", systemImage: "hand.raised.fill") }
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis").font(.system(size: 15, weight: .bold))
+                                .frame(width: 36, height: 36).background(Color.black.opacity(0.3), in: Circle())
+                        }
+                        .accessibilityLabel(Text("Şikayet et ya da engelle"))
+                    }
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark").font(.system(size: 14, weight: .bold))
+                            .frame(width: 36, height: 36).background(Color.black.opacity(0.3), in: Circle())
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 16).padding(.top, 16)
+                ZStack {
+                    Circle().fill(Color(red: 0.06, green: 0.07, blue: 0.14))
+                    if let text = avatar, let url = URL(string: text) {
+                        AsyncImage(url: url) { image in image.resizable().scaledToFill() } placeholder: { Color.clear }
+                            .clipShape(Circle())
+                    } else {
+                        Text(String(target.username.prefix(1)).uppercased()).font(.system(size: 46, weight: .bold, design: .rounded))
+                    }
+                    AvatarFrameRing(frame: frame, lineWidth: 6)
+                }
+                .frame(width: 128, height: 128)
+                .shadow(color: accent.opacity(0.5), radius: 20)
+                .padding(.top, 78)
+            }
+            VStack(spacing: 7) {
+                HStack(spacing: 8) {
+                    Text(target.username).font(.system(size: 27, weight: .black, design: .rounded)).lineLimit(1).minimumScaleFactor(0.6)
+                    ClanTagBadge(tag: card?.clan?.tag, size: 14)
+                }
+                HStack(spacing: 6) {
+                    if let title {
+                        Text(Cosmetic.titleName(title))
+                            .font(.system(size: 12, weight: .heavy, design: .rounded)).foregroundStyle(.black)
+                            .padding(.horizontal, 12).padding(.vertical, 5)
+                            .background(LinearGradient(colors: [Color.yellow, Color.orange], startPoint: .leading, endPoint: .trailing), in: Capsule())
+                    }
+                    if let frame {
+                        Text(Cosmetic.frameName(frame)).font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.75))
+                            .padding(.horizontal, 10).padding(.vertical, 5)
+                            .background(Color.white.opacity(0.08), in: Capsule())
+                    }
+                }
+            }
+            .padding(.top, 12)
+        }
+        .padding(.top, 8)
+    }
+
+    private func clanCard(_ clan: StoreManager.PlayerClan) -> some View {
+        Button { openClan = clan.id } label: {
+            HStack(spacing: 14) {
+                ClanEmblem(icon: clan.icon, color: clan.color, shape: clan.shape, size: 54, tier: clan.frame ?? ClanStyle.tier(forLevel: clan.level))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("KLAN").font(.system(size: 10, weight: .black, design: .rounded)).tracking(1.4).foregroundStyle(.white.opacity(0.45))
+                    HStack(spacing: 6) {
+                        Text(verbatim: clan.name).font(.system(size: 17, weight: .heavy, design: .rounded)).lineLimit(1)
+                        Text(verbatim: "[\(clan.tag)]").font(.system(size: 12, weight: .heavy, design: .rounded)).foregroundStyle(ClanStyle.color(clan.color))
+                    }
+                    HStack(spacing: 8) {
+                        Label { Text(LS("Sv. \(clan.level)")) } icon: { Image(systemName: "star.fill") }
+                        Label { Text(LS("\(clan.members) üye")) } icon: { Image(systemName: "person.2.fill") }
+                        if let role = clan.role, role != "member" {
+                            Text(ClanStyle.roleName(role)).foregroundStyle(role == "leader" ? Color.yellow : Color.purple)
+                        }
+                    }
+                    .font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.6))
+                }
+                Spacer(minLength: 4)
+                VStack(spacing: 2) {
+                    Image(systemName: "arrow.up.right.circle.fill").font(.system(size: 24)).foregroundStyle(ClanStyle.color(clan.color))
+                    Text("Klana git").font(.system(size: 9, weight: .heavy, design: .rounded)).foregroundStyle(.white.opacity(0.55))
+                }
+            }
+            .padding(14)
+            .background(LinearGradient(colors: [ClanStyle.color(clan.color).opacity(0.22), Color.black.opacity(0.35)], startPoint: .leading, endPoint: .trailing), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(ClanStyle.color(clan.color).opacity(0.4), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func leagueStrip(_ card: StoreManager.PlayerCard) -> some View {
+        let color = Cosmetic.leagueColor(card.league)
+        return HStack(spacing: 12) {
+            Image(systemName: "shield.lefthalf.filled").font(.system(size: 20, weight: .bold)).foregroundStyle(color)
+                .frame(width: 42, height: 42).background(color.opacity(0.16), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            VStack(alignment: .leading, spacing: 2) {
+                Text("LİG").font(.system(size: 10, weight: .black, design: .rounded)).tracking(1.4).foregroundStyle(.white.opacity(0.45))
+                Text("\(Cosmetic.leagueName(card.league)) Ligi").font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(color)
+            }
+            Spacer()
+            if let rank = card.weeklyRank {
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("BU HAFTA").font(.system(size: 10, weight: .black, design: .rounded)).tracking(1.2).foregroundStyle(.white.opacity(0.45))
+                    Text(verbatim: "#\(rank)").font(.system(size: 20, weight: .black, design: .rounded)).foregroundStyle(rank <= 3 ? Color.yellow : Color.cyan)
+                }
+            }
+        }
+        .padding(14)
+        .background(LinearGradient(colors: [color.opacity(0.16), Color.black.opacity(0.3)], startPoint: .leading, endPoint: .trailing), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(color.opacity(0.3), lineWidth: 1))
+    }
+
+    private var actions: some View {
+        HStack(spacing: 10) {
+            Button { showReport = true } label: {
+                Label("Şikayet et", systemImage: "exclamationmark.bubble.fill")
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .frame(maxWidth: .infinity).frame(height: 44)
+                    .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
+            .buttonStyle(.plain)
+            Button { if isBlocked { toggleBlock(false) } else { confirmBlock = true } } label: {
+                Label(isBlocked ? L("Engeli kaldır") : L("Engelle"), systemImage: isBlocked ? "person.crop.circle.badge.checkmark" : "hand.raised.fill")
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundStyle(isBlocked ? Color.white : Color(hex: 0xFF6B81))
+                    .frame(maxWidth: .infinity).frame(height: 44)
+                    .background((isBlocked ? Color.white : Color(hex: 0xFF6B81)).opacity(0.10), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -852,14 +939,16 @@ struct PlayerCardSheet: View {
     }
 
     private func stat(_ icon: String, _ color: Color, _ label: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(spacing: 6) {
             Image(systemName: icon).font(.system(size: 14, weight: .bold)).foregroundStyle(color)
-            Text(value).font(.system(size: 20, weight: .bold, design: .rounded)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
-            Text(label).font(.system(size: 11, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.5))
+                .frame(width: 30, height: 30).background(color.opacity(0.15), in: Circle())
+            Text(value).font(.system(size: 17, weight: .black, design: .rounded)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.5)
+            Text(label).font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.5)).lineLimit(1).minimumScaleFactor(0.7)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(13)
-        .background(Color.black.opacity(0.26), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12).padding(.horizontal, 6)
+        .background(LinearGradient(colors: [color.opacity(0.10), Color.black.opacity(0.32)], startPoint: .top, endPoint: .bottom), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(color.opacity(0.18), lineWidth: 1))
     }
 }
 

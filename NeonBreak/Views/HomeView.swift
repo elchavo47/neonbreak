@@ -1504,6 +1504,7 @@ struct DailyBoardSheet: View {
                                         .frame(width: 30)
                                     Text(e.username).font(.system(size: 15, weight: e.userId == store.profile?.id ? .bold : .medium, design: .rounded))
                                         .foregroundStyle(e.userId == store.profile?.id ? Color.cyan : Color.white).lineLimit(1)
+                                    ClanTagBadge(tag: e.clanTag, size: 11)
                                     Spacer(minLength: 6)
                                     VStack(alignment: .trailing, spacing: 1) {
                                         Text(e.bestScore.formatted()).font(.system(size: 15, weight: .bold, design: .rounded)).monospacedDigit()

@@ -273,6 +273,7 @@ struct ContentView: View {
             supportStartsOnTickets = false
             transition(to: .support)
         case "inbox": transition(to: .notifications)
+        case "clan": transition(to: .clan)
         default: transition(to: .home)
         }
     }
@@ -1557,10 +1558,13 @@ private struct LeaderboardView: View {
             }
             .frame(width: 34, height: 34)
             VStack(alignment: .leading, spacing: 1) {
-                Text(entry.username)
-                    .font(.system(size: 14, weight: mine ? .black : .bold, design: .rounded))
-                    .foregroundStyle(mine ? Color.cyan : Color.white)
-                    .lineLimit(1)
+                HStack(spacing: 4) {
+                    Text(entry.username)
+                        .font(.system(size: 14, weight: mine ? .black : .bold, design: .rounded))
+                        .foregroundStyle(mine ? Color.cyan : Color.white)
+                        .lineLimit(1)
+                    ClanTagBadge(tag: entry.clanTag)
+                }
                 if let title = entry.title {
                     Text(Cosmetic.titleName(title))
                         .font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(.yellow.opacity(0.8))
@@ -1675,6 +1679,8 @@ private struct LeaderRow: View {
                 HStack(spacing: 6) {
                     Text(entry.username)
                         .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .lineLimit(1)
+                    ClanTagBadge(tag: entry.clanTag)
                     if isMe {
                         Text("SEN")
                             .font(.system(size: 9, weight: .bold, design: .rounded))

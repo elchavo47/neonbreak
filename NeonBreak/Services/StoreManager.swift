@@ -223,6 +223,7 @@ final class StoreManager: ObservableObject {
         let bestLevel: Int
         let frame: String?
         let title: String?
+        var clanTag: String? = nil
     }
 
     /// Oyuncunun bu haftaki lig grubu. `placed` false ise bu hafta henüz skor yapılmamıştır.
@@ -388,6 +389,7 @@ final class StoreManager: ObservableObject {
             let avatarUrl: String?
             let bestScore: Int
             let bestLevel: Int
+            var clanTag: String? = nil
         }
         let enabled: Bool
         let day: String
@@ -436,6 +438,7 @@ final class StoreManager: ObservableObject {
         /// Oyuncunun taktığı çerçeve ve unvan (eski sunucuda yok).
         var frame: String? = nil
         var title: String? = nil
+        var clanTag: String? = nil
     }
 
     struct Announcement: Codable, Equatable {
@@ -537,6 +540,56 @@ final class StoreManager: ObservableObject {
         let perks: [ClanPerk]?
         let description: String?
         let weekRank: Int?
+        /// Çerçeve kademesi: 0 bronz, 1 gümüş, 2 altın, 3 platin, 4 elmas.
+        var frame: Int? = nil
+    }
+
+    struct ClanUnlocks: Codable, Hashable {
+        let icons: [String: Int]
+        let shapes: [String: Int]
+        let colors: [Int]
+    }
+
+    struct ClanBoost: Codable, Hashable, Identifiable {
+        var id: String { type }
+        let type: String
+        let value: Int
+        let cost: Int
+        let hours: Int
+        let activeUntil: String?
+    }
+
+    struct ClanTreasuryEntry: Codable, Hashable {
+        let kind: String
+        let amount: Int
+        let username: String?
+        let target: String?
+        let note: String?
+        let createdAt: String?
+    }
+
+    struct ClanDonor: Codable, Hashable {
+        let username: String
+        let total: Int
+    }
+
+    struct ClanTreasury: Codable, Hashable {
+        let balance: Int
+        let boosts: [ClanBoost]
+        let giveDaily: Int
+        let giveLeft: Int
+        let log: [ClanTreasuryEntry]
+        let top: [ClanDonor]
+    }
+
+    struct ClanQuest: Codable, Hashable {
+        let target: Int
+        let progress: Int
+        let completed: Bool
+        let coins: Int
+        let xp: Int
+        let mine: Int
+        let endsAt: String?
     }
 
     struct ClanMember: Codable, Identifiable, Hashable {
@@ -572,6 +625,11 @@ final class StoreManager: ObservableObject {
         let gift: ClanGift?
         let createCost: Int?
         let requestsSent: [Int]?
+        var treasury: ClanTreasury? = nil
+        var quest: ClanQuest? = nil
+        var unlocks: ClanUnlocks? = nil
+        var renameAvailableAt: String? = nil
+        var renameDays: Int? = nil
     }
 
     struct ClanMessage: Codable, Identifiable, Hashable {
@@ -1977,6 +2035,31 @@ final class StoreManager: ObservableObject {
             await loadClan()
             return nil
         } catch { return clanError(error) }
+    }
+
+    func donateToClan(amount: Int) async -> String? {
+        struct In: Encodable { let amount: Int }
+        struct Out: Decodable { let success: Bool; let balance: Int }
+        do {
+            let out: Out = try await send(try authorizedJSONRequest(path: "/clans/me/treasury/donate", method: "POST", body: In(amount: amount)))
+            if var current = profile { current.balance = out.balance; profile = current }
+            await loadClan()
+            return nil
+        } catch { return clanError(error) }
+    }
+
+    func giveFromClan(userId: Int, amount: Int) async -> String? {
+        struct In: Encodable { let userId: Int; let amount: Int }
+        struct Out: Decodable { let success: Bool }
+        do { let _: Out = try await send(try authorizedJSONRequest(path: "/clans/me/treasury/give", method: "POST", body: In(userId: userId, amount: amount))); await loadClan(); return nil }
+        catch { return clanError(error) }
+    }
+
+    func buyClanBoost(type: String) async -> String? {
+        struct In: Encodable { let type: String }
+        struct Out: Decodable { let success: Bool }
+        do { let _: Out = try await send(try authorizedJSONRequest(path: "/clans/me/treasury/boost", method: "POST", body: In(type: type))); await loadClan(); return nil }
+        catch { return clanError(error) }
     }
 
     func clanMessages() async -> [ClanMessage]? {

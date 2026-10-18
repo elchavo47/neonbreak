@@ -97,7 +97,7 @@ struct HomeView: View {
                             .frame(width: 44, height: 44)
                     }
                     .frame(width: 44, height: 44)
-                    .padding(.horizontal, (store.cosmetics?.frame ?? store.profile?.frame) == "champion" ? 18 : 0)
+                    .padding(.horizontal, (store.cosmetics?.frame ?? store.profile?.frame) == "champion" ? 6 : 0)
                     VStack(alignment: .leading, spacing: 1) {
                         HStack(spacing: 5) {
                             Text(store.playerName)

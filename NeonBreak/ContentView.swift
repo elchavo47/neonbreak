@@ -369,7 +369,7 @@ private struct CosmeticsSheet: View {
                 }
             }
             .frame(width: 42, height: 42)
-            .padding(.horizontal, kind == "frame" && key == "champion" ? 20 : 0)
+            .padding(.horizontal, kind == "frame" && key == "champion" ? 6 : 0)
             VStack(alignment: .leading, spacing: 2) {
                 Text(name)
                     .font(.system(size: 14, weight: .bold, design: .rounded))
@@ -1532,7 +1532,7 @@ private struct LeaderboardView: View {
                 AvatarFrameRing(frame: "weekly1", lineWidth: 2.5)
             }
             .frame(width: 42, height: 42)
-            .padding(.horizontal, 22).padding(.vertical, 4)
+            .padding(.horizontal, 6).padding(.vertical, 6)
             VStack(alignment: .leading, spacing: 2) {
                 Label("GEÇEN HAFTANIN ŞAMPİYONU", systemImage: "crown.fill")
                     .font(.system(size: 10, weight: .black, design: .rounded)).tracking(0.8)
@@ -1647,7 +1647,7 @@ private struct LeaderboardView: View {
                 AvatarFrameRing(frame: entry.rank == 1 ? "flame" : (entry.rank == 2 ? "storm" : (entry.rank == 3 ? "ember" : entry.frame)), lineWidth: 2.5)
             }
             .frame(width: 34, height: 34)
-            .padding(.horizontal, entry.rank > 3 && entry.frame == "champion" ? 16 : 0)
+            .padding(.horizontal, entry.rank > 3 && entry.frame == "champion" ? 5 : 0)
             VStack(alignment: .leading, spacing: 1) {
                 Text(entry.username)
                     .font(.system(size: 14, weight: mine ? .black : .bold, design: .rounded))
@@ -1769,7 +1769,7 @@ private struct LeaderRow: View {
                 // Çok satırlı listede yalnızca üst sıralar canlı çizilir (pil ve akıcılık için).
                 // Haftanın birincisi hareketli altın kanatlı çerçeveyle görünür.
                 .overlay(AvatarFrameRing(frame: entry.rank == 1 ? "weekly1" : entry.frame, lineWidth: 2.5, animated: entry.rank <= 10).frame(width: 42, height: 42))
-                .padding(.horizontal, (entry.rank == 1 || entry.frame == "champion") ? 18 : 0)
+                .padding(.horizontal, (entry.rank == 1 || entry.frame == "champion") ? 6 : 0)
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(entry.username)
@@ -1832,6 +1832,9 @@ private struct ProfileView: View {
     @State private var showSupport = false
     @State private var isSaving = false
     @State private var profileMessage: String?
+    /// Profil fotoğrafıyla ilgili uyarı: fotoğrafın hemen altında görünür (hesap kartı ekranın altında kalıyordu).
+    @State private var avatarMessage: String?
+    @State private var avatarMessageOK = false
     @State private var profileSaved = false
     @State private var isUploadingAvatar = false
     @State private var localAvatarPreview: UIImage?
@@ -1898,7 +1901,7 @@ private struct ProfileView: View {
                 pendingCropImage = nil
             } onUse: { cropped in
                 guard let data = makeAvatarJPEG(from: cropped) else {
-                    profileMessage = L("Fotoğraf işlenemedi. Lütfen tekrar dene.")
+                    showAvatarMessage(L("Fotoğraf işlenemedi. Lütfen tekrar dene."), ok: false)
                     return
                 }
 
@@ -1908,8 +1911,7 @@ private struct ProfileView: View {
                 Persistence.shared.pendingAvatarJPEG = data
                 localAvatarPreview = UIImage(data: data)
                 pendingCropImage = nil
-                profileSaved = true
-                profileMessage = L("Profil fotoğrafı kaydedildi.")
+                showAvatarMessage(L("Profil fotoğrafı kaydedildi."), ok: true)
 
                 Task {
                     isUploadingAvatar = true
@@ -1918,8 +1920,7 @@ private struct ProfileView: View {
                     // Sunucu haftalık limiti nedeniyle reddettiyse önizlemeyi geri al ve nedenini göster.
                     if !uploaded, let reason = store.errorMessage {
                         localAvatarPreview = nil
-                        profileSaved = false
-                        profileMessage = reason
+                        showAvatarMessage(reason, ok: false)
                     }
                 }
             }
@@ -1989,6 +1990,18 @@ private struct ProfileView: View {
                         Text("Katılım \(profileDateText)")
                             .font(.system(size: 11, weight: .medium, design: .rounded))
                             .foregroundStyle(faint)
+                        if let avatarMessage {
+                            HStack(spacing: 6) {
+                                Image(systemName: avatarMessageOK ? "checkmark.circle.fill" : "clock.fill")
+                                Text(verbatim: avatarMessage).multilineTextAlignment(.leading)
+                            }
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(avatarMessageOK ? Color.green : Color.orange)
+                            .padding(.horizontal, 12).padding(.vertical, 8)
+                            .background((avatarMessageOK ? Color.green : Color.orange).opacity(0.13), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .transition(.scale.combined(with: .opacity))
+                            .onTapGesture { withAnimation { self.avatarMessage = nil } }
+                        }
                     }
                     rankProgress
                 }
@@ -2009,8 +2022,7 @@ private struct ProfileView: View {
     private var avatarButton: some View {
         Button {
             if let remaining = store.avatarChangeRemaining() {
-                profileSaved = false
-                profileMessage = LS("Profil fotoğrafını haftada bir kez değiştirebilirsin. Kalan süre: \(formatRemaining(remaining))")
+                showAvatarMessage(LS("Profil fotoğrafını haftada bir kez değiştirebilirsin. Kalan süre: \(formatRemaining(remaining))"), ok: false)
             } else {
                 showAvatarPicker = true
             }
@@ -2394,6 +2406,14 @@ private struct ProfileView: View {
                     .stroke(LinearGradient(colors: [tint.opacity(glow ? 0.45 : 0.28), Color.white.opacity(0.04)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1.2)
             )
             .shadow(color: tint.opacity(glow ? 0.25 : 0.12), radius: 18, y: 8)
+    }
+
+    private func showAvatarMessage(_ text: String, ok: Bool) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { avatarMessage = text; avatarMessageOK = ok }
+        let shown = text
+        DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
+            if avatarMessage == shown { withAnimation { avatarMessage = nil } }
+        }
     }
 
     private func saveName() {

@@ -713,7 +713,7 @@ struct AvatarFrameRing: View {
             // Haftanın birincisi: hareketli altın kanatlı çerçeve (halkanın içi fotoğrafa oturur).
             GeometryReader { g in
                 let d = min(g.size.width, g.size.height)
-                LegendRankFrame(width: min(d * 1.0 / 0.394, 340))
+                LegendRankFrame(width: d * 0.97 / LegendRankFrame.holeRatio)
                     .position(x: g.size.width / 2, y: g.size.height / 2)
             }
             .allowsHitTesting(false)

@@ -720,12 +720,15 @@ struct RankBadge: View {
     }
 }
 
-/// Haftanın birincisinin hareketli çerçevesi (LottieFiles, Lottie Simple License): 96 karelik sprite (24 fps, 4 sn döngü).
+/// "Haftanın Şampiyonu" çerçevesi (LottieFiles, Lottie Simple License): 50 karelik sprite, 30 fps döngü.
+/// Halkanın iç boşluğu genişliğin %64,6'sı, tam ortada.
 struct LegendRankFrame: View {
     var width: CGFloat = 90
+    static let holeRatio: CGFloat = 0.646
+    static let aspect: CGFloat = 244.0 / 260.0
     private static let frames: [UIImage] = {
-        guard let sheet = UIImage(named: "RankLegendSheet")?.cgImage else { return [] }
-        let cols = 12, rows = 8, count = 96
+        guard let sheet = UIImage(named: "ChampionFrameSheet")?.cgImage else { return [] }
+        let cols = 10, rows = 5, count = 50
         let cw = sheet.width / cols, ch = sheet.height / rows
         var out: [UIImage] = []
         for i in 0..<count {
@@ -737,15 +740,15 @@ struct LegendRankFrame: View {
 
     var body: some View {
         let frames = Self.frames
-        TimelineView(.animation(minimumInterval: 1.0 / 24.0)) { context in
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { context in
             if frames.isEmpty {
                 Color.clear
             } else {
-                let i = Int(context.date.timeIntervalSinceReferenceDate * 24) % frames.count
+                let i = Int(context.date.timeIntervalSinceReferenceDate * 30) % frames.count
                 Image(uiImage: frames[i]).resizable().interpolation(.high).scaledToFit()
             }
         }
-        .frame(width: width, height: width * 2 / 3)
+        .frame(width: width, height: width * Self.aspect)
     }
 }
 

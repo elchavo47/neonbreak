@@ -747,7 +747,7 @@ private struct AboutPage: View {
                         GameSymbol(name: "sparkles", size: 16)
                         Text("Teşekkürler").font(.system(size: 14, weight: .bold, design: .rounded))
                     }
-                    Text(verbatim: "Game icons and clan emblems: game-icons.net — Lorc, Delapouite, Sbed, Skoll. Licensed under CC BY 3.0 (creativecommons.org/licenses/by/3.0).")
+                    Text(verbatim: "Game icons and clan emblems: game-icons.net — Lorc, Delapouite, Sbed, Skoll. Licensed under CC BY 3.0 (creativecommons.org/licenses/by/3.0). Rank badges: designed by Freepik (freepik.com). Legend rank frame animation: LottieFiles (Lottie Simple License).")
                         .font(.system(size: 11, design: .rounded)).foregroundStyle(.white.opacity(0.55))
                         .fixedSize(horizontal: false, vertical: true)
                 }

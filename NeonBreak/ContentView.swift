@@ -1833,6 +1833,7 @@ private struct ProfileView: View {
     @State private var emailSheet: EmailAccountSheet.Mode?
     @State private var showCosmetics = false
     @State private var showShowcase = false
+    @State private var showRanks = false
     @FocusState private var nameFocused: Bool
 
     // Tek tip, sakin bir görünüm: tek vurgu rengi, ince çizgiler, ölçülü yazı ağırlıkları.
@@ -1921,6 +1922,7 @@ private struct ProfileView: View {
         .sheet(item: $emailSheet) { mode in EmailAccountSheet(mode: mode) }
         .sheet(isPresented: $showCosmetics) { CosmeticsSheet().environmentObject(store) }
         .sheet(isPresented: $showShowcase) { ShowcasePickerSheet().environmentObject(store) }
+        .sheet(isPresented: $showRanks) { RankLadderSheet(currentRank: progression.rank) }
         .sheet(isPresented: $showSupport) { SupportCenterView().environmentObject(store).environmentObject(appState) }
         .task { await store.loadSupportTickets() }
     }
@@ -2028,13 +2030,10 @@ private struct ProfileView: View {
 
     private var rankProgress: some View {
         HStack(spacing: 12) {
-            ZStack {
-                Image("GIMedal").resizable().scaledToFit().frame(width: 46, height: 46)
-                Text(verbatim: "\(progression.rank)")
-                    .font(.system(size: 12, weight: .black, design: .rounded)).foregroundStyle(.black.opacity(0.8))
-                    .offset(y: -8)
+            Button { showRanks = true } label: {
+                RankBadge(rank: progression.rank, size: 56)
             }
-            .frame(width: 48, height: 48)
+            .buttonStyle(.plain)
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Text(verbatim: profileRankTitle.uppercased(with: Locale(identifier: AppLanguage.effectiveCode)))

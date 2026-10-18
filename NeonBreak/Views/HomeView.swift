@@ -26,6 +26,7 @@ struct HomeView: View {
     @State private var adMessageOK = false
     @State private var questsOpen = false
     @State private var achievementsOpen = false
+    @State private var showRanks = false
     @State private var notificationStatus: UNAuthorizationStatus = .authorized
     @State private var reminderHidden = false
     @State private var claimingAchievement: String?
@@ -1027,14 +1028,11 @@ struct HomeView: View {
     private var progressCard: some View {
         let xp = store.profile?.lifetimeXp ?? Persistence.shared.lifetimeXP
         return HStack(spacing: 14) {
-            ZStack {
-                Image("GIMedal").resizable().scaledToFit().frame(width: 54, height: 54)
-                    .shadow(color: Color.orange.opacity(0.5), radius: 8)
-                Text(verbatim: "\(progression.rank)")
-                    .font(.system(size: 13, weight: .black, design: .rounded)).foregroundStyle(.black.opacity(0.8))
-                    .offset(y: -9)
+            Button { showRanks = true } label: {
+                RankBadge(rank: progression.rank, size: 60)
             }
-            .frame(width: 58, height: 58)
+            .buttonStyle(.plain)
+            .sheet(isPresented: $showRanks) { RankLadderSheet(currentRank: progression.rank) }
             VStack(alignment: .leading, spacing: 7) {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 1) {

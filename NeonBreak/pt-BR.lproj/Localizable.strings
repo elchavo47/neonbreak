@@ -1062,3 +1062,5 @@
 "Rütbe %lld • %@" = "Patente %lld • %@";
 "%@ / %@ XP • sonraki rütbe" = "%@ / %@ XP • próxima patente";
 "%@ / %@ XP" = "%@ / %@ XP";
+"Rütbe %lld+" = "Patente %lld+";
+"Rütbeler" = "Patentes";

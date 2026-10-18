@@ -678,3 +678,137 @@ struct ShowcasePickerSheet: View {
         .onAppear { selected = store.profile?.showcase ?? [] }
     }
 }
+
+// MARK: - Rütbe rozetleri
+
+/// Rütbe rozeti: 7 kademe. 1-6 sabit rozet (Freepik), 7. kademe (SINGULARITY) hareketli altın çerçeve (LottieFiles, Lottie Simple License).
+struct RankBadge: View {
+    let rank: Int
+    var size: CGFloat = 56
+    var showNumber = true
+
+    static func tier(_ rank: Int) -> Int {
+        switch rank {
+        case ...2: return 1
+        case 3...5: return 2
+        case 6...9: return 3
+        case 10...14: return 4
+        case 15...19: return 5
+        case 20...29: return 6
+        default: return 7
+        }
+    }
+    /// Kademenin başladığı rütbe.
+    static let tierStarts = [1, 3, 6, 10, 15, 20, 30]
+
+    var body: some View {
+        let t = Self.tier(rank)
+        if t < 7 {
+            Image("Rank\(t)").resizable().interpolation(.high).scaledToFit()
+                .frame(width: size, height: size)
+                .overlay(alignment: .bottom) {
+                    if showNumber {
+                        Text(verbatim: "\(rank)")
+                            .font(.system(size: max(9, size * 0.2), weight: .black, design: .rounded)).monospacedDigit()
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, size * 0.08).frame(minWidth: size * 0.32, minHeight: size * 0.26)
+                            .background(Capsule().fill(Color.black.opacity(0.75)))
+                            .overlay(Capsule().stroke(Color.white.opacity(0.35), lineWidth: 1))
+                            .offset(y: size * 0.06)
+                    }
+                }
+        } else {
+            LegendRankFrame(width: size * 1.5)
+                .overlay(alignment: .center) {
+                    if showNumber {
+                        Text(verbatim: "\(rank)")
+                            .font(.system(size: max(10, size * 0.3), weight: .black, design: .rounded)).monospacedDigit()
+                            .foregroundStyle(LinearGradient(colors: [Color(red: 1, green: 0.95, blue: 0.6), .orange], startPoint: .top, endPoint: .bottom))
+                            .shadow(color: .orange.opacity(0.8), radius: 4)
+                            .offset(y: -size * 0.06)
+                    }
+                }
+                .frame(width: size * 1.5, height: size)
+        }
+    }
+}
+
+/// Hareketli efsane çerçevesi: 96 karelik sprite (24 fps, 4 sn döngü).
+struct LegendRankFrame: View {
+    var width: CGFloat = 90
+    private static let frames: [UIImage] = {
+        guard let sheet = UIImage(named: "RankLegendSheet")?.cgImage else { return [] }
+        let cols = 12, rows = 8, count = 96
+        let cw = sheet.width / cols, ch = sheet.height / rows
+        var out: [UIImage] = []
+        for i in 0..<count {
+            let rect = CGRect(x: (i % cols) * cw, y: (i / cols) * ch, width: cw, height: ch)
+            if let c = sheet.cropping(to: rect) { out.append(UIImage(cgImage: c)) }
+        }
+        return out
+    }()
+
+    var body: some View {
+        let frames = Self.frames
+        TimelineView(.animation(minimumInterval: 1.0 / 24.0)) { context in
+            if frames.isEmpty {
+                Color.clear
+            } else {
+                let i = Int(context.date.timeIntervalSinceReferenceDate * 24) % frames.count
+                Image(uiImage: frames[i]).resizable().interpolation(.high).scaledToFit()
+            }
+        }
+        .frame(width: width, height: width * 2 / 3)
+    }
+}
+
+/// Bütün rütbe kademelerini gösteren ekran (rozete dokununca açılır).
+struct RankLadderSheet: View {
+    let currentRank: Int
+    @Environment(\.dismiss) private var dismiss
+    private let names = ["ÇAYLAK", "KIRICI", "NEON AVCISI", "USTA", "ELİT", "EFSANE", "SINGULARITY"]
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color(red: 0.04, green: 0.05, blue: 0.10).ignoresSafeArea()
+                ScrollView {
+                    VStack(spacing: 10) {
+                        ForEach(Array(RankBadge.tierStarts.enumerated()).reversed(), id: \.offset) { idx, start in
+                            let tier = idx + 1
+                            let reached = RankBadge.tier(currentRank) >= tier
+                            let isCurrent = RankBadge.tier(currentRank) == tier
+                            HStack(spacing: 14) {
+                                RankBadge(rank: tier == 7 ? max(30, currentRank) : start, size: 60, showNumber: false)
+                                    .frame(width: 92)
+                                    .saturation(reached ? 1 : 0).opacity(reached ? 1 : 0.45)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(L(names[idx])).font(.system(size: 17, weight: .black, design: .rounded))
+                                        .foregroundStyle(tier == 7 ? Color.orange : .white)
+                                    Text(LS("Rütbe \(start)+")).font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.55))
+                                }
+                                Spacer()
+                                if isCurrent {
+                                    Text("SEN").font(.system(size: 11, weight: .black, design: .rounded)).foregroundStyle(.black)
+                                        .padding(.horizontal, 9).frame(height: 24).background(Color.cyan, in: Capsule())
+                                } else if reached {
+                                    Image(systemName: "checkmark.seal.fill").foregroundStyle(.green)
+                                } else {
+                                    Image(systemName: "lock.fill").foregroundStyle(.white.opacity(0.35))
+                                }
+                            }
+                            .padding(12)
+                            .background(isCurrent ? Color.cyan.opacity(0.12) : Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(isCurrent ? Color.cyan.opacity(0.5) : .clear, lineWidth: 1.2))
+                        }
+                    }
+                    .padding(16)
+                }
+            }
+            .navigationTitle(Text("Rütbeler"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button { dismiss() } label: { Text("Kapat") } } }
+        }
+        .preferredColorScheme(.dark)
+    }
+}

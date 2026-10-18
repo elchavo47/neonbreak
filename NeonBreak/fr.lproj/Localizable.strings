@@ -1062,3 +1062,5 @@
 "Rütbe %lld • %@" = "Rang %lld • %@";
 "%@ / %@ XP • sonraki rütbe" = "%@ / %@ XP • rang suivant";
 "%@ / %@ XP" = "%@ / %@ XP";
+"Rütbe %lld+" = "Rang %lld+";
+"Rütbeler" = "Rangs";

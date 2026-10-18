@@ -709,11 +709,11 @@ struct AvatarFrameRing: View {
 
     var body: some View {
         let colors = Cosmetic.frameColors(frame)
-        if frame == "weekly1" {
+        if frame == "weekly1" || frame == "champion" {
             // Haftanın birincisi: hareketli altın kanatlı çerçeve (halkanın içi fotoğrafa oturur).
             GeometryReader { g in
                 let d = min(g.size.width, g.size.height)
-                LegendRankFrame(width: d * 1.0 / 0.394)
+                LegendRankFrame(width: min(d * 1.0 / 0.394, 340))
                     .position(x: g.size.width / 2, y: g.size.height / 2)
             }
             .allowsHitTesting(false)

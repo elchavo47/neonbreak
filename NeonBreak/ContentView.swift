@@ -1646,16 +1646,18 @@ private struct LeaderboardView: View {
             }
             .frame(width: 34, height: 34)
             VStack(alignment: .leading, spacing: 1) {
-                HStack(spacing: 4) {
-                    Text(entry.username)
-                        .font(.system(size: 14, weight: mine ? .black : .bold, design: .rounded))
-                        .foregroundStyle(mine ? Color.cyan : Color.white)
-                        .lineLimit(1)
-                    ClanTagBadge(tag: entry.clanTag)
-                }
-                if let title = entry.title {
-                    Text(Cosmetic.titleName(title))
-                        .font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(.yellow.opacity(0.8))
+                Text(entry.username)
+                    .font(.system(size: 14, weight: mine ? .black : .bold, design: .rounded))
+                    .foregroundStyle(mine ? Color.cyan : Color.white)
+                    .lineLimit(1).minimumScaleFactor(0.7)
+                if entry.clanTag != nil || entry.title != nil {
+                    HStack(spacing: 5) {
+                        ClanTagBadge(tag: entry.clanTag)
+                        if let title = entry.title {
+                            Text(Cosmetic.titleName(title))
+                                .font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(.yellow.opacity(0.8)).lineLimit(1)
+                        }
+                    }
                 }
             }
             Spacer(minLength: 4)
@@ -1767,8 +1769,8 @@ private struct LeaderRow: View {
                 HStack(spacing: 6) {
                     Text(entry.username)
                         .font(.system(size: 14, weight: .bold, design: .rounded))
-                        .lineLimit(1)
-                    ClanTagBadge(tag: entry.clanTag)
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                        .layoutPriority(1)
                     if isMe {
                         Text("SEN")
                             .font(.system(size: 9, weight: .bold, design: .rounded))
@@ -1778,9 +1780,11 @@ private struct LeaderRow: View {
                     }
                 }
                 HStack(spacing: 6) {
+                    ClanTagBadge(tag: entry.clanTag)
                     Text("Seviye \(entry.bestLevel)")
                         .font(.caption2)
                         .foregroundStyle(.white.opacity(0.42))
+                        .fixedSize()
                     if let title = entry.title {
                         Text(Cosmetic.titleName(title))
                             .font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(.yellow.opacity(0.8)).lineLimit(1)

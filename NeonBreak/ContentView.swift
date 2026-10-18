@@ -828,7 +828,7 @@ struct PlayerCardSheet: View {
                     } else {
                         Text(String(target.username.prefix(1)).uppercased()).font(.system(size: 46, weight: .bold, design: .rounded))
                     }
-                    AvatarFrameRing(frame: frame, lineWidth: 6)
+                    AvatarFrameRing(frame: (card?.weeklyRank == 1 || store.weeklyWinner?.userId == target.id) ? "weekly1" : frame, lineWidth: 6)
                 }
                 .frame(width: 128, height: 128)
                 .shadow(color: accent.opacity(0.5), radius: 20)
@@ -1528,9 +1528,10 @@ private struct LeaderboardView: View {
                     Circle().fill(Color.white.opacity(0.08))
                     Text(String(winner.username.prefix(1)).uppercased()).font(.system(size: 16, weight: .bold, design: .rounded))
                 }
-                AvatarFrameRing(frame: "champion", lineWidth: 2.5)
+                AvatarFrameRing(frame: "weekly1", lineWidth: 2.5)
             }
             .frame(width: 42, height: 42)
+            .padding(.horizontal, 22).padding(.vertical, 4)
             VStack(alignment: .leading, spacing: 2) {
                 Label("GEÇEN HAFTANIN ŞAMPİYONU", systemImage: "crown.fill")
                     .font(.system(size: 10, weight: .black, design: .rounded)).tracking(0.8)
@@ -1764,7 +1765,9 @@ private struct LeaderRow: View {
                 .frame(width: 38)
             avatar
                 // Çok satırlı listede yalnızca üst sıralar canlı çizilir (pil ve akıcılık için).
-                .overlay(AvatarFrameRing(frame: entry.frame, lineWidth: 2.5, animated: entry.rank <= 10).frame(width: 42, height: 42))
+                // Haftanın birincisi hareketli altın kanatlı çerçeveyle görünür.
+                .overlay(AvatarFrameRing(frame: entry.rank == 1 ? "weekly1" : entry.frame, lineWidth: 2.5, animated: entry.rank <= 10).frame(width: 42, height: 42))
+                .padding(.horizontal, entry.rank == 1 ? 18 : 0)
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(entry.username)
@@ -2012,7 +2015,7 @@ private struct ProfileView: View {
         } label: {
             ZStack(alignment: .bottomTrailing) {
                 profileAvatar
-                    .overlay(AvatarFrameRing(frame: store.cosmetics?.frame ?? store.profile?.frame, lineWidth: 5).frame(width: 112, height: 112))
+                    .overlay(AvatarFrameRing(frame: (weeklyRank == 1 || (store.weeklyWinner?.userId != nil && store.weeklyWinner?.userId == store.profile?.id)) ? "weekly1" : (store.cosmetics?.frame ?? store.profile?.frame), lineWidth: 5).frame(width: 112, height: 112))
                 Group {
                     if isUploadingAvatar { ProgressView().controlSize(.small).tint(.black) }
                     else { Image(systemName: "camera.fill").font(.system(size: 12, weight: .bold)) }

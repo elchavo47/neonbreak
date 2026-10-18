@@ -681,7 +681,7 @@ struct ShowcasePickerSheet: View {
 
 // MARK: - Rütbe rozetleri
 
-/// Rütbe rozeti: 7 kademe. 1-6 sabit rozet (Freepik), 7. kademe (SINGULARITY) hareketli altın çerçeve (LottieFiles, Lottie Simple License).
+/// Rütbe rozeti: 7 kademe, 6 rozet (Freepik). 7. kademe (SINGULARITY) 6. rozeti parlamayla kullanır.
 struct RankBadge: View {
     let rank: Int
     var size: CGFloat = 56
@@ -703,37 +703,24 @@ struct RankBadge: View {
 
     var body: some View {
         let t = Self.tier(rank)
-        if t < 7 {
-            Image("Rank\(t)").resizable().interpolation(.high).scaledToFit()
-                .frame(width: size, height: size)
-                .overlay(alignment: .bottom) {
-                    if showNumber {
-                        Text(verbatim: "\(rank)")
-                            .font(.system(size: max(9, size * 0.2), weight: .black, design: .rounded)).monospacedDigit()
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, size * 0.08).frame(minWidth: size * 0.32, minHeight: size * 0.26)
-                            .background(Capsule().fill(Color.black.opacity(0.75)))
-                            .overlay(Capsule().stroke(Color.white.opacity(0.35), lineWidth: 1))
-                            .offset(y: size * 0.06)
-                    }
+        Image("Rank\(min(6, t))").resizable().interpolation(.high).scaledToFit()
+            .frame(width: size, height: size)
+            .shadow(color: t == 7 ? Color.purple.opacity(0.9) : .clear, radius: t == 7 ? size * 0.18 : 0)
+            .overlay(alignment: .bottom) {
+                if showNumber {
+                    Text(verbatim: "\(rank)")
+                        .font(.system(size: max(9, size * 0.2), weight: .black, design: .rounded)).monospacedDigit()
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, size * 0.08).frame(minWidth: size * 0.32, minHeight: size * 0.26)
+                        .background(Capsule().fill(Color.black.opacity(0.75)))
+                        .overlay(Capsule().stroke(t == 7 ? Color.orange : Color.white.opacity(0.35), lineWidth: 1))
+                        .offset(y: size * 0.06)
                 }
-        } else {
-            LegendRankFrame(width: size * 1.5)
-                .overlay(alignment: .center) {
-                    if showNumber {
-                        Text(verbatim: "\(rank)")
-                            .font(.system(size: max(10, size * 0.3), weight: .black, design: .rounded)).monospacedDigit()
-                            .foregroundStyle(LinearGradient(colors: [Color(red: 1, green: 0.95, blue: 0.6), .orange], startPoint: .top, endPoint: .bottom))
-                            .shadow(color: .orange.opacity(0.8), radius: 4)
-                            .offset(y: -size * 0.06)
-                    }
-                }
-                .frame(width: size * 1.5, height: size)
-        }
+            }
     }
 }
 
-/// Hareketli efsane çerçevesi: 96 karelik sprite (24 fps, 4 sn döngü).
+/// Haftanın birincisinin hareketli çerçevesi (LottieFiles, Lottie Simple License): 96 karelik sprite (24 fps, 4 sn döngü).
 struct LegendRankFrame: View {
     var width: CGFloat = 90
     private static let frames: [UIImage] = {
@@ -780,7 +767,7 @@ struct RankLadderSheet: View {
                             let isCurrent = RankBadge.tier(currentRank) == tier
                             HStack(spacing: 14) {
                                 RankBadge(rank: tier == 7 ? max(30, currentRank) : start, size: 60, showNumber: false)
-                                    .frame(width: 92)
+                                    .frame(width: 70)
                                     .saturation(reached ? 1 : 0).opacity(reached ? 1 : 0.45)
                                 VStack(alignment: .leading, spacing: 3) {
                                     Text(L(names[idx])).font(.system(size: 17, weight: .black, design: .rounded))

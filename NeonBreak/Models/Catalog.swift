@@ -709,7 +709,15 @@ struct AvatarFrameRing: View {
 
     var body: some View {
         let colors = Cosmetic.frameColors(frame)
-        if !colors.isEmpty {
+        if frame == "weekly1" {
+            // Haftanın birincisi: hareketli altın kanatlı çerçeve (halkanın içi fotoğrafa oturur).
+            GeometryReader { g in
+                let d = min(g.size.width, g.size.height)
+                LegendRankFrame(width: d * 1.0 / 0.394)
+                    .position(x: g.size.width / 2, y: g.size.height / 2)
+            }
+            .allowsHitTesting(false)
+        } else if !colors.isEmpty {
             if animated && frame == "flame" {
                 FlameFrameRing(colors: colors, lineWidth: lineWidth)
             } else if animated && frame == "storm" {

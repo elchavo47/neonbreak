@@ -465,7 +465,11 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         cellH = max(22, min(widthCell * 0.92, heightCell))
         gridLeft = side
         launcherY = bottomPad
-        dangerY = launcherY + cellH * dangerRows
+        // Uzun ekranlarda hücreler genişliğe göre sınırlanır ve üstte boşluk kalır. Izgara (ve bariyer)
+        // yukarı kaydırılır; en üstte en fazla bir satırlık boşluk bırakılır, fazlası atış alanına geçer.
+        let used = bottomPad + cellH * (dangerRows + rows) + topPad
+        let lift = max(0, size.height - used - cellH)
+        dangerY = launcherY + cellH * dangerRows + lift
         gridTop = dangerY + cellH * rows
         ballRadius = max(5.5, min(9.5, cellH * 0.15))
         baseBallSpeed = cellH * 11.5

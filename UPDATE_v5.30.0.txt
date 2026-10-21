@@ -1,0 +1,8 @@
+NeonBreak v5.30.0 (App Store 1.0.2)
+
+- Mağazaya yeni "İZLER" sekmesi: top arkası iz efektleri (Ateş, Yıldız Tozu, Şimşek,
+  Gölge, Kuyruklu Yıldız, Gökkuşağı). Yalnızca görünüm; hasarı ve hızı değiştirmez.
+  Parçacıklar sahadaki ilk 24 topta (premium efektler kapalıysa 8) açılır, kare hızı korunur.
+- Uzun ekranlarda blok ızgarası yukarı alındı: üstte en fazla bir satır boşluk kalır,
+  artan yer atış alanına geçer. Kısa ekranlarda değişiklik yok.
+- Backend v2.8.0 gerekir (izler mağaza kataloğunda, 'trail' kategorisi).

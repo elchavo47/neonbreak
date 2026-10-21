@@ -130,8 +130,14 @@ struct ContentView: View {
             guard showSplash else { return }
             try? await Task.sleep(nanoseconds: 1_450_000_000)
             withAnimation(.easeOut(duration: 0.42)) { showSplash = false }
+            MusicManager.shared.play(route == .game ? .game : .menu)
+        }
+        .onChange(of: route) { next in
+            MusicManager.shared.play(next == .game ? .game : .menu)
         }
         .onChange(of: scenePhase) { phase in
+            if phase == .background { MusicManager.shared.suspend() }
+            if phase == .active { MusicManager.shared.resume() }
             if phase == .background {
                 NotificationManager.reschedule(dailyAvailable: store.daily?.available ?? false, hasUnfinishedRun: RunSnapshot.load() != nil)
             }

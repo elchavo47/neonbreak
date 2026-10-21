@@ -13,6 +13,8 @@ final class Persistence {
         static let selectedBall = "selectedBall"
         static let selectedBackground = "selectedBackground"
         static let soundEnabled = "soundEnabled"
+        static let musicEnabled = "musicEnabled"
+        static let musicVolume = "musicVolume"
         static let hapticsEnabled = "hapticsEnabled"
         static let hapticIntensity = "hapticIntensity"
         static let aimGuideEnabled = "aimGuideEnabled"
@@ -90,6 +92,17 @@ final class Persistence {
     var soundEnabled: Bool {
         get { defaults.object(forKey: Keys.soundEnabled) as? Bool ?? true }
         set { defaults.set(newValue, forKey: Keys.soundEnabled) }
+    }
+
+    var musicEnabled: Bool {
+        get { defaults.object(forKey: Keys.musicEnabled) as? Bool ?? true }
+        set { defaults.set(newValue, forKey: Keys.musicEnabled) }
+    }
+
+    /// 0...1, varsayılan orta seviye.
+    var musicVolume: Double {
+        get { min(1, max(0, defaults.object(forKey: Keys.musicVolume) as? Double ?? 0.6)) }
+        set { defaults.set(min(1, max(0, newValue)), forKey: Keys.musicVolume) }
     }
 
     var hapticsEnabled: Bool {

@@ -1064,3 +1064,5 @@
 "%@ / %@ XP" = "%@ / %@ XP";
 "Rütbe %lld+" = "Ранг %lld+";
 "Rütbeler" = "Ранги";
+"Müzik" = "Музыка";
+"Menüde ve oyunda arka plan müziği" = "Фоновая музыка в меню и в игре";

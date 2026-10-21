@@ -260,6 +260,7 @@ private struct GameSettingsPage: View {
 
     var body: some View {
         SettingsPage(title: "Oyun") {
+            MusicCard()
             ToggleCard(icon: "speaker.wave.2.fill", title: L("Ses Efektleri"), subtitle: L("Vuruş, kırılma, bonus ve atış sesleri"), isOn: $appState.soundEnabled)
             HapticCard()
             FPSCard()
@@ -325,6 +326,34 @@ private struct FPSCard: View {
             return LS("Bu cihaz en fazla \(maxFPS) Hz destekliyor; oyun desteklenen en yüksek değerde çalışır.")
         }
         return L("Seçim yeni oyuna girildiğinde gerçek SKView preferredFramesPerSecond değerine uygulanır.")
+    }
+}
+
+private struct MusicCard: View {
+    @EnvironmentObject private var appState: AppState
+
+    var body: some View {
+        let accent = Color(hex: appState.selectedBackground.accentHex)
+        GlassCard {
+            VStack(spacing: 14) {
+                HStack(spacing: 12) {
+                    GameSymbol(name: "music.note", size: 21, weight: .bold).foregroundStyle(accent)
+                        .frame(width: 42, height: 42).background(accent.opacity(0.1), in: RoundedRectangle(cornerRadius: 13))
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(L("Müzik")).font(.system(size: 15, weight: .bold, design: .rounded))
+                        Text(L("Menüde ve oyunda arka plan müziği")).font(.caption).foregroundStyle(.white.opacity(0.45))
+                    }
+                    Spacer(); Toggle("", isOn: $appState.musicEnabled).labelsHidden()
+                }
+                HStack(spacing: 10) {
+                    Image(systemName: "speaker.fill").font(.system(size: 11, weight: .bold)).foregroundStyle(.white.opacity(0.35))
+                    Slider(value: $appState.musicVolume, in: 0...1, step: 0.05).tint(accent)
+                    Image(systemName: "speaker.wave.3.fill").font(.system(size: 11, weight: .bold)).foregroundStyle(.white.opacity(0.35))
+                }
+                .disabled(!appState.musicEnabled)
+                .opacity(appState.musicEnabled ? 1 : 0.35)
+            }
+        }
     }
 }
 

@@ -287,7 +287,9 @@ private struct GameRoundContent: View {
         .onDisappear {
             scene.onStableState = nil
             scene.setUserPaused(true)
+            MusicManager.shared.setDucked(false)
         }
+        .onChange(of: isPaused) { paused in MusicManager.shared.setDucked(paused) }
         .alert(Text("Reklam izle, 1 tane kazan"), isPresented: Binding(get: { adOffer != nil }, set: { if !$0 { adOffer = nil } }), presenting: adOffer) { kind in
             Button("Reklamı izle") { earnPowerUpWithAd(kind) }
             Button("Vazgeç", role: .cancel) { setPaused(false) }
@@ -323,6 +325,7 @@ private struct GameRoundContent: View {
         guard !session.isGameOver else { return }
         isPaused = paused
         scene.setUserPaused(paused)
+        MusicManager.shared.setDucked(paused)
     }
 
     /// Her tur sonunda oyunu kaydeder; uygulama kapansa da kaldığı yerden devam edilir.

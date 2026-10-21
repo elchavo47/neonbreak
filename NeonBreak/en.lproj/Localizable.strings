@@ -1064,3 +1064,5 @@
 "%@ / %@ XP" = "%@ / %@ XP";
 "Rütbe %lld+" = "Rank %lld+";
 "Rütbeler" = "Ranks";
+"Müzik" = "Music";
+"Menüde ve oyunda arka plan müziği" = "Background music in menus and in game";

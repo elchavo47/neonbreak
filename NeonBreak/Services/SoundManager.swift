@@ -90,3 +90,145 @@ final class SoundManager: NSObject, AVAudioPlayerDelegate {
         nextVoice[assetName] = (index + 1) % pool.count
     }
 }
+
+// MARK: - Arka plan müziği
+
+/// Arka plan müziği: menüde sakin parça, oyunda tempolu parça.
+/// Parçalar arasında ve döngü başa dönerken yumuşak geçiş yapar (atlama duyulmaz).
+/// Ses oturumu SoundManager'daki gibi `.ambient`: telefon sessizdeyken susar,
+/// kullanıcının kendi müziğini kesmez.
+final class MusicManager {
+    static let shared = MusicManager()
+
+    enum Track: String {
+        case menu = "MusicMenu"
+        case game = "MusicGame"
+    }
+
+    /// Ayarlardaki ses seviyesinin üst sınırı (efektlerin üstüne çıkmasın).
+    private let baseVolume: Float = 0.55
+    private let switchFade: TimeInterval = 0.9
+    private let loopFade: TimeInterval = 2.2
+
+    private var track: Track?
+    private var player: AVAudioPlayer?
+    private var fadingOut: [AVAudioPlayer] = []
+    private var loopTimer: Timer?
+    private var assetData: [Track: Data] = [:]
+
+    /// Reklam ya da uygulama arka plandayken müzik durur.
+    private var suspended = false
+    /// Oyun duraklatılınca müzik kısılır.
+    private var ducked = false
+
+    private init() {
+        NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification, object: nil, queue: .main) { [weak self] note in
+            guard let raw = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
+                  AVAudioSession.InterruptionType(rawValue: raw) == .ended else { return }
+            self?.resumeIfNeeded()
+        }
+    }
+
+    private var enabled: Bool { Persistence.shared.musicEnabled }
+    private var targetVolume: Float {
+        Float(Persistence.shared.musicVolume) * baseVolume * (ducked ? 0.35 : 1)
+    }
+
+    // MARK: Dışarıdan
+
+    func play(_ next: Track) {
+        dispatchPrecondition(condition: .onQueue(.main))
+        if track == next, player?.isPlaying == true { return }
+        track = next
+        guard enabled, !suspended else { stopAll(fade: switchFade); return }
+        startFresh(fadeIn: player == nil ? 1.4 : switchFade)
+    }
+
+    /// Ayar değişince (aç/kapa, ses seviyesi).
+    func settingsChanged() {
+        dispatchPrecondition(condition: .onQueue(.main))
+        if !enabled {
+            stopAll(fade: 0.4)
+        } else if let player, player.isPlaying {
+            player.setVolume(targetVolume, fadeDuration: 0.15)
+        } else if !suspended, track != nil {
+            startFresh(fadeIn: 0.6)
+        }
+    }
+
+    func setDucked(_ value: Bool) {
+        guard ducked != value else { return }
+        ducked = value
+        player?.setVolume(targetVolume, fadeDuration: 0.35)
+    }
+
+    /// Ödüllü reklam açılırken ve uygulama arka plana geçerken.
+    func suspend() {
+        suspended = true
+        stopAll(fade: 0.25)
+    }
+
+    func resume() {
+        suspended = false
+        resumeIfNeeded()
+    }
+
+    // MARK: İç işler
+
+    private func resumeIfNeeded() {
+        guard enabled, !suspended, track != nil, player?.isPlaying != true else { return }
+        startFresh(fadeIn: 1.0)
+    }
+
+    private func makePlayer(for track: Track) -> AVAudioPlayer? {
+        if assetData[track] == nil { assetData[track] = NSDataAsset(name: track.rawValue)?.data }
+        guard let data = assetData[track], let player = try? AVAudioPlayer(data: data) else { return nil }
+        player.numberOfLoops = 0
+        player.volume = 0
+        player.prepareToPlay()
+        return player
+    }
+
+    /// Yeni bir oynatıcıyla baştan başlar; eskisi (varsa) kısılarak kapanır.
+    private func startFresh(fadeIn: TimeInterval) {
+        guard let track, let next = makePlayer(for: track) else { return }
+        if let old = player { fadeOutAndStop(old, duration: fadeIn) }
+        player = next
+        next.play()
+        next.setVolume(targetVolume, fadeDuration: fadeIn)
+        scheduleLoopCheck()
+    }
+
+    private func fadeOutAndStop(_ old: AVAudioPlayer, duration: TimeInterval) {
+        fadingOut.append(old)
+        old.setVolume(0, fadeDuration: duration)
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration + 0.1) { [weak self] in
+            old.stop()
+            self?.fadingOut.removeAll { $0 === old }
+        }
+    }
+
+    private func stopAll(fade: TimeInterval) {
+        loopTimer?.invalidate()
+        loopTimer = nil
+        if let player { fadeOutAndStop(player, duration: fade) }
+        player = nil
+    }
+
+    /// Parça bitmeden baştan başlayan ikinci kopyaya geçilir: döngü sırasında sessizlik ya da atlama olmaz.
+    private func scheduleLoopCheck() {
+        loopTimer?.invalidate()
+        let timer = Timer(timeInterval: 0.25, repeats: true) { [weak self] _ in
+            guard let self, let player = self.player else { return }
+            if player.duration > self.loopFade * 2, player.currentTime >= player.duration - self.loopFade {
+                self.startFresh(fadeIn: self.loopFade)
+            } else if !player.isPlaying, !self.suspended, self.enabled {
+                // Başka bir sebeple durduysa (ör. kesinti) yeniden başlat.
+                self.startFresh(fadeIn: 0.8)
+            }
+        }
+        // Mağazada kaydırırken de çalışsın (varsayılan mod kaydırma sırasında durur).
+        RunLoop.main.add(timer, forMode: .common)
+        loopTimer = timer
+    }
+}

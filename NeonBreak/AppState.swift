@@ -31,6 +31,12 @@ final class AppState: ObservableObject {
     @Published var soundEnabled: Bool {
         didSet { Persistence.shared.soundEnabled = soundEnabled }
     }
+    @Published var musicEnabled: Bool {
+        didSet { Persistence.shared.musicEnabled = musicEnabled; MusicManager.shared.settingsChanged() }
+    }
+    @Published var musicVolume: Double {
+        didSet { Persistence.shared.musicVolume = musicVolume; MusicManager.shared.settingsChanged() }
+    }
     @Published var hapticsEnabled: Bool {
         didSet { Persistence.shared.hapticsEnabled = hapticsEnabled }
     }
@@ -53,6 +59,8 @@ final class AppState: ObservableObject {
         selectedBallID = Persistence.shared.selectedBallID
         selectedBackgroundID = Persistence.shared.selectedBackgroundID
         soundEnabled = Persistence.shared.soundEnabled
+        musicEnabled = Persistence.shared.musicEnabled
+        musicVolume = Persistence.shared.musicVolume
         if !UserDefaults.standard.bool(forKey: "haptics.defaultOff.v440") {
             Persistence.shared.hapticsEnabled = false
             UserDefaults.standard.set(true, forKey: "haptics.defaultOff.v440")
@@ -214,6 +222,7 @@ final class RewardedAds: NSObject, ObservableObject {
         self.completion = completion
         didEarnReward = false
         isReady = false
+        MusicManager.shared.suspend()
         ad.present(from: Self.topViewController()) { [weak self] in
             self?.didEarnReward = true
         }
@@ -258,6 +267,7 @@ final class RewardedAds: NSObject, ObservableObject {
     }
 
     private func finish() {
+        MusicManager.shared.resume()
         let earned = didEarnReward
         let callback = completion
         completion = nil

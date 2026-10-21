@@ -196,6 +196,9 @@ struct ContentView: View {
             if let productID = appState.selectedBackground.productID, !store.isUnlocked(productID: productID) {
                 appState.selectedBackgroundID = "midnight"
             }
+            if !appState.selectedTrail.isFree, !store.isOwned(itemKey: appState.selectedTrail.itemKey) {
+                appState.selectedTrailID = "standard"
+            }
         }
         .sheet(isPresented: $showSettings) {
             SettingsView()

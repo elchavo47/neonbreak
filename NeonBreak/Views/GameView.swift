@@ -35,7 +35,8 @@ private final class GameHolder {
         self.session = session
         self.ticket = ticket
         self.baseElapsed = snapshot?.elapsedSeconds ?? 0
-        self.scene = GameScene(session: session, ballSkin: ballSkin, theme: theme, config: config, aimGuideEnabled: aimGuideEnabled, premiumEffectsEnabled: premiumEffectsEnabled, snapshot: snapshot)
+        let trail = BallTrail.all.first(where: { $0.id == Persistence.shared.selectedTrailID }) ?? BallTrail.all[0]
+        self.scene = GameScene(session: session, ballSkin: ballSkin, theme: theme, config: config, aimGuideEnabled: aimGuideEnabled, premiumEffectsEnabled: premiumEffectsEnabled, trail: trail, snapshot: snapshot)
     }
 }
 

@@ -28,6 +28,9 @@ final class AppState: ObservableObject {
     @Published var selectedBackgroundID: String {
         didSet { Persistence.shared.selectedBackgroundID = selectedBackgroundID }
     }
+    @Published var selectedTrailID: String {
+        didSet { Persistence.shared.selectedTrailID = selectedTrailID }
+    }
     @Published var soundEnabled: Bool {
         didSet { Persistence.shared.soundEnabled = soundEnabled }
     }
@@ -58,6 +61,7 @@ final class AppState: ObservableObject {
     init() {
         selectedBallID = Persistence.shared.selectedBallID
         selectedBackgroundID = Persistence.shared.selectedBackgroundID
+        selectedTrailID = Persistence.shared.selectedTrailID
         soundEnabled = Persistence.shared.soundEnabled
         musicEnabled = Persistence.shared.musicEnabled
         musicVolume = Persistence.shared.musicVolume
@@ -75,6 +79,10 @@ final class AppState: ObservableObject {
 
     var selectedBall: BallSkin {
         BallSkin.all.first(where: { $0.id == selectedBallID }) ?? BallSkin.all[0]
+    }
+
+    var selectedTrail: BallTrail {
+        BallTrail.all.first(where: { $0.id == selectedTrailID }) ?? BallTrail.all[0]
     }
 
     var selectedBackground: BackgroundTheme {

@@ -17,6 +17,7 @@ struct ShopView: View {
     enum ShopTab: String, CaseIterable, Identifiable {
         case balls = "TOPLAR"
         case backgrounds = "DÜNYALAR"
+        case trails = "İZLER"
         case powerups = "GÜÇLER"
         case bundles = "PAKETLER"
         var id: String { rawValue }
@@ -38,6 +39,8 @@ struct ShopView: View {
     private var ballsOwned: [BallSkin] { BallSkin.all.filter { isBallOwned($0) } }
     private var backgroundsForSale: [BackgroundTheme] { BackgroundTheme.all.filter { !isBackgroundOwned($0) }.sorted { price("background.\($0.id)") < price("background.\($1.id)") } }
     private var backgroundsOwned: [BackgroundTheme] { BackgroundTheme.all.filter { isBackgroundOwned($0) } }
+    private var trailsForSale: [BallTrail] { BallTrail.all.filter { !isTrailOwned($0) }.sorted { price($0.itemKey) < price($1.itemKey) } }
+    private var trailsOwned: [BallTrail] { BallTrail.all.filter { isTrailOwned($0) } }
 
     /// Bakiye yetmiyorsa kartta "şu kadar coin kaldı" ve ilerleme çubuğu.
     @ViewBuilder
@@ -93,6 +96,11 @@ struct ShopView: View {
                             ForEach(backgroundsForSale) { backgroundCard($0) }
                             if !backgroundsOwned.isEmpty { ownedDivider(backgroundsOwned.count) }
                             ForEach(backgroundsOwned) { backgroundCard($0) }
+                        case .trails:
+                            sectionHeader(L("İZ KOLEKSİYONU"), owned: trailsOwned.count, total: BallTrail.all.count)
+                            ForEach(trailsForSale) { trailCard($0) }
+                            if !trailsOwned.isEmpty { ownedDivider(trailsOwned.count) }
+                            ForEach(trailsOwned) { trailCard($0) }
                         case .powerups:
                             adPowerCard
                             if powerupItems.isEmpty { emptyState } else { ForEach(powerupItems) { powerupCard($0) } }
@@ -235,6 +243,45 @@ struct ShopView: View {
 
     private func isBallOwned(_ skin: BallSkin) -> Bool {
         skin.productID == nil || store.isOwned(itemKey: "ball.\(skin.id)")
+    }
+
+    private func isTrailOwned(_ trail: BallTrail) -> Bool {
+        trail.isFree || store.isOwned(itemKey: trail.itemKey)
+    }
+
+    private func trailCard(_ trail: BallTrail) -> some View {
+        let selected = appState.selectedTrailID == trail.id
+        let accent = Color(hex: trail.primaryHex)
+        return HStack(spacing: 12) {
+            TrailPreview(trail: trail, ball: appState.selectedBall)
+                .frame(width: 76, height: 76)
+                .background(Color.black.opacity(0.35), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(accent.opacity(0.35), lineWidth: 1))
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 7) {
+                    Text(trail.name.uppercased())
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                    Text(trail.rarity)
+                        .font(.system(size: 9, weight: .bold, design: .rounded))
+                        .foregroundStyle(accent)
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(accent.opacity(0.14), in: Capsule())
+                }
+                Text(trail.subtitle)
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.5)).lineLimit(2)
+                Text(L("Yalnızca görünüm • hasarı değiştirmez"))
+                    .font(.system(size: 11, weight: .bold, design: .rounded)).foregroundStyle(accent)
+                affordHint(trail.itemKey, accent: accent)
+            }
+            Spacer(minLength: 4)
+            cosmeticAction(key: trail.itemKey, name: trail.name, owned: isTrailOwned(trail), selected: selected, accent: accent) {
+                appState.selectedTrailID = trail.id
+            }
+        }
+        .padding(14)
+        .background(cardBackground(selected: selected, accent: accent))
     }
 
     private func isBackgroundOwned(_ theme: BackgroundTheme) -> Bool {
@@ -733,6 +780,64 @@ struct ShopView: View {
                 .foregroundStyle(.white.opacity(0.45))
                 .padding(.horizontal, 10).frame(minHeight: 36)
                 .background(Color.white.opacity(0.06), in: Capsule())
+        }
+    }
+}
+
+/// Mağaza kartında izin küçük, canlı önizlemesi: seçili top, arkasında seçilen iz.
+struct TrailPreview: View {
+    let trail: BallTrail
+    let ball: BallSkin
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { context in
+            let t = context.date.timeIntervalSinceReferenceDate
+            Canvas { ctx, size in
+                let center = CGPoint(x: size.width * 0.72, y: size.height * 0.36 + CGFloat(sin(t * 2.2)) * 3)
+                let angle = CGFloat.pi * 0.78
+                let length = size.width * (trail.style == .comet ? 0.78 : 0.56)
+                let tailEnd = CGPoint(x: center.x + cos(angle) * length, y: center.y + sin(angle) * length)
+                let primary = Color(hex: trail.primaryHex)
+                let secondary = Color(hex: trail.secondaryHex)
+                let tailColors: [Color]
+                if trail.style == .rainbow {
+                    let shift = t.truncatingRemainder(dividingBy: 1.2) / 1.2
+                    tailColors = (0..<6).map { Color(hue: (Double($0) / 6 + shift).truncatingRemainder(dividingBy: 1), saturation: 0.85, brightness: 1) }
+                } else if trail.style == .standard {
+                    tailColors = [Color(hex: ball.trailHex).opacity(0), Color(hex: ball.trailHex)]
+                } else {
+                    tailColors = [secondary.opacity(0), secondary, primary]
+                }
+                var path = Path()
+                path.move(to: center)
+                path.addLine(to: tailEnd)
+                ctx.drawLayer { layer in
+                    layer.addFilter(.blur(radius: 1.5))
+                    layer.stroke(path, with: .linearGradient(Gradient(colors: tailColors), startPoint: tailEnd, endPoint: center), style: StrokeStyle(lineWidth: trail.style == .comet ? 9 : 7, lineCap: .round))
+                }
+
+                if trail.style != .standard {
+                    // Parçacıklar: iz boyunca sabit tohumlu, zamanla kayan noktalar.
+                    for i in 0..<14 {
+                        let seed = Double(i) * 12.9898
+                        let phase = (t * (trail.style == .electric ? 3.2 : 1.1) + seed).truncatingRemainder(dividingBy: 1)
+                        let along = CGFloat(phase)
+                        let jitter = CGFloat(sin(seed * 3.1 + t * 4)) * (trail.style == .electric ? 9 : 5)
+                        let p = CGPoint(x: center.x + cos(angle) * length * along + cos(angle + .pi / 2) * jitter,
+                                        y: center.y + sin(angle) * length * along + sin(angle + .pi / 2) * jitter + (trail.style == .fire ? -along * 10 : 0))
+                        let r = (trail.style == .shadow ? 5.0 : 2.2) * (1 - along * 0.7)
+                        let color: Color = trail.style == .rainbow
+                            ? Color(hue: Double(i) / 14, saturation: 0.85, brightness: 1)
+                            : (i % 2 == 0 ? primary : secondary)
+                        ctx.fill(Path(ellipseIn: CGRect(x: p.x - r, y: p.y - r, width: r * 2, height: r * 2)), with: .color(color.opacity(Double(1 - along) * (trail.style == .shadow ? 0.5 : 0.95))))
+                    }
+                }
+                if let image = ctx.resolveSymbol(id: 0) {
+                    ctx.draw(image, at: center)
+                }
+            } symbols: {
+                Image(ball.textureName).resizable().scaledToFit().frame(width: 26, height: 26).tag(0)
+            }
         }
     }
 }

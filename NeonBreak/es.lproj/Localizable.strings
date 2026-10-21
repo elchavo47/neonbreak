@@ -1066,3 +1066,22 @@
 "Rütbeler" = "Rangos";
 "Müzik" = "Música";
 "Menüde ve oyunda arka plan müziği" = "Música de fondo en el menú y en el juego";
+
+/* Top izleri */
+"İZLER" = "ESTELAS";
+"İZ KOLEKSİYONU" = "COLECCIÓN DE ESTELAS";
+"Yalnızca görünüm • hasarı değiştirmez" = "Solo estética • no cambia el daño";
+"Standart" = "Estándar";
+"Topunun kendi neon izi" = "La estela neón propia de tu bola";
+"Ateş" = "Fuego";
+"Arkasında kor ve kıvılcım bırakır" = "Deja brasas y chispas a su paso";
+"Yıldız Tozu" = "Polvo de estrellas";
+"Parıldayan altın ve beyaz tozlar" = "Polvo dorado y blanco brillante";
+"Şimşek" = "Relámpago";
+"Çıtırdayan mavi elektrik kıvılcımları" = "Chispas eléctricas azules crepitantes";
+"Gölge" = "Sombra";
+"Mor dumandan karanlık bir iz" = "Una estela oscura de humo morado";
+"Kuyruklu Yıldız" = "Cometa";
+"Uzun, parlak bir kuyruk ve ışık serpintisi" = "Una cola larga y brillante con lluvia de luz";
+"Gökkuşağı" = "Arcoíris";
+"Renkten renge akan bir iz" = "Una estela que fluye de color en color";

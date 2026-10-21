@@ -1066,3 +1066,22 @@
 "Rütbeler" = "Patentes";
 "Müzik" = "Música";
 "Menüde ve oyunda arka plan müziği" = "Música de fundo no menu e no jogo";
+
+/* Top izleri */
+"İZLER" = "RASTROS";
+"İZ KOLEKSİYONU" = "COLEÇÃO DE RASTROS";
+"Yalnızca görünüm • hasarı değiştirmez" = "Só visual • não muda o dano";
+"Standart" = "Padrão";
+"Topunun kendi neon izi" = "O rastro neon da sua bola";
+"Ateş" = "Fogo";
+"Arkasında kor ve kıvılcım bırakır" = "Deixa brasas e faíscas para trás";
+"Yıldız Tozu" = "Poeira estelar";
+"Parıldayan altın ve beyaz tozlar" = "Poeira dourada e branca brilhante";
+"Şimşek" = "Relâmpago";
+"Çıtırdayan mavi elektrik kıvılcımları" = "Faíscas elétricas azuis crepitantes";
+"Gölge" = "Sombra";
+"Mor dumandan karanlık bir iz" = "Um rastro escuro de fumaça roxa";
+"Kuyruklu Yıldız" = "Cometa";
+"Uzun, parlak bir kuyruk ve ışık serpintisi" = "Uma cauda longa e brilhante com chuva de luz";
+"Gökkuşağı" = "Arco-íris";
+"Renkten renge akan bir iz" = "Um rastro que flui de cor em cor";

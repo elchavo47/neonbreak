@@ -1066,3 +1066,22 @@
 "Rütbeler" = "Ранги";
 "Müzik" = "Музыка";
 "Menüde ve oyunda arka plan müziği" = "Фоновая музыка в меню и в игре";
+
+/* Top izleri */
+"İZLER" = "СЛЕДЫ";
+"İZ KOLEKSİYONU" = "КОЛЛЕКЦИЯ СЛЕДОВ";
+"Yalnızca görünüm • hasarı değiştirmez" = "Только внешний вид • урон не меняется";
+"Standart" = "Стандарт";
+"Topunun kendi neon izi" = "Собственный неоновый след шара";
+"Ateş" = "Огонь";
+"Arkasında kor ve kıvılcım bırakır" = "Оставляет угли и искры";
+"Yıldız Tozu" = "Звёздная пыль";
+"Parıldayan altın ve beyaz tozlar" = "Сверкающая золотая и белая пыль";
+"Şimşek" = "Молния";
+"Çıtırdayan mavi elektrik kıvılcımları" = "Трещащие синие электрические искры";
+"Gölge" = "Тень";
+"Mor dumandan karanlık bir iz" = "Тёмный след фиолетового дыма";
+"Kuyruklu Yıldız" = "Комета";
+"Uzun, parlak bir kuyruk ve ışık serpintisi" = "Длинный яркий хвост и россыпь света";
+"Gökkuşağı" = "Радуга";
+"Renkten renge akan bir iz" = "След, переливающийся всеми цветами";

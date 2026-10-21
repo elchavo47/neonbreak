@@ -1066,3 +1066,22 @@
 "Rütbeler" = "Ranks";
 "Müzik" = "Music";
 "Menüde ve oyunda arka plan müziği" = "Background music in menus and in game";
+
+/* Top izleri */
+"İZLER" = "TRAILS";
+"İZ KOLEKSİYONU" = "TRAIL COLLECTION";
+"Yalnızca görünüm • hasarı değiştirmez" = "Looks only • doesn't change damage";
+"Standart" = "Standard";
+"Topunun kendi neon izi" = "Your ball's own neon trail";
+"Ateş" = "Fire";
+"Arkasında kor ve kıvılcım bırakır" = "Leaves embers and sparks behind";
+"Yıldız Tozu" = "Stardust";
+"Parıldayan altın ve beyaz tozlar" = "Sparkling gold and white dust";
+"Şimşek" = "Lightning";
+"Çıtırdayan mavi elektrik kıvılcımları" = "Crackling blue electric sparks";
+"Gölge" = "Shadow";
+"Mor dumandan karanlık bir iz" = "A dark trail of purple smoke";
+"Kuyruklu Yıldız" = "Comet";
+"Uzun, parlak bir kuyruk ve ışık serpintisi" = "A long, bright tail with a shower of light";
+"Gökkuşağı" = "Rainbow";
+"Renkten renge akan bir iz" = "A trail that flows from color to color";

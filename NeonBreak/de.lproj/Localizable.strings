@@ -1066,3 +1066,22 @@
 "Rütbeler" = "Ränge";
 "Müzik" = "Musik";
 "Menüde ve oyunda arka plan müziği" = "Hintergrundmusik im Menü und im Spiel";
+
+/* Top izleri */
+"İZLER" = "SPUREN";
+"İZ KOLEKSİYONU" = "SPUREN-SAMMLUNG";
+"Yalnızca görünüm • hasarı değiştirmez" = "Nur Optik • ändert den Schaden nicht";
+"Standart" = "Standard";
+"Topunun kendi neon izi" = "Die eigene Neonspur deines Balls";
+"Ateş" = "Feuer";
+"Arkasında kor ve kıvılcım bırakır" = "Hinterlässt Glut und Funken";
+"Yıldız Tozu" = "Sternenstaub";
+"Parıldayan altın ve beyaz tozlar" = "Funkelnder goldener und weißer Staub";
+"Şimşek" = "Blitz";
+"Çıtırdayan mavi elektrik kıvılcımları" = "Knisternde blaue Elektrofunken";
+"Gölge" = "Schatten";
+"Mor dumandan karanlık bir iz" = "Eine dunkle Spur aus violettem Rauch";
+"Kuyruklu Yıldız" = "Komet";
+"Uzun, parlak bir kuyruk ve ışık serpintisi" = "Ein langer, heller Schweif mit Lichtregen";
+"Gökkuşağı" = "Regenbogen";
+"Renkten renge akan bir iz" = "Eine Spur, die von Farbe zu Farbe fließt";

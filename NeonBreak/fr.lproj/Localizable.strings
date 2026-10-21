@@ -1066,3 +1066,22 @@
 "Rütbeler" = "Rangs";
 "Müzik" = "Musique";
 "Menüde ve oyunda arka plan müziği" = "Musique de fond dans les menus et en jeu";
+
+/* Top izleri */
+"İZLER" = "TRAÎNÉES";
+"İZ KOLEKSİYONU" = "COLLECTION DE TRAÎNÉES";
+"Yalnızca görünüm • hasarı değiştirmez" = "Esthétique uniquement • ne change pas les dégâts";
+"Standart" = "Standard";
+"Topunun kendi neon izi" = "La traînée néon de ta balle";
+"Ateş" = "Feu";
+"Arkasında kor ve kıvılcım bırakır" = "Laisse des braises et des étincelles";
+"Yıldız Tozu" = "Poussière d'étoiles";
+"Parıldayan altın ve beyaz tozlar" = "Poussière dorée et blanche scintillante";
+"Şimşek" = "Éclair";
+"Çıtırdayan mavi elektrik kıvılcımları" = "Étincelles électriques bleues crépitantes";
+"Gölge" = "Ombre";
+"Mor dumandan karanlık bir iz" = "Une traînée sombre de fumée violette";
+"Kuyruklu Yıldız" = "Comète";
+"Uzun, parlak bir kuyruk ve ışık serpintisi" = "Une longue queue brillante et une pluie de lumière";
+"Gökkuşağı" = "Arc-en-ciel";
+"Renkten renge akan bir iz" = "Une traînée qui passe d'une couleur à l'autre";

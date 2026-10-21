@@ -522,6 +522,42 @@ struct BackgroundTheme: Identifiable, Hashable {
     ] as [BackgroundTheme] } }
 }
 
+enum TrailStyle: String, Hashable {
+    /// Topun kendi izi (ücretsiz).
+    case standard
+    case fire
+    case stardust
+    case rainbow
+    case electric
+    case comet
+    case shadow
+}
+
+/// Top arkası iz efekti: topun rengini değiştirmez, yalnızca arkasındaki izi değiştirir.
+/// Mağazada coin ile satılır (sunucu anahtarı "trail.<id>").
+struct BallTrail: Identifiable, Hashable {
+    let id: String
+    let name: String
+    let subtitle: String
+    let style: TrailStyle
+    let primaryHex: UInt32
+    let secondaryHex: UInt32
+    let rarity: String
+
+    var itemKey: String { "trail.\(id)" }
+    var isFree: Bool { style == .standard }
+
+    static var all: [BallTrail] { LocalizedCatalog.cached("trails") { [
+        .init(id: "standard", name: L("Standart"), subtitle: L("Topunun kendi neon izi"), style: .standard, primaryHex: 0x57F2FF, secondaryHex: 0x008CFF, rarity: "CORE"),
+        .init(id: "fire", name: L("Ateş"), subtitle: L("Arkasında kor ve kıvılcım bırakır"), style: .fire, primaryHex: 0xFFB020, secondaryHex: 0xFF3B1F, rarity: "RARE"),
+        .init(id: "stardust", name: L("Yıldız Tozu"), subtitle: L("Parıldayan altın ve beyaz tozlar"), style: .stardust, primaryHex: 0xFFF3B0, secondaryHex: 0xFFD34E, rarity: "RARE"),
+        .init(id: "electric", name: L("Şimşek"), subtitle: L("Çıtırdayan mavi elektrik kıvılcımları"), style: .electric, primaryHex: 0x7DF9FF, secondaryHex: 0x2F6BFF, rarity: "EPIC"),
+        .init(id: "shadow", name: L("Gölge"), subtitle: L("Mor dumandan karanlık bir iz"), style: .shadow, primaryHex: 0xB26BFF, secondaryHex: 0x3B0A6B, rarity: "EPIC"),
+        .init(id: "comet", name: L("Kuyruklu Yıldız"), subtitle: L("Uzun, parlak bir kuyruk ve ışık serpintisi"), style: .comet, primaryHex: 0xE0F7FF, secondaryHex: 0x38BDF8, rarity: "LEGENDARY"),
+        .init(id: "rainbow", name: L("Gökkuşağı"), subtitle: L("Renkten renge akan bir iz"), style: .rainbow, primaryHex: 0xFF4D9D, secondaryHex: 0x4DFFB8, rarity: "LEGENDARY"),
+    ] as [BallTrail] } }
+}
+
 /// Kod içindeki Türkçe metni uygulama diline çevirir (en.lproj/Localizable.strings).
 func L(_ key: String) -> String {
     NSLocalizedString(key, comment: "")

@@ -12,6 +12,7 @@ final class Persistence {
         static let gamesPlayed = "gamesPlayed"
         static let selectedBall = "selectedBall"
         static let selectedBackground = "selectedBackground"
+        static let selectedTrail = "selectedTrail"
         static let soundEnabled = "soundEnabled"
         static let musicEnabled = "musicEnabled"
         static let musicVolume = "musicVolume"
@@ -82,6 +83,11 @@ final class Persistence {
     var selectedBallID: String {
         get { defaults.string(forKey: Keys.selectedBall) ?? "classic" }
         set { defaults.set(newValue, forKey: Keys.selectedBall) }
+    }
+
+    var selectedTrailID: String {
+        get { defaults.string(forKey: Keys.selectedTrail) ?? "standard" }
+        set { defaults.set(newValue, forKey: Keys.selectedTrail) }
     }
 
     var selectedBackgroundID: String {

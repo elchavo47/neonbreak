@@ -1,0 +1,25 @@
+NeonBreak iOS v5.29.0 — App Store 1.0.1 (Backend değişmedi)
+
+Sürüm:
+- MARKETING_VERSION 1.0.0 -> 1.0.1. App Store'da 1.0 yayında olduğu için güncelleme 1.0.1 olarak gönderilir.
+
+Arka plan müziği (yeni):
+- İki parça eklendi (Pixabay, Pixabay Content License; isim yazma zorunluluğu yok):
+  - MusicMenu: "Retro Arcade Game Music" — ARPMedia (menü, mağaza, sıralama, profil)
+  - MusicGame: "Retro Arcade Game Music" — MFCC / Mykola Sosin (oyun içi)
+  Dosyalar sondaki sessizlik kırpılıp ses seviyesi eşitlendi (-16 LUFS), AAC 128 kbps .m4a
+  olarak Assets.xcassets içinde (MusicMenu.dataset, MusicGame.dataset).
+- MusicManager (SoundManager.swift içinde): ekran değişince parçalar arasında yumuşak geçiş;
+  parça biterken baştan başlayan ikinci kopyaya geçerek atlamasız döngü.
+- Ses oturumu .ambient: telefon sessizdeyken müzik susar, kullanıcının kendi müziğini kesmez.
+- Ödüllü reklam açılınca ve uygulama arka plana geçince müzik durur, dönünce devam eder.
+- Oyun duraklatılınca müzik kısılır, devam edince eski seviyesine döner.
+- Ayarlar > Oyun: "Müzik" kartı (aç/kapa + ses seviyesi). Varsayılan: açık, orta seviye.
+  Ses efektleri ayarı ayrı kalmaya devam ediyor.
+- Yeni metinler 7 dile çevrildi (tr, en, de, es, fr, pt-BR, ru).
+
+Not: Parçalar YouTube Content ID'ye kayıtlı. Oyun içinde kullanım serbest; oyuncular oynanış
+videosu yüklerse YouTube telif bildirimi gösterebilir (video kaldırılmaz). Pixabay sayfasındaki
+lisans sertifikalarını saklamak iyi olur.
+
+Derlenerek denenmedi (GitHub Actions'ta derlenecek).

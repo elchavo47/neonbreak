@@ -145,6 +145,26 @@ private enum NeonTex {
         }
     }
 
+    /// Gökkuşağı izi: renkler dokuya gömülü, böylece her top için renk animasyonu çalışmaz.
+    static let rainbowTrail: SKTexture = make(CGSize(width: 128, height: 24)) { c in
+        let size = CGSize(width: 128, height: 24)
+        let shape = UIBezierPath()
+        shape.move(to: CGPoint(x: 0, y: size.height / 2))
+        shape.addLine(to: CGPoint(x: size.width, y: 1))
+        shape.addLine(to: CGPoint(x: size.width, y: size.height - 1))
+        shape.close()
+        c.addPath(shape.cgPath)
+        c.clip()
+        let hues: [CGFloat] = [0.83, 0.66, 0.5, 0.33, 0.16, 0.08, 0.0]
+        let colors = hues.enumerated().map { i, h in
+            UIColor(hue: h, saturation: 0.8, brightness: 1, alpha: CGFloat(i) / CGFloat(hues.count - 1) * 0.95).cgColor
+        } as CFArray
+        let locations: [CGFloat] = hues.indices.map { CGFloat($0) / CGFloat(hues.count - 1) }
+        if let g = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors, locations: locations) {
+            c.drawLinearGradient(g, start: .zero, end: CGPoint(x: size.width, y: 0), options: [])
+        }
+    }
+
     static let balloon: SKTexture = make(CGSize(width: 24, height: 30)) { c in
         let rect = CGRect(x: 2, y: 2, width: 20, height: 26)
         c.saveGState()
@@ -215,6 +235,8 @@ private final class BallNode: SKSpriteNode {
     var tail: SKSpriteNode?
     /// Mağazadan alınan iz efektinin parçacıkları (yalnızca ilk birkaç topta).
     var trailEmitter: SKEmitterNode?
+    /// Parçacıklı top sahadan çıkınca sahne sayacını düşürür (her atışta çocukları taramamak için).
+    var onTrailRelease: (() -> Void)?
 
     init(texture: SKTexture, radius: CGFloat, damage: CGFloat) {
         self.damage = damage
@@ -224,6 +246,19 @@ private final class BallNode: SKSpriteNode {
 
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func removeFromParent() {
+        releaseTrail()
+        super.removeFromParent()
+    }
+
+    func releaseTrail() {
+        guard trailEmitter != nil else { return }
+        trailEmitter?.particleBirthRate = 0
+        trailEmitter = nil
+        onTrailRelease?()
+        onTrailRelease = nil
     }
 }
 
@@ -282,6 +317,8 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
     private var ballsToLaunch = 0
     private var launchedBalls = 0
     private var activeBalls = 0
+    /// Sahada parçacık yayan top sayısı.
+    private var liveTrailEmitters = 0
     private var firstReturnX: CGFloat?
     private var aimVector: CGVector?
     private var isAiming = false
@@ -383,7 +420,7 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         anchorPoint = .zero
         assert(BoardGenerator.selfTest(), "BoardGenerator sunucudaki board.php ile aynı sonucu üretmiyor")
         // İlk vuruşta texture üretimi yüzünden mikro takılma olmasın diye önceden ısıt.
-        _ = NeonTex.spark; _ = NeonTex.ring; _ = NeonTex.trail; _ = NeonTex.radial; _ = NeonTex.balloon
+        _ = NeonTex.spark; _ = NeonTex.ring; _ = NeonTex.trail; _ = NeonTex.rainbowTrail; _ = NeonTex.radial; _ = NeonTex.balloon
 
         addChild(world)
         decorLayer.zPosition = 2
@@ -1202,6 +1239,7 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         ballsToLaunch = count
         launchedBalls = 0
         activeBalls = 0
+        liveTrailEmitters = 0
         firstReturnX = nil
         volleyElapsed = 0
         velocityAccumulator = 0
@@ -1236,7 +1274,7 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         body.velocity = CGVector(dx: direction.dx * ballSpeed, dy: direction.dy * ballSpeed)
         ball.physicsBody = body
 
-        let tail = SKSpriteNode(texture: NeonTex.trail, color: SKColor(hex: ballSkin.trailHex), size: CGSize(width: ballRadius * 5.2, height: ballRadius * 1.15))
+        let tail = SKSpriteNode(texture: NeonTex.trail, color: SKColor(hex: ballSkin.trailHex), size: CGSize(width: ballRadius * 6, height: ballRadius * 1.3))
         tail.colorBlendFactor = 1
         tail.anchorPoint = CGPoint(x: 1.0, y: 0.5)
         tail.alpha = 0.5
@@ -1257,34 +1295,37 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
     /// birkaç topta açılır ki çok toplu turlarda kare hızı düşmesin.
     private func applyTrail(to ball: BallNode, tail: SKSpriteNode) {
         guard trail.style != .standard else { return }
-        let primary = SKColor(hex: trail.primaryHex)
-        tail.color = primary
+        tail.color = SKColor(hex: trail.primaryHex)
+        // Mağaza izleri belirgin olsun: kuyruk topun ~4 katı uzunluğunda, top kadar kalın.
+        tail.size = CGSize(width: ballRadius * 11, height: ballRadius * 2.1)
+        tail.alpha = 0.85
         switch trail.style {
         case .comet:
-            tail.size.width *= 1.9
-            tail.size.height *= 1.15
-            tail.alpha = 0.8
+            tail.size.width = ballRadius * 16
+            tail.alpha = 0.95
         case .rainbow:
-            tail.alpha = 0.7
-            let hues: [CGFloat] = [0.0, 0.08, 0.16, 0.33, 0.5, 0.66, 0.8]
-            let steps = hues.map { SKAction.colorize(with: SKColor(hue: $0, saturation: 0.85, brightness: 1, alpha: 1), colorBlendFactor: 1, duration: 0.14) }
-            tail.run(.repeatForever(.sequence(steps)))
+            tail.texture = NeonTex.rainbowTrail
+            tail.colorBlendFactor = 0
+            tail.alpha = 0.95
         case .shadow:
-            tail.alpha = 0.55
-        case .fire, .electric:
-            tail.alpha = 0.6
+            tail.alpha = 0.75
         default:
             break
         }
 
-        let cap = premiumEffectsEnabled ? 24 : 8
-        let live = ballsLayer.children.reduce(0) { $0 + ((($1 as? BallNode)?.trailEmitter != nil) ? 1 : 0) }
-        guard live < cap else { return }
+        // Parçacıklar yalnızca aynı anda sahadaki birkaç topta: 60 toplu turda bile kare hızı sabit kalsın.
+        let cap = premiumEffectsEnabled ? 6 : 3
+        guard liveTrailEmitters < cap else { return }
         let emitter = makeTrailEmitter()
         emitter.targetNode = trailLayer
         emitter.zPosition = -2
         ball.addChild(emitter)
         ball.trailEmitter = emitter
+        liveTrailEmitters += 1
+        ball.onTrailRelease = { [weak self] in
+            guard let self else { return }
+            self.liveTrailEmitters = max(0, self.liveTrailEmitters - 1)
+        }
     }
 
     private func makeTrailEmitter() -> SKEmitterNode {
@@ -1295,54 +1336,53 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         e.particleTexture = NeonTex.spark
         e.particleBlendMode = .add
         e.particleColorBlendFactor = 1
+        e.particleRenderOrder = .dontCare
         e.emissionAngleRange = .pi * 2
-        e.particlePositionRange = CGVector(dx: ballRadius * 0.6, dy: ballRadius * 0.6)
+        e.particlePositionRange = CGVector(dx: ballRadius * 0.8, dy: ballRadius * 0.8)
         switch trail.style {
         case .fire:
-            e.particleBirthRate = 42
-            e.particleLifetime = 0.34; e.particleLifetimeRange = 0.12
+            e.particleBirthRate = 22
+            e.particleLifetime = 0.4; e.particleLifetimeRange = 0.12
             e.particleSpeed = ballRadius * 1.2; e.particleSpeedRange = ballRadius
             e.yAcceleration = ballRadius * 6
-            e.particleScale = unit * 1.1; e.particleScaleRange = unit * 0.5; e.particleScaleSpeed = -unit * 2.4
-            e.particleAlpha = 0.9; e.particleAlphaSpeed = -2.4
+            e.particleScale = unit * 2.2; e.particleScaleRange = unit * 0.8; e.particleScaleSpeed = -unit * 4
+            e.particleAlpha = 0.95; e.particleAlphaSpeed = -2.2
             e.particleColorSequence = SKKeyframeSequence(keyframeValues: [SKColor(hex: 0xFFF2A8), primary, secondary, SKColor(hex: 0x5A0A00)], times: [0, 0.25, 0.6, 1])
         case .stardust:
-            e.particleBirthRate = 26
-            e.particleLifetime = 0.62; e.particleLifetimeRange = 0.2
+            e.particleBirthRate = 16
+            e.particleLifetime = 0.7; e.particleLifetimeRange = 0.2
             e.particleSpeed = ballRadius * 0.4; e.particleSpeedRange = ballRadius * 0.4
-            e.particleScale = unit * 0.55; e.particleScaleRange = unit * 0.4; e.particleScaleSpeed = -unit * 0.6
-            e.particleAlpha = 1; e.particleAlphaRange = 0.4; e.particleAlphaSpeed = -1.5
+            e.particleScale = unit * 1.3; e.particleScaleRange = unit * 0.6; e.particleScaleSpeed = -unit * 1.2
+            e.particleAlpha = 1; e.particleAlphaRange = 0.3; e.particleAlphaSpeed = -1.4
             e.particleColorSequence = SKKeyframeSequence(keyframeValues: [SKColor.white, primary, secondary], times: [0, 0.5, 1])
         case .electric:
-            e.particleBirthRate = 34
-            e.particleLifetime = 0.14; e.particleLifetimeRange = 0.06
+            e.particleBirthRate = 18
+            e.particleLifetime = 0.18; e.particleLifetimeRange = 0.06
             e.particleSpeed = ballRadius * 9; e.particleSpeedRange = ballRadius * 5
-            e.particleScale = unit * 0.45; e.particleScaleRange = unit * 0.25
-            e.particleAlpha = 1; e.particleAlphaSpeed = -6
+            e.particleScale = unit * 1.0; e.particleScaleRange = unit * 0.4
+            e.particleAlpha = 1; e.particleAlphaSpeed = -5
             e.particleColorSequence = SKKeyframeSequence(keyframeValues: [SKColor.white, primary, secondary], times: [0, 0.4, 1])
         case .shadow:
-            e.particleTexture = NeonTex.radial
             e.particleBlendMode = .alpha
-            e.particleBirthRate = 24
-            e.particleLifetime = 0.55; e.particleLifetimeRange = 0.15
+            e.particleBirthRate = 14
+            e.particleLifetime = 0.6; e.particleLifetimeRange = 0.15
             e.particleSpeed = ballRadius * 0.6; e.particleSpeedRange = ballRadius * 0.4
-            let soft = ballRadius / 128
-            e.particleScale = soft * 1.4; e.particleScaleSpeed = soft * 2.2
-            e.particleAlpha = 0.45; e.particleAlphaSpeed = -0.8
+            e.particleScale = unit * 2.4; e.particleScaleSpeed = unit * 1.6
+            e.particleAlpha = 0.6; e.particleAlphaSpeed = -1
             e.particleColorSequence = SKKeyframeSequence(keyframeValues: [primary, secondary], times: [0, 1])
         case .comet:
-            e.particleBirthRate = 30
-            e.particleLifetime = 0.42; e.particleLifetimeRange = 0.15
+            e.particleBirthRate = 18
+            e.particleLifetime = 0.5; e.particleLifetimeRange = 0.15
             e.particleSpeed = ballRadius * 0.5; e.particleSpeedRange = ballRadius * 0.5
-            e.particleScale = unit * 0.7; e.particleScaleRange = unit * 0.3; e.particleScaleSpeed = -unit * 1.4
-            e.particleAlpha = 0.9; e.particleAlphaSpeed = -2
+            e.particleScale = unit * 1.5; e.particleScaleRange = unit * 0.5; e.particleScaleSpeed = -unit * 2.4
+            e.particleAlpha = 0.95; e.particleAlphaSpeed = -1.9
             e.particleColorSequence = SKKeyframeSequence(keyframeValues: [SKColor.white, primary, secondary], times: [0, 0.35, 1])
         case .rainbow:
-            e.particleBirthRate = 30
-            e.particleLifetime = 0.45; e.particleLifetimeRange = 0.15
+            e.particleBirthRate = 18
+            e.particleLifetime = 0.5; e.particleLifetimeRange = 0.15
             e.particleSpeed = ballRadius * 0.5; e.particleSpeedRange = ballRadius * 0.5
-            e.particleScale = unit * 0.6; e.particleScaleRange = unit * 0.3; e.particleScaleSpeed = -unit * 1.1
-            e.particleAlpha = 0.95; e.particleAlphaSpeed = -2
+            e.particleScale = unit * 1.4; e.particleScaleRange = unit * 0.5; e.particleScaleSpeed = -unit * 2.2
+            e.particleAlpha = 0.95; e.particleAlphaSpeed = -1.9
             let colors: [SKColor] = [0.0, 0.16, 0.33, 0.5, 0.66, 0.83].map { SKColor(hue: $0, saturation: 0.85, brightness: 1, alpha: 1) }
             e.particleColorSequence = SKKeyframeSequence(keyframeValues: colors, times: [0, 0.2, 0.4, 0.6, 0.8, 1])
         case .standard:
@@ -1370,7 +1410,7 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
             guard let ball = node as? BallNode, ball.physicsBody != nil else { continue }
             ball.physicsBody = nil
             ball.tail?.isHidden = true
-            ball.trailEmitter?.particleBirthRate = 0
+            ball.releaseTrail()
             ball.run(.sequence([
                 .group([.move(to: home, duration: 0.2), .fadeAlpha(to: 0.2, duration: 0.2)]),
                 .removeFromParent()

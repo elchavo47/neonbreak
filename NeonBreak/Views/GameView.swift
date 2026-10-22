@@ -188,13 +188,13 @@ private struct GameRoundContent: View {
                     VStack(spacing: 8) {
                         if let toast {
                             Text(toast)
-                                .font(.system(size: 12, weight: .heavy, design: .rounded))
-                                .foregroundStyle(.white)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(.white.opacity(0.92))
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 8)
-                                .background(Color.black.opacity(0.82), in: Capsule())
-                                .overlay(Capsule().stroke(accent.opacity(0.45), lineWidth: 1))
+                                .background(ModalTone.surface.opacity(0.94), in: Capsule())
+                                .overlay(Capsule().stroke(ModalTone.hairline, lineWidth: 1))
                                 .transition(.opacity)
                                 .allowsHitTesting(false)
                         }
@@ -556,25 +556,14 @@ private struct TamperAbortView: View {
     let onExit: () -> Void
 
     var body: some View {
-        ZStack {
-            Color.black.opacity(0.9).ignoresSafeArea()
-            VStack(spacing: 16) {
-                GameSymbol(name: "exclamationmark.shield.fill", size: 54, weight: .bold)
-                    .foregroundStyle(.red)
-                    .shadow(color: .red.opacity(0.6), radius: 18)
-                Text("Oyun iptal edildi")
-                    .font(.system(size: 26, weight: .heavy, design: .rounded))
-                Text("Oyun verilerinde dışarıdan değişiklik algılandı. Bu oyun sayılmadı ve kayda geçti.")
-                    .font(.system(size: 15, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.7))
-                    .multilineTextAlignment(.center)
-                NeonButton(title: L("ANA MENÜ"), systemImage: "house.fill", accent: .white, filled: false, action: onExit)
-                    .padding(.top, 6)
-            }
-            .padding(28)
-            .frame(maxWidth: 380)
+        PremiumModal(
+            icon: "exclamationmark.shield",
+            accent: Color(red: 1, green: 0.45, blue: 0.45),
+            title: L("Oyun iptal edildi"),
+            subtitle: L("Oyun verilerinde dışarıdan değişiklik algılandı. Bu oyun sayılmadı ve kayda geçti.")
+        ) {
+            PremiumButton(title: SC("ANA MENÜ"), systemImage: "house", kind: .secondary, action: onExit)
         }
-        .preferredColorScheme(.dark)
     }
 }
 
@@ -769,15 +758,17 @@ private struct RecordBanner: View {
         VStack {
             if session.didCelebrateRecord && !session.isGameOver {
                 HStack(spacing: 9) {
-                    Image(systemName: "crown.fill").foregroundStyle(.yellow)
+                    Image(systemName: "crown.fill").foregroundStyle(ModalTone.gold)
                     Text("YENİ REKOR SEVİYESİ")
-                        .font(.system(size: 13, weight: .black, design: .rounded))
-                        .tracking(0.5)
+                        .font(.system(size: 11, weight: .semibold))
+                        .tracking(1.6)
+                        .foregroundStyle(.white.opacity(0.9))
                 }
+                .font(.system(size: 12))
                 .padding(.horizontal, 15)
                 .padding(.vertical, 9)
-                .background(Color.black.opacity(0.6), in: Capsule())
-                .overlay(Capsule().stroke(Color.yellow.opacity(0.4), lineWidth: 1))
+                .background(ModalTone.surface.opacity(0.92), in: Capsule())
+                .overlay(Capsule().stroke(ModalTone.hairline, lineWidth: 1))
                 .padding(.top, 12)
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
@@ -798,36 +789,25 @@ private struct PauseOverlay: View {
     let onSaveAndExit: () -> Void
 
     var body: some View {
-        ZStack {
-            Color.black.opacity(0.78).ignoresSafeArea()
-
-            VStack(spacing: 14) {
-                GameSymbol(name: "pause.circle.fill", size: 46)
-                    .foregroundStyle(accent)
-
-                VStack(spacing: 4) {
-                    Text("DURAKLATILDI")
-                        .font(.system(size: 24, weight: .black, design: .rounded))
-                    Text("Seviye \(session.level) • \(session.score.formatted()) skor")
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.55))
+        PremiumModal(
+            icon: "pause.fill",
+            accent: .white,
+            title: SC("DURAKLATILDI"),
+            subtitle: LS("Seviye \(session.level) • \(session.score.formatted()) skor")
+        ) {
+            VStack(spacing: 9) {
+                PremiumButton(title: SC("DEVAM ET"), systemImage: "play.fill", kind: .primary, action: onResume)
+                PremiumButton(title: SC("KAYDET VE ÇIK"), systemImage: "square.and.arrow.down", kind: .secondary, action: onSaveAndExit)
+                HStack(spacing: 9) {
+                    PremiumButton(title: SC("YENİDEN BAŞLA"), systemImage: "arrow.counterclockwise", kind: .secondary, action: onRestart)
+                    PremiumButton(title: SC("OYUNU BİTİR"), systemImage: "flag.checkered", kind: .accent(Color(red: 1, green: 0.45, blue: 0.45)), action: onQuit)
                 }
-
-                NeonButton(title: L("DEVAM ET"), systemImage: "play.fill", accent: accent, action: onResume)
-                NeonButton(title: L("KAYDET VE ÇIK"), systemImage: "square.and.arrow.down.fill", accent: .cyan, filled: false, action: onSaveAndExit)
-                NeonButton(title: L("YENİDEN BAŞLA"), systemImage: "arrow.counterclockwise", accent: .white, filled: false, action: onRestart)
-                NeonButton(title: L("OYUNU BİTİR"), systemImage: "flag.checkered", accent: .pink, filled: false, action: onQuit)
-
-                Text("Kaydedip çıkarsan ana menüden kaldığın yerden devam edersin. Yeniden başlarsan ya da bitirirsen skor kaydedilir.")
-                    .font(.system(size: 11, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.4))
-                    .multilineTextAlignment(.center)
             }
-            .padding(22)
-            .frame(maxWidth: 360)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Color.white.opacity(0.1), lineWidth: 1))
-            .padding(.horizontal, 22)
+            Text("Kaydedip çıkarsan ana menüden kaldığın yerden devam edersin. Yeniden başlarsan ya da bitirirsen skor kaydedilir.")
+                .font(.system(size: 11))
+                .foregroundStyle(ModalTone.tertiaryText)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
@@ -856,77 +836,74 @@ private struct GameOverCard: View {
     @State private var cardImage: UIImage?
 
     var body: some View {
-        ZStack {
-            Color.black.opacity(0.78).ignoresSafeArea()
+        PremiumModal(
+            icon: session.isNewRecord ? "crown.fill" : "flag.checkered",
+            accent: session.isNewRecord ? ModalTone.gold : .white,
+            title: session.isNewRecord ? SC("YENİ REKOR!") : SC("OYUN BİTTİ"),
+            subtitle: LS("Seviye \(session.level)'e ulaştın."),
+            maxWidth: 380
+        ) {
+            HStack(spacing: 0) {
+                result(value: Double(session.level), prefix: "", label: "SEVİYE")
+                divider
+                result(value: Double(session.score), prefix: "", label: "SKOR")
+                divider
+                result(value: Double(session.xpEarned), prefix: "+", label: "XP")
+            }
+            .padding(.vertical, 12)
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(ModalTone.raised))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(ModalTone.hairline, lineWidth: 1))
+            .onAppear {
+                withAnimation(.easeOut(duration: 1.0).delay(0.25)) { counted = true }
+            }
 
-            VStack(spacing: 14) {
-                GameSymbol(name: session.isNewRecord ? "crown.fill" : "burst.fill", size: 44)
-                    .foregroundStyle(session.isNewRecord ? Color.yellow : Color.pink)
-                    .shadow(color: (session.isNewRecord ? Color.yellow : Color.pink).opacity(0.5), radius: 18)
+            if let nearMiss {
+                Text(nearMiss)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(ModalTone.gold)
+                    .multilineTextAlignment(.center)
+            }
 
-                VStack(spacing: 5) {
-                    Text(session.isNewRecord ? L("YENİ REKOR!") : L("OYUN BİTTİ"))
-                        .font(.system(size: 28, weight: .black, design: .rounded))
-                    Text("Seviye \(session.level)'e ulaştın.")
-                        .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.55))
+            VStack(spacing: 7) {
+                Label("\(session.blocksBroken) blok kırıldı", systemImage: "square.grid.3x3")
+                    .foregroundStyle(ModalTone.secondaryText)
+                if session.didUseSafetyShield {
+                    Label("Kalkan kullanıldı", systemImage: "shield")
+                        .foregroundStyle(ModalTone.secondaryText)
                 }
+                rewardLine
+            }
+            .font(.system(size: 13, weight: .medium))
 
-                HStack(spacing: 8) {
-                    result(value: Double(session.level), prefix: "", label: "SEVİYE")
-                    result(value: Double(session.score), prefix: "", label: "SKOR")
-                    result(value: Double(session.xpEarned), prefix: "+", label: "XP")
-                }
-                .onAppear {
-                    withAnimation(.easeOut(duration: 1.0).delay(0.25)) { counted = true }
-                }
-
-                if let nearMiss {
-                    Text(nearMiss)
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.yellow)
-                        .multilineTextAlignment(.center)
-                }
-
-                VStack(spacing: 8) {
-                    Label("\(session.blocksBroken) blok kırıldı", systemImage: "square.grid.3x3.fill")
-                        .foregroundStyle(.cyan)
-                    if session.didUseSafetyShield {
-                        Label("Kalkan kullanıldı", systemImage: "shield.fill")
-                            .foregroundStyle(.mint)
-                    }
-                    rewardLine
-                }
-                .font(.system(size: 13, weight: .bold, design: .rounded))
-
+            VStack(spacing: 9) {
                 if showContinue {
-                    adButton(title: "REKLAM İZLE • DEVAM ET", icon: "play.rectangle.fill", action: onContinue)
+                    PremiumButton(title: sentenceCase(L("REKLAM İZLE • DEVAM ET")), systemImage: "play.rectangle", kind: .accent(ModalTone.gold), busy: adBusy, action: onContinue)
                 }
                 if showDouble, let serverCoins, serverCoins > 0 {
-                    adButton(title: "REKLAM İZLE • COİNİ 2'YE KATLA", icon: "hexagon.fill", action: onDouble)
+                    PremiumButton(title: sentenceCase(L("REKLAM İZLE • COİNİ 2'YE KATLA")), systemImage: "hexagon", kind: .accent(ModalTone.gold), busy: adBusy, action: onDouble)
                 }
-
-                NeonButton(title: L("TEKRAR OYNA"), systemImage: "arrow.counterclockwise", accent: .cyan, action: onRestart)
-                HStack(spacing: 10) {
-                    NeonButton(title: L("ANA MENÜ"), systemImage: "house.fill", accent: .white, filled: false, action: onExit)
+                PremiumButton(title: SC("TEKRAR OYNA"), systemImage: "arrow.counterclockwise", kind: .primary, action: onRestart)
+                HStack(spacing: 9) {
+                    PremiumButton(title: SC("ANA MENÜ"), systemImage: "house", kind: .secondary, action: onExit)
                     shareButton
                 }
             }
-            .padding(22)
-            .frame(maxWidth: 380)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Color.white.opacity(0.1), lineWidth: 1))
-            .padding(.horizontal, 22)
         }
         .onAppear { renderCard() }
     }
 
+    private var divider: some View {
+        Rectangle().fill(ModalTone.hairline).frame(width: 1, height: 30)
+    }
+
     @ViewBuilder
     private var shareButton: some View {
-        let icon = GameSymbol(name: "square.and.arrow.up", size: 17, weight: .bold)
+        let icon = Image(systemName: "square.and.arrow.up")
+            .font(.system(size: 15, weight: .semibold))
             .foregroundStyle(.white)
-            .frame(width: 56, height: 52)
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.white.opacity(0.28), lineWidth: 1))
+            .frame(width: 54, height: 50)
+            .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(ModalTone.raised))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(ModalTone.hairline, lineWidth: 1))
         if let cardImage {
             ShareLink(item: Image(uiImage: cardImage), preview: SharePreview("NEON BREAK", image: Image(uiImage: cardImage))) { icon }
                 .accessibilityLabel("Skorunu paylaş")
@@ -959,50 +936,32 @@ private struct GameOverCard: View {
         cardImage = renderer.uiImage
     }
 
-    private func adButton(title: LocalizedStringKey, icon: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 9) {
-                if adBusy { ProgressView().tint(.black) } else { Image(systemName: icon) }
-                Text(title)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-            }
-            .font(.system(size: 15, weight: .black, design: .rounded))
-            .foregroundStyle(.black)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 15)
-            .background(Color.yellow, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(color: Color.yellow.opacity(0.35), radius: 14, y: 5)
-        }
-        .buttonStyle(.plain)
-        .disabled(adBusy)
-    }
-
     @ViewBuilder
     private var rewardLine: some View {
         if !isCounted {
             Label("Çevrimdışı deneme • coin ve sıralama sayılmadı", systemImage: "wifi.slash")
-                .foregroundStyle(.orange)
+                .foregroundStyle(ModalTone.tertiaryText)
         } else if rewardPending {
-            Label("Ödül hesaplanıyor…", systemImage: "clock.fill")
-                .foregroundStyle(.yellow)
+            Label("Ödül hesaplanıyor…", systemImage: "clock")
+                .foregroundStyle(ModalTone.secondaryText)
         } else if let serverCoins {
             HStack(spacing: 6) {
                 Image(systemName: "hexagon.fill")
                 CountingNumber(value: counted ? Double(serverCoins) : 0, prefix: "+")
+                    .fontWeight(.semibold)
                 Text("coin hesabına eklendi")
             }
-            .foregroundStyle(.yellow)
+            .foregroundStyle(ModalTone.gold)
             .animation(.easeOut(duration: 0.9), value: serverCoins)
             if eventMultiplier > 1, serverCoins > 0 {
                 eventBonusBadge(total: serverCoins)
             }
         } else if session.blocksBroken == 0 {
-            Label("Ödül için en az bir blok kır", systemImage: "info.circle.fill")
-                .foregroundStyle(.white.opacity(0.5))
+            Label("Ödül için en az bir blok kır", systemImage: "info.circle")
+                .foregroundStyle(ModalTone.tertiaryText)
         } else {
             Label(failureText ?? L("Ödül sunucudan alınamadı"), systemImage: "wifi.exclamationmark")
-                .foregroundStyle(.orange)
+                .foregroundStyle(ModalTone.secondaryText)
                 .multilineTextAlignment(.center)
         }
     }
@@ -1016,19 +975,19 @@ private struct GameOverCard: View {
                 .font(.system(size: 12, weight: .black, design: .rounded))
                 .foregroundStyle(.black)
                 .padding(.horizontal, 8).padding(.vertical, 3)
-                .background(LinearGradient(colors: [.orange, .pink], startPoint: .leading, endPoint: .trailing), in: Capsule())
+                .background(ModalTone.gold, in: Capsule())
             Text(L("ETKİNLİK"))
-                .font(.system(size: 11, weight: .heavy, design: .rounded)).tracking(1)
-                .foregroundStyle(.orange)
+                .font(.system(size: 10, weight: .semibold)).tracking(1.5)
+                .foregroundStyle(ModalTone.secondaryText)
             Text("\(base)").strikethrough().foregroundStyle(.white.opacity(0.45))
             Image(systemName: "arrow.right").font(.system(size: 10, weight: .bold)).foregroundStyle(.white.opacity(0.45))
-            Text("\(total)").foregroundStyle(.yellow)
-            Text("+\(total - base) bonus").foregroundStyle(.orange)
+            Text("\(total)").foregroundStyle(ModalTone.gold)
+            Text("+\(total - base) bonus").foregroundStyle(ModalTone.secondaryText)
         }
-        .font(.system(size: 13, weight: .bold, design: .rounded))
+        .font(.system(size: 13, weight: .medium))
         .padding(.horizontal, 12).padding(.vertical, 7)
-        .background(Color.orange.opacity(0.12), in: Capsule())
-        .overlay(Capsule().stroke(Color.orange.opacity(0.35), lineWidth: 1))
+        .background(ModalTone.raised, in: Capsule())
+        .overlay(Capsule().stroke(ModalTone.hairline, lineWidth: 1))
     }
 
     /// Rekor kıl payı kaçtıysa oyuncuya bunu söyler: bir tur daha oynatmanın en kolay yolu.
@@ -1039,19 +998,18 @@ private struct GameOverCard: View {
     }
 
     private func result(value: Double, prefix: String, label: LocalizedStringKey) -> some View {
-        VStack(spacing: 3) {
+        VStack(spacing: 4) {
             CountingNumber(value: counted ? value : 0, prefix: prefix)
-                .font(.system(size: 21, weight: .black, design: .rounded))
+                .font(.system(size: 20, weight: .semibold).monospacedDigit())
+                .foregroundStyle(.white)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
             Text(label)
-                .font(.system(size: 10, weight: .heavy, design: .rounded))
-                .tracking(0.7)
-                .foregroundStyle(.white.opacity(0.45))
+                .font(.system(size: 9, weight: .semibold))
+                .tracking(1.6)
+                .foregroundStyle(ModalTone.tertiaryText)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
     }
 }
 

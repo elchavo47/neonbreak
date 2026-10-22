@@ -21,7 +21,9 @@ enum BoardGenerator {
     /// satırda 5 blok seviye 20'de başlar. Gen 4 (seviye 41+): satırda 6 blok; 3 hafif, 2 normal, 1 ağır;
     /// toplam can 30 seviyede 1,0x'ten 1,6x'e çıkar. Gen 5: bloklar gen 4 ile aynı; seviye 41+ satırlarda özel güç
     /// (satır silici / dağıtıcı / bomba) bir bloğun içine gömülür ve blok kırılınca tetiklenir.
-    static let version = 5
+    /// Gen 6: daha seyrek tahta. Satırda en fazla 5 blok (seviye 30+), her 4. satır 4 blok; seviye 24 sonrası can
+    /// artışı %50; seviye 41+ coin şansı %10 (boşalan hücreler ekonomiyi şişirmesin).
+    static let version = 6
 
     static func randomSeed() -> Int { Int.random(in: 1...2_147_483_646) }
 
@@ -42,8 +44,17 @@ enum BoardGenerator {
             i -= 1
         }
         let dense = version >= 4 && level > 40
-        let blockTarget = dense ? 6 : (level <= 4 ? 3 : (level <= 19 ? 4 : 5))
-        let baseHP = level > 24 ? 18 + ((level - 24) * 65 + 50) / 100 : max(1, (level * 75 + 50) / 100)
+        let blockTarget: Int
+        let growth: Int
+        if version >= 6 {
+            blockTarget = level <= 4 ? 3 : (level <= 29 ? 4 : (level % 4 == 0 ? 4 : 5))
+            growth = 50
+        } else {
+            blockTarget = dense ? 6 : (level <= 4 ? 3 : (level <= 19 ? 4 : 5))
+            growth = 65
+        }
+        let baseHP = level > 24 ? 18 + ((level - 24) * growth + 50) / 100 : max(1, (level * 75 + 50) / 100)
+        let coinChance = (version >= 6 && level > 40) ? 10 : 45
         let ballChance = level <= 20 ? 100 : 90
         var row = Row()
         for index in 0..<blockTarget {
@@ -66,7 +77,7 @@ enum BoardGenerator {
         var roll = rand(100)
         if fi < free.count && roll < ballChance { row.addBallColumn = free[fi]; fi += 1 }
         roll = rand(100)
-        if fi < free.count && roll < 45 { row.coinColumn = free[fi]; fi += 1; row.coinValue = 5 + level / 4 }
+        if fi < free.count && roll < coinChance { row.coinColumn = free[fi]; fi += 1; row.coinValue = 5 + level / 4 }
         roll = rand(100)
         let kind = rand(4)
         if level >= 3 && fi < free.count && roll < 20 {
@@ -83,15 +94,15 @@ enum BoardGenerator {
     }
 
     /// Sunucunun ürettiği değerlerle karşılaştırma: (tohum, seviye, blok, azami skor, azami top, azami coin).
-    private static let serverVectors: [(Int, Int, Int, Int, Int, Int)] = [(12345, 60, 297, 126245, 56, 182), (2147483646, 150, 837, 869855, 136, 376), (987654321, 19, 72, 11266, 20, 62)]
+    private static let serverVectors: [(Int, Int, Int, Int, Int, Int)] = [(12345, 60, 259, 97855, 57, 269), (2147483646, 150, 687, 513595, 141, 489), (987654321, 19, 72, 11266, 20, 62), (12345, 77, 340, 151830, 74, 315)]
 
-    /// Sunucunun (board.php, gen 5) gömülü güç ürettiği satırlar: (tohum, seviye, sütun, tür).
-    private static let embeddedVectors: [(Int, Int, Int, String)] = [(12345, 41, 2, "rowClear"), (12345, 42, 1, "scatter"), (12345, 44, 1, "bomb"), (987654321, 41, 1, "rowClear"), (987654321, 50, 4, "rowClear"), (987654321, 55, 0, "rowClear")]
+    /// Sunucunun (board.php, gen 6) gömülü güç ürettiği satırlar: (tohum, seviye, sütun, tür).
+    private static let embeddedVectors: [(Int, Int, Int, String)] = [(7777, 41, 5, "rowClear"), (15554, 55, 0, "bomb"), (23331, 50, 0, "bomb"), (31108, 45, 0, "scatter"), (987654321, 50, 0, "scatter")]
 
     /// Üretecin sunucuyla aynı sonucu verdiğini doğrular. DEBUG derlemede oyun açılırken çalışır.
     static func selfTest() -> Bool {
         for vector in embeddedVectors {
-            let spec = row(seed: vector.0, level: vector.1, version: 5)
+            let spec = row(seed: vector.0, level: vector.1, version: 6)
             if spec.embeddedColumn != vector.2 || spec.embeddedKind != vector.3 { return false }
         }
         for vector in serverVectors {

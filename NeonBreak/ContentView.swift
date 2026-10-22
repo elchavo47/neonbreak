@@ -4068,15 +4068,8 @@ private struct AnnouncementPopup: View {
     let announcement: StoreManager.Announcement
     let onDismiss: () -> Void
     var body: some View {
-        ZStack {
-            Color.black.opacity(0.72).ignoresSafeArea()
-            VStack(spacing: 16) {
-                ZStack { Circle().fill(Color.yellow.opacity(0.15)).frame(width:74,height:74); Image(systemName:"megaphone.fill").font(.system(size:30,weight:.black)).foregroundStyle(.yellow) }
-                Text("DUYURU").font(.system(size:9,weight:.black,design:.rounded)).tracking(2).foregroundStyle(.yellow)
-                Text(L(announcement.title)).font(.system(size:23,weight:.black,design:.rounded)).multilineTextAlignment(.center)
-                Text(L(announcement.message)).font(.system(size:13,weight:.medium,design:.rounded)).foregroundStyle(.white.opacity(0.68)).multilineTextAlignment(.center)
-                NeonButton(title:L("TAMAM"), systemImage:"checkmark", accent:.yellow, action:onDismiss)
-            }.padding(24).background(.ultraThinMaterial,in:RoundedRectangle(cornerRadius:30)).overlay(RoundedRectangle(cornerRadius:30).stroke(Color.yellow.opacity(0.22))).padding(.horizontal,28)
+        PremiumModal(icon: "megaphone", accent: .white, eyebrow: L("DUYURU"), title: L(announcement.title), subtitle: L(announcement.message)) {
+            PremiumButton(title: SC("TAMAM"), kind: .primary, action: onDismiss)
         }
     }
 }
@@ -4086,27 +4079,30 @@ private struct RewardPopup: View {
     let onDismiss: () -> Void
 
     /// Ödül dışı kayıtlar (uyarı, bilgi, satın alma) "ödül geldi" diye gösterilmez.
-    private var style: (icon: String, color: Color, header: String, button: String, buttonIcon: String) {
+    private var style: (icon: String, color: Color, header: String, button: String) {
         switch StoreManager.noticeType(for: reward) {
-        case "warning": return ("exclamationmark.triangle.fill", .orange, L("HESABINLA İLGİLİ UYARI"), L("ANLADIM"), "checkmark")
-        case "info": return ("info.circle.fill", .cyan, L("BİLGİLENDİRME"), L("TAMAM"), "checkmark")
-        case "purchase": return ("bag.fill", .mint, L("SATIN ALMA TAMAMLANDI"), L("TAMAM"), "checkmark")
-        default: return ("gift.fill", .yellow, L("HESABINA ÖDÜL GELDİ"), L("ÖDÜLÜ AL"), "sparkles")
+        case "warning": return ("exclamationmark.triangle", Color(red: 1, green: 0.62, blue: 0.38), L("HESABINLA İLGİLİ UYARI"), SC("ANLADIM"))
+        case "info": return ("info.circle", .white, L("BİLGİLENDİRME"), SC("TAMAM"))
+        case "purchase": return ("bag", .white, L("SATIN ALMA TAMAMLANDI"), SC("TAMAM"))
+        default: return ("gift", ModalTone.gold, L("HESABINA ÖDÜL GELDİ"), SC("ÖDÜLÜ AL"))
         }
     }
 
     var body: some View {
         let st = style
-        ZStack {
-            Color.black.opacity(0.78).ignoresSafeArea()
-            VStack(spacing:15) {
-                ZStack { Circle().fill(LinearGradient(colors:[st.color.opacity(0.3),st.color.opacity(0.08)],startPoint:.top,endPoint:.bottom)).frame(width:88,height:88); Image(systemName:st.icon).font(.system(size:36,weight:.black)).foregroundStyle(st.color).shadow(color:st.color.opacity(0.5),radius:15) }
-                Text(st.header).font(.system(size:9,weight:.black,design:.rounded)).tracking(1.7).foregroundStyle(st.color)
-                Text(L(reward.title)).font(.system(size:24,weight:.black,design:.rounded)).multilineTextAlignment(.center)
-                Text(LM(reward.message)).font(.system(size:12,weight:.medium,design:.rounded)).foregroundStyle(.white.opacity(0.62)).multilineTextAlignment(.center)
-                if reward.coinsAwarded > 0 { Label("+\(reward.coinsAwarded.formatted()) COIN",systemImage:"hexagon.fill").font(.system(size:17,weight:.black,design:.rounded)).foregroundStyle(.yellow).padding(.vertical,10).padding(.horizontal,16).background(Color.yellow.opacity(0.10),in:Capsule()) }
-                NeonButton(title:st.button,systemImage:st.buttonIcon,accent:st.color,action:onDismiss)
-            }.padding(24).background(.ultraThinMaterial,in:RoundedRectangle(cornerRadius:30)).overlay(RoundedRectangle(cornerRadius:30).stroke(st.color.opacity(0.22))).padding(.horizontal,28)
+        PremiumModal(icon: st.icon, accent: st.color, eyebrow: st.header, title: L(reward.title), subtitle: LM(reward.message)) {
+            if reward.coinsAwarded > 0 {
+                HStack(spacing: 7) {
+                    Image(systemName: "hexagon.fill").font(.system(size: 13))
+                    Text(verbatim: "+\(reward.coinsAwarded.formatted())").font(.system(size: 18, weight: .semibold).monospacedDigit())
+                    Text(verbatim: "coin").font(.system(size: 13, weight: .medium)).foregroundStyle(ModalTone.secondaryText)
+                }
+                .foregroundStyle(ModalTone.gold)
+                .padding(.vertical, 9).padding(.horizontal, 16)
+                .background(ModalTone.raised, in: Capsule())
+                .overlay(Capsule().stroke(ModalTone.hairline, lineWidth: 1))
+            }
+            PremiumButton(title: st.button, kind: .primary, action: onDismiss)
         }
     }
 }

@@ -35,3 +35,9 @@ jobs:
           # Derleme hataları özet olarak görünsün (Actions sayfasında "Annotations").
           grep -E "error:" build.log | sort -u | head -40 | while read -r line; do echo "::error::${line##*/NeonBreak/}"; done
           exit $status
+
+      - name: BoardGenerator self-test (board.php ile aynı mı)
+        run: |
+          sed -n '1,/^}/p' NeonBreak/Game/GameSession.swift | grep -v '^import Combine' > gen.swift
+          echo 'print(BoardGenerator.selfTest() ? "SELFTEST OK" : "SELFTEST FAIL"); if !BoardGenerator.selfTest() { exit(1) }' >> gen.swift
+          swiftc gen.swift -o gen && ./gen

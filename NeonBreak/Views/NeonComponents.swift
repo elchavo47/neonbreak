@@ -802,3 +802,157 @@ struct RankLadderSheet: View {
         .preferredColorScheme(.dark)
     }
 }
+
+// MARK: - Sade, premium açılır pencereler
+
+/// Oyun içi açılır pencerelerin ortak görünümü: koyu düz yüzey, ince çizgi kenar, tek vurgu rengi.
+/// Renk yalnızca küçük simgede ve üstteki ince çizgide kullanılır; yazılar beyaz/gri tonlarındadır.
+enum ModalTone {
+    static let surface = Color(red: 0.055, green: 0.06, blue: 0.075)
+    static let raised = Color.white.opacity(0.045)
+    static let hairline = Color.white.opacity(0.09)
+    static let secondaryText = Color.white.opacity(0.56)
+    static let tertiaryText = Color.white.opacity(0.36)
+    static let gold = Color(red: 0.90, green: 0.78, blue: 0.50)
+}
+
+/// Metinler çevrilmiş olarak verilir (L / LS).
+struct PremiumModal<Content: View>: View {
+    var icon: String
+    var accent: Color = .white
+    var eyebrow: String? = nil
+    var title: String
+    var subtitle: String? = nil
+    var maxWidth: CGFloat = 360
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.74).ignoresSafeArea()
+            VStack(spacing: 18) {
+                VStack(spacing: 12) {
+                    Image(systemName: icon)
+                        .font(.system(size: 19, weight: .semibold))
+                        .foregroundStyle(accent)
+                        .frame(width: 48, height: 48)
+                        .background(Circle().fill(accent.opacity(0.10)))
+                        .overlay(Circle().stroke(accent.opacity(0.28), lineWidth: 1))
+                    VStack(spacing: 6) {
+                        if let eyebrow {
+                            Text(verbatim: eyebrow)
+                                .font(.system(size: 10, weight: .semibold))
+                                .tracking(2.2)
+                                .foregroundStyle(ModalTone.tertiaryText)
+                        }
+                        Text(verbatim: title)
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundStyle(.white)
+                            .multilineTextAlignment(.center)
+                        if let subtitle {
+                            Text(verbatim: subtitle)
+                                .font(.system(size: 13, weight: .regular))
+                                .foregroundStyle(ModalTone.secondaryText)
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+                content
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 24)
+            .padding(.bottom, 20)
+            .frame(maxWidth: maxWidth)
+            .background(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(ModalTone.surface)
+                    .overlay(alignment: .top) {
+                        LinearGradient(colors: [accent.opacity(0), accent.opacity(0.55), accent.opacity(0)], startPoint: .leading, endPoint: .trailing)
+                            .frame(height: 1)
+                            .padding(.horizontal, 40)
+                    }
+            )
+            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(ModalTone.hairline, lineWidth: 1))
+            .shadow(color: .black.opacity(0.6), radius: 30, y: 14)
+            .padding(.horizontal, 22)
+        }
+        .preferredColorScheme(.dark)
+    }
+}
+
+struct PremiumButton: View {
+    enum Kind { case primary, secondary, accent(Color), quiet }
+    let title: String
+    var systemImage: String? = nil
+    var kind: Kind = .primary
+    var busy = false
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                if busy {
+                    ProgressView().tint(foreground)
+                } else if let systemImage {
+                    Image(systemName: systemImage).font(.system(size: 14, weight: .semibold))
+                }
+                Text(verbatim: title)
+                    .font(.system(size: 15, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .foregroundStyle(foreground)
+            .frame(maxWidth: .infinity)
+            .frame(height: isQuiet ? 38 : 50)
+            .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(fill))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(stroke, lineWidth: 1))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PremiumPressStyle())
+        .disabled(busy)
+    }
+
+    private var isQuiet: Bool { if case .quiet = kind { return true }; return false }
+    private var foreground: Color {
+        switch kind {
+        case .primary: return .black
+        case .secondary: return .white
+        case .accent(let c): return c
+        case .quiet: return ModalTone.secondaryText
+        }
+    }
+    private var fill: Color {
+        switch kind {
+        case .primary: return Color.white.opacity(0.94)
+        case .secondary: return ModalTone.raised
+        case .accent(let c): return c.opacity(0.10)
+        case .quiet: return .clear
+        }
+    }
+    private var stroke: Color {
+        switch kind {
+        case .primary, .quiet: return .clear
+        case .secondary: return ModalTone.hairline
+        case .accent(let c): return c.opacity(0.35)
+        }
+    }
+}
+
+private struct PremiumPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .opacity(configuration.isPressed ? 0.85 : 1)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
+/// Büyük harfli çeviri anahtarını cümle düzenine çevirir ("OYUN BİTTİ" → "Oyun bitti"); sade pencerelerde kullanılır.
+func SC(_ key: String) -> String { sentenceCase(L(key)) }
+
+func sentenceCase(_ text: String) -> String {
+    let locale = Locale(identifier: AppLanguage.effectiveCode)
+    let lower = text.lowercased(with: locale)
+    guard let first = lower.first else { return lower }
+    return String(first).uppercased(with: locale) + lower.dropFirst()
+}

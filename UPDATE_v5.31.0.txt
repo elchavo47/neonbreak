@@ -1,0 +1,13 @@
+NeonBreak v5.31.0 (App Store 1.0.2)
+
+- Zorluk düşürüldü (üreteç gen 6): seviye 30+ satırda en fazla 5 blok (eskiden 41+ 6 blok),
+  her 4. satır 4 blokla nefes aldırır; seviye 24 sonrası can artışı %65 → %50.
+  Seviye 41+ coin şansı %10 (boşalan hücreler ekonomiyi şişirmesin). Yarıda kalan eski
+  oyunlar kendi üreteciyle (gen 5) devam eder.
+- Top izleri: kuyruk ~2 kat uzun ve kalın, parçacıklar 2 kat büyük ama yarı sayıda.
+  Parçacık yayan top sayısı aynı anda en fazla 6 (premium efektler kapalıysa 3); her atışta
+  çocuk taraması ve gökkuşağı renk animasyonu kaldırıldı (gökkuşağı rengi dokuda). Kasma giderildi.
+- Açılır pencereler yeniden tasarlandı: koyu düz yüzey, ince kenar, tek vurgu rengi, cümle düzeni
+  başlıklar (Duraklatıldı, Oyun bitti, Duyuru, Ödül/Uyarı, Oyun iptal edildi, rekor şeridi, bildirim).
+- CI: BoardGenerator self-test derleme kontrolünde ayrıca çalışır (board.php ile aynı mı).
+- Backend v2.9.0 GEREKİR (board.php gen 6). Önce backend kurulmalı, sonra uygulama.

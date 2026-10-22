@@ -23,6 +23,8 @@ private final class PickupNode: SKNode {
     var row: Int
     var col: Int
     var isCollected = false
+    /// Fizik dairesinin yarıçapı (topun ulaşıp ulaşamayacağı hesabı için).
+    var hitRadius: CGFloat = 0
 
     init(kind: PickupKind, row: Int, col: Int, value: Int = 0) {
         self.kind = kind
@@ -1425,6 +1427,7 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         ring.run(.repeatForever(.sequence([.scale(to: 1.08, duration: 0.7), .scale(to: 0.96, duration: 0.7)])))
 
         let body = SKPhysicsBody(circleOfRadius: side * 0.34)
+        container.hitRadius = side * 0.34
         body.isDynamic = false
         body.categoryBitMask = PhysicsCategory.pickup
         body.collisionBitMask = 0
@@ -2234,6 +2237,13 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
             ballsToLaunch = launchedBalls
             session.setAssist(.none)
         }
+        // Blok olsa bile sahadaki hiçbir topun yolu artık bir bloğa ya da toplanacak bir şeye çıkmıyorsa
+        // (hepsi bir şeye değmeden aşağı inecekse) beklemeden aşağı çağrılır.
+        if !isDropping && maintain && volleyElapsed > 0.8 && launchedBalls >= ballsToLaunch
+            && pendingEmbedded.isEmpty && pendingBlasts.isEmpty && !anyBallCanReachTarget(leftLimit: wallInset + ballRadius * 0.92, rightLimit: size.width - wallInset - ballRadius * 0.92, topLimit: size.height - wallInset - ballRadius * 0.92) {
+            isDropping = true
+            session.setAssist(.none)
+        }
 
         for node in ballsLayer.children {
             guard let ball = node as? BallNode, let body = ball.physicsBody else { continue }
@@ -2288,6 +2298,68 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         } else if volleyElapsed > 5 && !isSpedUp {
             session.setAssist(.speedUp)
         }
+    }
+
+    /// Toplar birbirine çarpmaz ve yerçekimi yoktur: her topun yolu duvar/tavan yansımalarıyla düz çizgidir.
+    /// Bu yol, atış çizgisine inene kadar bir bloğa ya da toplanmamış bir öğeye değiyor mu? Hiçbir top
+    /// değmiyorsa tur boşuna sürüyordur. Emin olunamayan durumda (çok sekme) "değebilir" kabul edilir.
+    private func anyBallCanReachTarget(leftLimit: CGFloat, rightLimit: CGFloat, topLimit: CGFloat) -> Bool {
+        let pad = ballRadius * 0.92
+        var rects: [CGRect] = []
+        for node in blocksLayer.children {
+            if let block = node as? BlockNode, block.hitPoints > 0, block.physicsBody != nil {
+                rects.append(CGRect(x: block.position.x - block.hitSize.width / 2 - pad, y: block.position.y - block.hitSize.height / 2 - pad,
+                                    width: block.hitSize.width + pad * 2, height: block.hitSize.height + pad * 2))
+            } else if let pickup = node as? PickupNode, !pickup.isCollected, pickup.physicsBody != nil {
+                let radius = pickup.hitRadius + pad
+                rects.append(CGRect(x: pickup.position.x - radius, y: pickup.position.y - radius, width: radius * 2, height: radius * 2))
+            }
+        }
+        guard !rects.isEmpty else { return false }
+        for node in ballsLayer.children {
+            guard let ball = node as? BallNode, let body = ball.physicsBody else { continue }
+            if pathHits(rects, from: ball.position, velocity: normalizedVelocity(body.velocity), left: leftLimit, right: rightLimit, top: topLimit) { return true }
+        }
+        return false
+    }
+
+    private func pathHits(_ rects: [CGRect], from start: CGPoint, velocity: CGVector, left: CGFloat, right: CGFloat, top: CGFloat) -> Bool {
+        let speed = hypot(velocity.dx, velocity.dy)
+        guard speed > 1 else { return true }
+        var p = start
+        var d = CGVector(dx: velocity.dx / speed, dy: velocity.dy / speed)
+        for _ in 0..<24 {
+            let inf = CGFloat.greatestFiniteMagnitude
+            let tx = d.dx > 1e-6 ? (right - p.x) / d.dx : (d.dx < -1e-6 ? (left - p.x) / d.dx : inf)
+            let tTop = d.dy > 1e-6 ? (top - p.y) / d.dy : inf
+            let tBottom = d.dy < -1e-6 ? (launcherY - p.y) / d.dy : inf
+            let tEnd = max(0, min(tx, tTop, tBottom))
+            guard tEnd < inf else { return true }
+            for rect in rects where segment(from: p, direction: d, length: tEnd, hits: rect) { return true }
+            if tBottom <= tx && tBottom <= tTop { return false }
+            p = CGPoint(x: p.x + d.dx * tEnd, y: p.y + d.dy * tEnd)
+            if tx <= tTop { d.dx = -d.dx } else { d.dy = -d.dy }
+        }
+        return true
+    }
+
+    /// Işın-dikdörtgen kesişimi (slab yöntemi), 0...length aralığında.
+    private func segment(from p: CGPoint, direction d: CGVector, length: CGFloat, hits rect: CGRect) -> Bool {
+        var tMin: CGFloat = 0
+        var tMax = length
+        for (origin, dir, lo, hi) in [(p.x, d.dx, rect.minX, rect.maxX), (p.y, d.dy, rect.minY, rect.maxY)] {
+            if abs(dir) < 1e-6 {
+                if origin < lo || origin > hi { return false }
+            } else {
+                var t1 = (lo - origin) / dir
+                var t2 = (hi - origin) / dir
+                if t1 > t2 { swap(&t1, &t2) }
+                tMin = max(tMin, t1)
+                tMax = min(tMax, t2)
+                if tMin > tMax { return false }
+            }
+        }
+        return true
     }
 
     /// Top hızını sabit tutar ve neredeyse yatay sekmelerde takılıp kalmasını engeller.

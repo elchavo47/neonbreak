@@ -1,0 +1,7 @@
+NeonBreak v5.33.0 (App Store 1.1.0)
+
+- Toplar, blok olsa bile hiçbirinin yolu artık bir bloğa ya da toplanacak bir öğeye çıkmıyorsa beklemeden
+  aşağı çağrılır. Toplar birbirine çarpmadığı için her topun duvar/tavan yansımalı yolu hesaplanır;
+  hiçbiri bir şeye değmeyecekse tur hemen biter.
+- App Store sürümü 1.1.0 (yeni bloklar, gen 7, izler, sade pencereler bu sürümde yayına çıkar).
+- Backend değişikliği yok (v2.10.0).

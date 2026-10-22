@@ -1,0 +1,5 @@
+NeonBreak v5.32.1 (App Store 1.0.2)
+
+- Buz blok yeniden çizildi: kristal yüzey kırılmaları, parlak buz kenarı, ortada kar tanesi; çatlak hali daha belirgin.
+- Yeni blok tanıtım kartı üstte yeni satırı kapatıyordu; artık atış çizgisinin hemen üstünde çıkıyor.
+- Backend değişikliği yok (v2.10.0).

@@ -189,8 +189,9 @@ private struct GameRoundContent: View {
                     RecordBanner(session: session)
                     if let blockIntro {
                         BlockIntroCard(kind: blockIntro) { withAnimation(.easeOut(duration: 0.2)) { self.blockIntro = nil } }
-                            .frame(maxHeight: .infinity, alignment: .top)
-                            .padding(.top, 14)
+                            // Yeni satır üstte doğar; kart onu kapatmasın diye atış çizgisinin hemen üstünde durur.
+                            .frame(maxHeight: .infinity, alignment: .bottom)
+                            .padding(.bottom, 112)
                             .padding(.horizontal, 16)
                             .transition(.move(edge: .top).combined(with: .opacity))
                             .zIndex(3)

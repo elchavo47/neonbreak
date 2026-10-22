@@ -83,46 +83,86 @@ private enum NeonTex {
 
     // MARK: Özel bloklar (üreteç 7)
 
-    /// Buz blok: buzlu yarı saydam yüzey, ince ışıltı; çatlamış hali üstünde çatlak deseni taşır.
+    /// Buz blok: koyu buz mavisinden açığa geçen kristal yüzey, parlak buz kenarı, yüzey kırılmaları ve
+    /// ortada kar tanesi (canı yazmaz). Çatlamış hali üstünde çatlak deseni taşır.
     static func ice(size: CGSize, cracked: Bool, flash: Bool) -> SKTexture {
-        let key = "ice\(Int(size.width))x\(Int(size.height))-\(cracked ? 1 : 0)-\(flash ? 1 : 0)"
+        let key = "ice2-\(Int(size.width))x\(Int(size.height))-\(cracked ? 1 : 0)-\(flash ? 1 : 0)"
         if let cached = cache[key] { return cached }
         let pad = blockPad
         let full = CGSize(width: size.width + pad * 2, height: size.height + pad * 2)
         let rect = CGRect(x: pad, y: pad, width: size.width, height: size.height)
-        let corner = min(10, size.height / 4)
+        let corner = min(12, size.height / 4)
+        let edge = UIColor(hex: 0xBFF1FF)
         let texture = make(full) { c in
             let path = UIBezierPath(roundedRect: rect, cornerRadius: corner)
+            // Dış buz parıltısı
             c.saveGState()
-            c.setShadow(offset: .zero, blur: 5, color: UIColor(hex: 0x8FDcFF).withAlphaComponent(0.75).cgColor)
-            UIColor(hex: 0x9FE3FF).withAlphaComponent(0.2).setFill()
+            c.setShadow(offset: .zero, blur: 6, color: UIColor(hex: 0x5CCBFF).withAlphaComponent(0.95).cgColor)
+            UIColor(hex: 0x1B6FB8).withAlphaComponent(0.55).setFill()
             path.fill()
             c.restoreGState()
 
             c.saveGState()
             path.addClip()
-            let colors = [UIColor(hex: 0xF2FBFF).withAlphaComponent(flash ? 0.75 : 0.5).cgColor,
-                          UIColor(hex: 0xA9E4FF).withAlphaComponent(flash ? 0.5 : 0.26).cgColor,
-                          UIColor(hex: 0x5FB8F0).withAlphaComponent(flash ? 0.42 : 0.2).cgColor] as CFArray
-            if let g = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors, locations: [0, 0.55, 1]) {
+            let colors = [UIColor(hex: 0xE4F8FF).withAlphaComponent(flash ? 0.95 : 0.78).cgColor,
+                          UIColor(hex: 0x7ED6FF).withAlphaComponent(flash ? 0.8 : 0.6).cgColor,
+                          UIColor(hex: 0x2B87D6).withAlphaComponent(flash ? 0.8 : 0.66).cgColor] as CFArray
+            if let g = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors, locations: [0, 0.45, 1]) {
                 c.drawLinearGradient(g, start: CGPoint(x: rect.minX, y: rect.minY), end: CGPoint(x: rect.maxX, y: rect.maxY), options: [])
             }
-            // Çapraz ışık süzmesi
-            UIColor.white.withAlphaComponent(0.32).setStroke()
-            for offset in [CGFloat(0.18), 0.3] {
-                let streak = UIBezierPath()
-                streak.move(to: CGPoint(x: rect.minX + rect.width * offset, y: rect.minY - 2))
-                streak.addLine(to: CGPoint(x: rect.minX - 2, y: rect.minY + rect.width * offset))
-                streak.lineWidth = offset < 0.2 ? 2.2 : 1.1
-                streak.stroke()
+            // Kristal yüzey kırılmaları (açık ve koyu düzlemler)
+            let w = rect.width, h = rect.height, x0 = rect.minX, y0 = rect.minY
+            let facets: [([(CGFloat, CGFloat)], UIColor)] = [
+                ([(0, 0), (0.58, 0), (0.22, 0.62), (0, 0.42)], UIColor.white.withAlphaComponent(0.22)),
+                ([(0.58, 0), (1, 0), (1, 0.3), (0.44, 0.5)], UIColor.white.withAlphaComponent(0.1)),
+                ([(0.22, 0.62), (0.44, 0.5), (1, 0.3), (1, 1), (0.5, 1)], UIColor(hex: 0x0D4E92).withAlphaComponent(0.22)),
+                ([(0, 0.42), (0.22, 0.62), (0.5, 1), (0, 1)], UIColor(hex: 0x0D4E92).withAlphaComponent(0.12))
+            ]
+            for (points, color) in facets {
+                let f = UIBezierPath()
+                f.move(to: CGPoint(x: x0 + w * points[0].0, y: y0 + h * points[0].1))
+                for p in points.dropFirst() { f.addLine(to: CGPoint(x: x0 + w * p.0, y: y0 + h * p.1)) }
+                f.close()
+                color.setFill()
+                f.fill()
             }
-            // Kırağı noktaları
-            UIColor.white.withAlphaComponent(0.55).setFill()
-            for (fx, fy) in [(0.78, 0.25), (0.86, 0.62), (0.62, 0.8), (0.22, 0.74), (0.5, 0.42)] as [(CGFloat, CGFloat)] {
-                UIBezierPath(ovalIn: CGRect(x: rect.minX + rect.width * fx, y: rect.minY + rect.height * fy, width: 1.6, height: 1.6)).fill()
+            // Kırılma çizgileri
+            UIColor.white.withAlphaComponent(0.35).setStroke()
+            let ridge = UIBezierPath()
+            ridge.move(to: CGPoint(x: x0 + w * 0.58, y: y0))
+            ridge.addLine(to: CGPoint(x: x0 + w * 0.22, y: y0 + h * 0.62))
+            ridge.addLine(to: CGPoint(x: x0, y: y0 + h * 0.42))
+            ridge.move(to: CGPoint(x: x0 + w * 0.44, y: y0 + h * 0.5))
+            ridge.addLine(to: CGPoint(x: x0 + w, y: y0 + h * 0.3))
+            ridge.lineWidth = 0.8
+            ridge.stroke()
+
+            // Ortada kar tanesi
+            let center = CGPoint(x: rect.midX, y: rect.midY)
+            let arm = min(w, h) * 0.24
+            c.saveGState()
+            c.setShadow(offset: .zero, blur: 3, color: UIColor(hex: 0x0B4A8C).withAlphaComponent(0.8).cgColor)
+            UIColor.white.withAlphaComponent(cracked ? 0.6 : 0.95).setStroke()
+            let flake = UIBezierPath()
+            for i in 0..<6 {
+                let angle = CGFloat(i) * .pi / 3 + .pi / 2
+                let tip = CGPoint(x: center.x + cos(angle) * arm, y: center.y + sin(angle) * arm)
+                flake.move(to: center)
+                flake.addLine(to: tip)
+                let mid = CGPoint(x: center.x + cos(angle) * arm * 0.58, y: center.y + sin(angle) * arm * 0.58)
+                for side in [CGFloat(-1), 1] {
+                    let a2 = angle + side * .pi / 4
+                    flake.move(to: mid)
+                    flake.addLine(to: CGPoint(x: mid.x + cos(a2) * arm * 0.32, y: mid.y + sin(a2) * arm * 0.32))
+                }
             }
+            flake.lineWidth = max(1.4, arm * 0.13)
+            flake.lineCapStyle = .round
+            flake.stroke()
+            c.restoreGState()
+
             if cracked {
-                let center = CGPoint(x: rect.midX + rect.width * 0.06, y: rect.midY - rect.height * 0.04)
+                let origin = CGPoint(x: rect.midX + w * 0.08, y: rect.midY - h * 0.06)
                 let arms: [[(CGFloat, CGFloat)]] = [
                     [(-0.12, -0.18), (-0.22, -0.42), (-0.34, -0.5)],
                     [(0.14, -0.1), (0.3, -0.3), (0.5, -0.38)],
@@ -130,24 +170,32 @@ private enum NeonTex {
                     [(-0.16, 0.12), (-0.36, 0.2), (-0.52, 0.36)],
                     [(0.2, 0.02), (0.52, 0.06)]
                 ]
-                for (shadowPass, color) in [(true, UIColor(hex: 0x1D5D8C).withAlphaComponent(0.55)), (false, UIColor.white.withAlphaComponent(0.92))] {
+                for (shadowPass, color) in [(true, UIColor(hex: 0x08345F).withAlphaComponent(0.75)), (false, UIColor.white.withAlphaComponent(0.95))] {
                     color.setStroke()
                     for arm in arms {
                         let crack = UIBezierPath()
-                        crack.move(to: CGPoint(x: center.x + (shadowPass ? 0.8 : 0), y: center.y + (shadowPass ? 0.8 : 0)))
-                        for point in arm {
-                            crack.addLine(to: CGPoint(x: center.x + rect.width * point.0 + (shadowPass ? 0.8 : 0), y: center.y + rect.height * point.1 + (shadowPass ? 0.8 : 0)))
-                        }
-                        crack.lineWidth = shadowPass ? 1.6 : 1.1
+                        let o: CGFloat = shadowPass ? 0.9 : 0
+                        crack.move(to: CGPoint(x: origin.x + o, y: origin.y + o))
+                        for point in arm { crack.addLine(to: CGPoint(x: origin.x + w * point.0 + o, y: origin.y + h * point.1 + o)) }
+                        crack.lineWidth = shadowPass ? 1.8 : 1.2
                         crack.lineJoinStyle = .round
                         crack.stroke()
                     }
                 }
             }
             c.restoreGState()
-            UIColor.white.withAlphaComponent(flash ? 1 : 0.85).setStroke()
-            path.lineWidth = 1.6
+
+            // Buz kenarı ve üst parlama
+            edge.withAlphaComponent(flash ? 1 : 0.95).setStroke()
+            path.lineWidth = 2
             path.stroke()
+            let top = UIBezierPath()
+            top.move(to: CGPoint(x: rect.minX + corner, y: rect.minY + 4))
+            top.addLine(to: CGPoint(x: rect.maxX - corner, y: rect.minY + 4))
+            top.lineWidth = 1.3
+            top.lineCapStyle = .round
+            UIColor.white.withAlphaComponent(0.6).setStroke()
+            top.stroke()
         }
         cache[key] = texture
         return texture

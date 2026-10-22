@@ -1313,9 +1313,11 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
             break
         }
 
-        // Parçacıklar yalnızca aynı anda sahadaki birkaç topta: 60 toplu turda bile kare hızı sabit kalsın.
+        // Parçacıklar aynı anda en fazla birkaç topta ve dizinin tamamına yayılır: top sayısı arttıkça aralık
+        // açılır (12 topta 2'de 1, 30 topta 5'te 1, 60 topta 10'da 1). Yük sabit kalır, arka toplar da parlar.
         let cap = premiumEffectsEnabled ? 6 : 3
-        guard liveTrailEmitters < cap else { return }
+        let stride = max(1, ballsToLaunch / cap)
+        guard launchedBalls % stride == 0, liveTrailEmitters < cap else { return }
         let emitter = makeTrailEmitter()
         emitter.targetNode = trailLayer
         emitter.zPosition = -2

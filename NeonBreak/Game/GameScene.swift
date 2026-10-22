@@ -539,6 +539,8 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
     private var isSpedUp = false
     /// Tahtada kırılacak blok kalmadı: toplar sekmeye devam etmeden doğrudan aşağı iner.
     private var isDropping = false
+    /// Hiçbir topun bir şeye değemeyeceği anlaşılınca: toplar normal hızda, dikçe aşağı süzülür.
+    private var isGentleDrop = false
     private var pendingLaser = false
     private var userPaused = false
     private var pendingSnapshot: RunSnapshot?
@@ -2239,9 +2241,13 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         // Blok olsa bile sahadaki hiçbir topun yolu artık bir bloğa ya da toplanacak bir şeye çıkmıyorsa
         // (hepsi bir şeye değmeden aşağı inecekse) beklemeden aşağı çağrılır.
-        if !isDropping && maintain && volleyElapsed > 0.8 && launchedBalls >= ballsToLaunch
-            && pendingEmbedded.isEmpty && pendingBlasts.isEmpty && !anyBallCanReachTarget(leftLimit: wallInset + ballRadius * 0.92, rightLimit: size.width - wallInset - ballRadius * 0.92, topLimit: size.height - wallInset - ballRadius * 0.92) {
+        // Toplar zaten birazdan inecekse dokunulmaz; yalnızca boşta uzun süre dolaşacaklarsa devreye girer.
+        if !isDropping && maintain && volleyElapsed > 1.2 && launchedBalls >= ballsToLaunch
+            && pendingEmbedded.isEmpty && pendingBlasts.isEmpty,
+           let idle = longestIdlePath(leftLimit: wallInset + ballRadius * 0.92, rightLimit: size.width - wallInset - ballRadius * 0.92, topLimit: size.height - wallInset - ballRadius * 0.92),
+           idle / max(1, ballSpeed * physicsWorld.speed) > 1.4 {
             isDropping = true
+            isGentleDrop = true
             session.setAssist(.none)
         }
 
@@ -2263,7 +2269,13 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
                 ball.position = position
                 body.velocity = velocity
             }
-            if isDropping && velocity.dy > -ballSpeed * 0.9 {
+            if isGentleDrop {
+                // Normal hızda, hafif eğimle aşağı: ani ve hızlı düşüş hissi olmasın.
+                if maintain || velocity.dy > -ballSpeed * 0.8 {
+                    velocity = CGVector(dx: (velocity.dx >= 0 ? 1 : -1) * ballSpeed * 0.34, dy: -ballSpeed * 0.94)
+                    body.velocity = velocity
+                }
+            } else if isDropping && velocity.dy > -ballSpeed * 0.9 {
                 // Hafif eğimle, normalden hızlı aşağı.
                 velocity = CGVector(dx: (velocity.dx >= 0 ? 1 : -1) * ballSpeed * 0.25, dy: -ballSpeed * 1.6)
                 body.velocity = velocity
@@ -2303,7 +2315,8 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
     /// Toplar birbirine çarpmaz ve yerçekimi yoktur: her topun yolu duvar/tavan yansımalarıyla düz çizgidir.
     /// Bu yol, atış çizgisine inene kadar bir bloğa ya da toplanmamış bir öğeye değiyor mu? Hiçbir top
     /// değmiyorsa tur boşuna sürüyordur. Emin olunamayan durumda (çok sekme) "değebilir" kabul edilir.
-    private func anyBallCanReachTarget(leftLimit: CGFloat, rightLimit: CGFloat, topLimit: CGFloat) -> Bool {
+    /// Hiçbir top bir şeye değmeyecekse en uzun boş yolun uzunluğu; bir top bile değebilecekse nil.
+    private func longestIdlePath(leftLimit: CGFloat, rightLimit: CGFloat, topLimit: CGFloat) -> CGFloat? {
         let pad = ballRadius * 0.92
         var rects: [CGRect] = []
         for node in blocksLayer.children {
@@ -2315,17 +2328,21 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
                 rects.append(CGRect(x: pickup.position.x - radius, y: pickup.position.y - radius, width: radius * 2, height: radius * 2))
             }
         }
-        guard !rects.isEmpty else { return false }
+        guard !rects.isEmpty else { return nil }
+        var longest: CGFloat = 0
         for node in ballsLayer.children {
             guard let ball = node as? BallNode, let body = ball.physicsBody else { continue }
-            if pathHits(rects, from: ball.position, velocity: normalizedVelocity(body.velocity), left: leftLimit, right: rightLimit, top: topLimit) { return true }
+            guard let length = idleLength(rects, from: ball.position, velocity: normalizedVelocity(body.velocity), left: leftLimit, right: rightLimit, top: topLimit) else { return nil }
+            longest = max(longest, length)
         }
-        return false
+        return longest
     }
 
-    private func pathHits(_ rects: [CGRect], from start: CGPoint, velocity: CGVector, left: CGFloat, right: CGFloat, top: CGFloat) -> Bool {
+    /// Topun yolu bir şeye değmeden atış çizgisine iniyorsa o yolun uzunluğu, değiyorsa (ya da emin değilsek) nil.
+    private func idleLength(_ rects: [CGRect], from start: CGPoint, velocity: CGVector, left: CGFloat, right: CGFloat, top: CGFloat) -> CGFloat? {
         let speed = hypot(velocity.dx, velocity.dy)
-        guard speed > 1 else { return true }
+        guard speed > 1 else { return nil }
+        var travelled: CGFloat = 0
         var p = start
         var d = CGVector(dx: velocity.dx / speed, dy: velocity.dy / speed)
         for _ in 0..<24 {
@@ -2334,13 +2351,14 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
             let tTop = d.dy > 1e-6 ? (top - p.y) / d.dy : inf
             let tBottom = d.dy < -1e-6 ? (launcherY - p.y) / d.dy : inf
             let tEnd = max(0, min(tx, tTop, tBottom))
-            guard tEnd < inf else { return true }
-            for rect in rects where segment(from: p, direction: d, length: tEnd, hits: rect) { return true }
-            if tBottom <= tx && tBottom <= tTop { return false }
+            guard tEnd < inf else { return nil }
+            for rect in rects where segment(from: p, direction: d, length: tEnd, hits: rect) { return nil }
+            travelled += tEnd
+            if tBottom <= tx && tBottom <= tTop { return travelled }
             p = CGPoint(x: p.x + d.dx * tEnd, y: p.y + d.dy * tEnd)
             if tx <= tTop { d.dx = -d.dx } else { d.dy = -d.dy }
         }
-        return true
+        return nil
     }
 
     /// Işın-dikdörtgen kesişimi (slab yöntemi), 0...length aralığında.
@@ -2381,6 +2399,7 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
     private func finishVolley() {
         isVolleyActive = false
         isDropping = false
+        isGentleDrop = false
         session.setVolleyActive(false)
         session.setAssist(.none)
         removeAction(forKey: "launch")

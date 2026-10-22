@@ -1,0 +1,5 @@
+NeonBreak v5.33.1 (App Store 1.1.0)
+
+- Otomatik geri çağırma yumuşatıldı: yalnızca hiçbir top bir şeye değmeyecekken VE en az bir top boşta
+  1,4 saniyeden uzun dolaşacaksa devreye girer. Toplar artık hızlanıp sert düşmez; normal hızda, hafif
+  eğimle aşağı süzülür. Zaten inmekte olan toplara dokunulmaz.

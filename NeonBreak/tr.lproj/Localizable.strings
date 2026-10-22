@@ -120,3 +120,12 @@
 "Uzun, parlak bir kuyruk ve ışık serpintisi" = "Uzun, parlak bir kuyruk ve ışık serpintisi";
 "Gökkuşağı" = "Gökkuşağı";
 "Renkten renge akan bir iz" = "Renkten renge akan bir iz";
+
+/* Özel bloklar (v5.32) */
+"Buz blok" = "Buz blok";
+"Canı ne olursa olsun 2 vuruşta kırılır: önce çatlar, sonra dağılır." = "Canı ne olursa olsun 2 vuruşta kırılır: önce çatlar, sonra dağılır.";
+"Kalkanlı blok" = "Kalkanlı blok";
+"Çelik şeritli yüzü hasar almaz. Diğer yüzlerden vur." = "Çelik şeritli yüzü hasar almaz. Diğer yüzlerden vur.";
+"Patlayıcı blok" = "Patlayıcı blok";
+"Kırılınca çevresindeki 8 bloğa hasar verir. Yan yana olanlar zincirleme patlar." = "Kırılınca çevresindeki 8 bloğa hasar verir. Yan yana olanlar zincirleme patlar.";
+"YENİ" = "YENİ";

@@ -1085,3 +1085,12 @@
 "Uzun, parlak bir kuyruk ve ışık serpintisi" = "A long, bright tail with a shower of light";
 "Gökkuşağı" = "Rainbow";
 "Renkten renge akan bir iz" = "A trail that flows from color to color";
+
+/* Özel bloklar (v5.32) */
+"Buz blok" = "Ice block";
+"Canı ne olursa olsun 2 vuruşta kırılır: önce çatlar, sonra dağılır." = "Breaks in 2 hits no matter its HP: it cracks first, then shatters.";
+"Kalkanlı blok" = "Shielded block";
+"Çelik şeritli yüzü hasar almaz. Diğer yüzlerden vur." = "The side with the steel plate takes no damage. Hit it from the other sides.";
+"Patlayıcı blok" = "Explosive block";
+"Kırılınca çevresindeki 8 bloğa hasar verir. Yan yana olanlar zincirleme patlar." = "When it breaks, it damages the 8 blocks around it. Neighbouring explosives chain-react.";
+"YENİ" = "NEW";

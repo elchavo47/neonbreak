@@ -15,6 +15,10 @@ enum BoardGenerator {
         /// Üreteç 5, seviye 41+: özel güç boş sütun olmadığı için bu sütundaki bloğun içine gömülür.
         var embeddedColumn: Int?
         var embeddedKind: String?
+        /// Üreteç 7, seviye 10+: satırdaki özel blok (ice / shield / explosive) ve kalkanın yüzü (0 üst, 1 alt, 2 sol, 3 sağ).
+        var typedColumn: Int?
+        var typedKind: String?
+        var shieldSide = 0
     }
 
     /// Sunucuya bildirilen üreteç sürümü (board.php'deki gen 4). Gen 3: blok canı seviyenin gerisinden gelir,
@@ -23,7 +27,9 @@ enum BoardGenerator {
     /// (satır silici / dağıtıcı / bomba) bir bloğun içine gömülür ve blok kırılınca tetiklenir.
     /// Gen 6: daha seyrek tahta. Satırda en fazla 5 blok (seviye 30+), her 4. satır 4 blok; seviye 24 sonrası can
     /// artışı %50; seviye 41+ coin şansı %10 (boşalan hücreler ekonomiyi şişirmesin).
-    static let version = 6
+    /// Gen 7: daha seyrek (1-9: 3 blok; 10-29: 4, her 3. satır 3; 30+: 4, her 3. satır 5) ve özel bloklar:
+    /// buz (seviye 10+, 2 vuruş), kalkanlı (15+, bir yüzü hasar almaz), patlayıcı (20+, çevresine hasar).
+    static let version = 7
 
     static func randomSeed() -> Int { Int.random(in: 1...2_147_483_646) }
 
@@ -46,7 +52,10 @@ enum BoardGenerator {
         let dense = version >= 4 && level > 40
         let blockTarget: Int
         let growth: Int
-        if version >= 6 {
+        if version >= 7 {
+            blockTarget = level <= 9 ? 3 : (level <= 29 ? (level % 3 == 0 ? 3 : 4) : (level % 3 == 0 ? 5 : 4))
+            growth = 50
+        } else if version >= 6 {
             blockTarget = level <= 4 ? 3 : (level <= 29 ? 4 : (level % 4 == 0 ? 4 : 5))
             growth = 50
         } else {
@@ -90,20 +99,46 @@ enum BoardGenerator {
             row.embeddedColumn = cols[rand(blockTarget)]
             row.embeddedKind = ["rowClear", "scatter", "scatter", "bomb"][kind]
         }
+        // Gen 7: özel blok. Rastgele sayılar koşulsuz ve en sonda çekilir (board.php ile aynı sıra).
+        if version >= 7 && level >= 10 {
+            let typeRoll = rand(100)
+            let pick = rand(blockTarget)
+            let kindRoll = rand(100)
+            let side = rand(4)
+            let chance = level >= 20 ? 35 : 20
+            if typeRoll < chance && cols[pick] != row.embeddedColumn {
+                var kinds = ["ice"]
+                if level >= 15 { kinds.append("shield") }
+                if level >= 20 { kinds.append("explosive") }
+                let typed = kinds[kindRoll % kinds.count]
+                row.typedKind = typed
+                row.typedColumn = cols[pick]
+                if typed == "shield" { row.shieldSide = side }
+                if typed == "ice" { row.blocks[pick].hp = 2 }
+            }
+        }
         return row
     }
 
     /// Sunucunun ürettiği değerlerle karşılaştırma: (tohum, seviye, blok, azami skor, azami top, azami coin).
-    private static let serverVectors: [(Int, Int, Int, Int, Int, Int)] = [(12345, 60, 259, 97855, 57, 269), (2147483646, 150, 687, 513595, 141, 489), (987654321, 19, 72, 11266, 20, 62), (12345, 77, 340, 151830, 74, 315)]
+    private static let serverVectors: [(Int, Int, Int, Int, Int, Int)] = [(12345, 60, 236, 87070, 56, 165), (2147483646, 150, 626, 448660, 139, 420), (987654321, 19, 64, 9972, 20, 63), (12345, 77, 309, 134101, 72, 188)]
 
     /// Sunucunun (board.php, gen 6) gömülü güç ürettiği satırlar: (tohum, seviye, sütun, tür).
     private static let embeddedVectors: [(Int, Int, Int, String)] = [(7777, 41, 5, "rowClear"), (15554, 55, 0, "bomb"), (23331, 50, 0, "bomb"), (31108, 45, 0, "scatter"), (987654321, 50, 0, "scatter")]
+
+    /// Sunucunun (board.php, gen 7) özel blok ürettiği satırlar: (tohum, seviye, sütun, tür, kalkan yüzü).
+    private static let typedVectors: [(Int, Int, Int, String, Int)] = [(12345, 14, 4, "ice", 0), (12345, 15, 2, "shield", 0), (12345, 17, 4, "shield", 2), (12345, 21, 4, "explosive", 0), (12345, 29, 4, "shield", 1), (12345, 45, 4, "shield", 3), (987654321, 50, 0, "ice", 0)]
 
     /// Üretecin sunucuyla aynı sonucu verdiğini doğrular. DEBUG derlemede oyun açılırken çalışır.
     static func selfTest() -> Bool {
         for vector in embeddedVectors {
             let spec = row(seed: vector.0, level: vector.1, version: 6)
             if spec.embeddedColumn != vector.2 || spec.embeddedKind != vector.3 { return false }
+        }
+        for vector in typedVectors {
+            let spec = row(seed: vector.0, level: vector.1, version: 7)
+            if spec.typedColumn != vector.2 || spec.typedKind != vector.3 || spec.shieldSide != vector.4 { return false }
+            if vector.3 == "ice", spec.blocks.first(where: { $0.col == vector.2 })?.hp != 2 { return false }
         }
         for vector in serverVectors {
             var blocks = 0, hpSum = 0, balls = 1, coins = 0
@@ -129,6 +164,9 @@ struct RunSnapshot: Codable, Equatable {
         let hp: Double
         /// Bloğun içine gömülü özel güç (rowClear / scatter / bomb); yoksa nil.
         var special: String? = nil
+        /// Üreteç 7 özel blok türü (ice / shield / explosive) ve kalkanın yüzü.
+        var kind: String? = nil
+        var side: Int? = nil
     }
     struct Pickup: Codable, Equatable { let kind: String; let row: Int; let col: Int; let value: Int }
 

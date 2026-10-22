@@ -1085,3 +1085,12 @@
 "Uzun, parlak bir kuyruk ve ışık serpintisi" = "Ein langer, heller Schweif mit Lichtregen";
 "Gökkuşağı" = "Regenbogen";
 "Renkten renge akan bir iz" = "Eine Spur, die von Farbe zu Farbe fließt";
+
+/* Özel bloklar (v5.32) */
+"Buz blok" = "Eisblock";
+"Canı ne olursa olsun 2 vuruşta kırılır: önce çatlar, sonra dağılır." = "Bricht unabhängig von den Lebenspunkten nach 2 Treffern: erst bekommt er Risse, dann zerspringt er.";
+"Kalkanlı blok" = "Schildblock";
+"Çelik şeritli yüzü hasar almaz. Diğer yüzlerden vur." = "Die Seite mit der Stahlplatte nimmt keinen Schaden. Triff ihn von den anderen Seiten.";
+"Patlayıcı blok" = "Sprengblock";
+"Kırılınca çevresindeki 8 bloğa hasar verir. Yan yana olanlar zincirleme patlar." = "Beim Zerbrechen beschädigt er die 8 Blöcke um ihn herum. Benachbarte Sprengblöcke explodieren in Kette.";
+"YENİ" = "NEU";

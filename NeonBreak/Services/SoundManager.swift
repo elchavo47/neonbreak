@@ -45,6 +45,8 @@ final class SoundManager: NSObject, AVAudioPlayerDelegate {
     func gameOver() { play("SFXGameOver", volume: 0.82) }
     func launch() { play("SFXLaunch", volume: 0.66) }
     func uiTap() { play("SFXUITap", volume: 0.48) }
+    /// Kalkanlı bloğun çelik yüzüne çarpma: kısa, tiz tık.
+    func shieldClank() { play("SFXUITap", volume: 0.72) }
 
     private func preloadAll() {
         let names = [

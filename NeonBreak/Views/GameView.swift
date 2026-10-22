@@ -161,6 +161,8 @@ private struct GameRoundContent: View {
     @State private var isPaused = false
     @State private var busyPowerUp: String?
     @State private var toast: String?
+    /// İlk kez görülen özel blok türünün tanıtım kartı.
+    @State private var blockIntro: BlockKind?
     @State private var toastToken = UUID()
     @State private var lastReportedLevel = 0
     /// Hafıza hilesi yakalandı: oyun iptal edildi.
@@ -185,6 +187,14 @@ private struct GameRoundContent: View {
                 ZStack(alignment: .bottom) {
                     ConfiguredSpriteKitView(scene: scene, preferredFPS: preferredFPS)
                     RecordBanner(session: session)
+                    if let blockIntro {
+                        BlockIntroCard(kind: blockIntro) { withAnimation(.easeOut(duration: 0.2)) { self.blockIntro = nil } }
+                            .frame(maxHeight: .infinity, alignment: .top)
+                            .padding(.top, 14)
+                            .padding(.horizontal, 16)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                            .zIndex(3)
+                    }
                     VStack(spacing: 8) {
                         if let toast {
                             Text(toast)
@@ -264,6 +274,14 @@ private struct GameRoundContent: View {
         .onAppear {
             startedAt = Date()
             scene.onStableState = { saveSnapshot() }
+            scene.onBlockKindIntro = { kind in
+                DispatchQueue.main.async {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { blockIntro = kind }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5.5) {
+                        if blockIntro == kind { withAnimation(.easeOut(duration: 0.25)) { blockIntro = nil } }
+                    }
+                }
+            }
             if runTicket == nil {
                 showToast(LS("Çevrimdışı deneme: coin ve sıralama sayılmaz"))
             }
@@ -287,6 +305,7 @@ private struct GameRoundContent: View {
         }
         .onDisappear {
             scene.onStableState = nil
+            scene.onBlockKindIntro = nil
             scene.setUserPaused(true)
             MusicManager.shared.setDucked(false)
         }
@@ -551,6 +570,55 @@ private struct GameRoundContent: View {
 }
 
 // MARK: - Hile iptali
+
+/// Yeni blok türü tanıtımı: oyunu durdurmayan, üstte beliren sade kart. Dokununca kapanır.
+private struct BlockIntroCard: View {
+    let kind: BlockKind
+    let onDismiss: () -> Void
+
+    private var content: (icon: String, color: Color, title: String, text: String) {
+        switch kind {
+        case .ice: return ("snowflake", Color(red: 0.66, green: 0.9, blue: 1), L("Buz blok"), L("Canı ne olursa olsun 2 vuruşta kırılır: önce çatlar, sonra dağılır."))
+        case .shield: return ("shield.lefthalf.filled", Color(red: 0.82, green: 0.85, blue: 0.9), L("Kalkanlı blok"), L("Çelik şeritli yüzü hasar almaz. Diğer yüzlerden vur."))
+        case .explosive: return ("flame", Color(red: 1, green: 0.55, blue: 0.2), L("Patlayıcı blok"), L("Kırılınca çevresindeki 8 bloğa hasar verir. Yan yana olanlar zincirleme patlar."))
+        case .normal: return ("square", .white, "", "")
+        }
+    }
+
+    var body: some View {
+        let c = content
+        Button(action: onDismiss) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: c.icon)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(c.color)
+                    .frame(width: 38, height: 38)
+                    .background(Circle().fill(c.color.opacity(0.10)))
+                    .overlay(Circle().stroke(c.color.opacity(0.3), lineWidth: 1))
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 6) {
+                        Text(verbatim: c.title).font(.system(size: 14, weight: .semibold)).foregroundStyle(.white)
+                        Text(verbatim: L("YENİ")).font(.system(size: 9, weight: .semibold)).tracking(1.4)
+                            .foregroundStyle(ModalTone.tertiaryText)
+                    }
+                    Text(verbatim: c.text)
+                        .font(.system(size: 12))
+                        .foregroundStyle(ModalTone.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .multilineTextAlignment(.leading)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "xmark").font(.system(size: 10, weight: .semibold)).foregroundStyle(ModalTone.tertiaryText).padding(.top, 2)
+            }
+            .padding(12)
+            .frame(maxWidth: 420)
+            .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(ModalTone.surface.opacity(0.96)))
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(ModalTone.hairline, lineWidth: 1))
+            .shadow(color: .black.opacity(0.5), radius: 16, y: 8)
+        }
+        .buttonStyle(.plain)
+    }
+}
 
 private struct TamperAbortView: View {
     let onExit: () -> Void

@@ -1,0 +1,12 @@
+NeonBreak v5.32.0 (App Store 1.0.2)
+
+- Üreteç gen 7: tahta daha seyrek. Seviye 1-9: 3 blok; 10-29: 4 (her 3. satır 3); 30+: 4 (her 3. satır 5).
+- Yeni özel bloklar (satırda en fazla bir tane; seviye 10-19 satırların %20'si, 20+ %35'i):
+  * Buz blok (10+): canı her zaman 2; ilk vuruşta çatlar, ikincide buz kırıntılarıyla dağılır.
+  * Kalkanlı blok (15+): bir yüzünde çelik şerit; o yüze gelen vuruş hasar ve skor vermez, kıvılcım ve
+    tık sesiyle seker. Diğer üç yüzden normal hasar alır.
+  * Patlayıcı blok (20+): koyu gövde, nabız atan turuncu çekirdek. Kırılınca çevresindeki 8 bloğa kendi
+    canının yarısı kadar hasar verir; komşu patlayıcılar zincirleme patlar. Şok dalgası + kısa kamera sarsıntısı.
+- Yeni blok türü ilk kez görüldüğünde oyunu durdurmayan tanıtım kartı (7 dil).
+- Kayıtlı oyun özel blokları (tür, kalkan yüzü, çatlak) saklar. Eski oyunlar kendi üreteciyle devam eder.
+- Backend v2.10.0 GEREKİR (board.php gen 7). Önce backend, sonra uygulama.

@@ -81,6 +81,155 @@ private enum NeonTex {
         return texture
     }
 
+    // MARK: Özel bloklar (üreteç 7)
+
+    /// Buz blok: buzlu yarı saydam yüzey, ince ışıltı; çatlamış hali üstünde çatlak deseni taşır.
+    static func ice(size: CGSize, cracked: Bool, flash: Bool) -> SKTexture {
+        let key = "ice\(Int(size.width))x\(Int(size.height))-\(cracked ? 1 : 0)-\(flash ? 1 : 0)"
+        if let cached = cache[key] { return cached }
+        let pad = blockPad
+        let full = CGSize(width: size.width + pad * 2, height: size.height + pad * 2)
+        let rect = CGRect(x: pad, y: pad, width: size.width, height: size.height)
+        let corner = min(10, size.height / 4)
+        let texture = make(full) { c in
+            let path = UIBezierPath(roundedRect: rect, cornerRadius: corner)
+            c.saveGState()
+            c.setShadow(offset: .zero, blur: 5, color: UIColor(hex: 0x8FDcFF).withAlphaComponent(0.75).cgColor)
+            UIColor(hex: 0x9FE3FF).withAlphaComponent(0.2).setFill()
+            path.fill()
+            c.restoreGState()
+
+            c.saveGState()
+            path.addClip()
+            let colors = [UIColor(hex: 0xF2FBFF).withAlphaComponent(flash ? 0.75 : 0.5).cgColor,
+                          UIColor(hex: 0xA9E4FF).withAlphaComponent(flash ? 0.5 : 0.26).cgColor,
+                          UIColor(hex: 0x5FB8F0).withAlphaComponent(flash ? 0.42 : 0.2).cgColor] as CFArray
+            if let g = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors, locations: [0, 0.55, 1]) {
+                c.drawLinearGradient(g, start: CGPoint(x: rect.minX, y: rect.minY), end: CGPoint(x: rect.maxX, y: rect.maxY), options: [])
+            }
+            // Çapraz ışık süzmesi
+            UIColor.white.withAlphaComponent(0.32).setStroke()
+            for offset in [CGFloat(0.18), 0.3] {
+                let streak = UIBezierPath()
+                streak.move(to: CGPoint(x: rect.minX + rect.width * offset, y: rect.minY - 2))
+                streak.addLine(to: CGPoint(x: rect.minX - 2, y: rect.minY + rect.width * offset))
+                streak.lineWidth = offset < 0.2 ? 2.2 : 1.1
+                streak.stroke()
+            }
+            // Kırağı noktaları
+            UIColor.white.withAlphaComponent(0.55).setFill()
+            for (fx, fy) in [(0.78, 0.25), (0.86, 0.62), (0.62, 0.8), (0.22, 0.74), (0.5, 0.42)] as [(CGFloat, CGFloat)] {
+                UIBezierPath(ovalIn: CGRect(x: rect.minX + rect.width * fx, y: rect.minY + rect.height * fy, width: 1.6, height: 1.6)).fill()
+            }
+            if cracked {
+                let center = CGPoint(x: rect.midX + rect.width * 0.06, y: rect.midY - rect.height * 0.04)
+                let arms: [[(CGFloat, CGFloat)]] = [
+                    [(-0.12, -0.18), (-0.22, -0.42), (-0.34, -0.5)],
+                    [(0.14, -0.1), (0.3, -0.3), (0.5, -0.38)],
+                    [(0.1, 0.16), (0.24, 0.34), (0.32, 0.52)],
+                    [(-0.16, 0.12), (-0.36, 0.2), (-0.52, 0.36)],
+                    [(0.2, 0.02), (0.52, 0.06)]
+                ]
+                for (shadowPass, color) in [(true, UIColor(hex: 0x1D5D8C).withAlphaComponent(0.55)), (false, UIColor.white.withAlphaComponent(0.92))] {
+                    color.setStroke()
+                    for arm in arms {
+                        let crack = UIBezierPath()
+                        crack.move(to: CGPoint(x: center.x + (shadowPass ? 0.8 : 0), y: center.y + (shadowPass ? 0.8 : 0)))
+                        for point in arm {
+                            crack.addLine(to: CGPoint(x: center.x + rect.width * point.0 + (shadowPass ? 0.8 : 0), y: center.y + rect.height * point.1 + (shadowPass ? 0.8 : 0)))
+                        }
+                        crack.lineWidth = shadowPass ? 1.6 : 1.1
+                        crack.lineJoinStyle = .round
+                        crack.stroke()
+                    }
+                }
+            }
+            c.restoreGState()
+            UIColor.white.withAlphaComponent(flash ? 1 : 0.85).setStroke()
+            path.lineWidth = 1.6
+            path.stroke()
+        }
+        cache[key] = texture
+        return texture
+    }
+
+    /// Patlayıcı blok: koyu gövde, turuncu kenar, köşelerde uyarı çizgileri ve ortada halka.
+    static func explosive(size: CGSize, flash: Bool) -> SKTexture {
+        let key = "exp\(Int(size.width))x\(Int(size.height))-\(flash ? 1 : 0)"
+        if let cached = cache[key] { return cached }
+        let pad = blockPad
+        let full = CGSize(width: size.width + pad * 2, height: size.height + pad * 2)
+        let rect = CGRect(x: pad, y: pad, width: size.width, height: size.height)
+        let corner = min(10, size.height / 4)
+        let orange = UIColor(hex: 0xFF8A1F)
+        let texture = make(full) { c in
+            let path = UIBezierPath(roundedRect: rect, cornerRadius: corner)
+            c.saveGState()
+            c.setShadow(offset: .zero, blur: 5, color: orange.withAlphaComponent(0.8).cgColor)
+            UIColor(hex: flash ? 0x3A2112 : 0x17100C).withAlphaComponent(0.94).setFill()
+            path.fill()
+            orange.setStroke()
+            path.lineWidth = 2
+            path.stroke()
+            c.restoreGState()
+            // Köşe uyarı çizgileri
+            orange.withAlphaComponent(0.85).setStroke()
+            let tick = min(rect.width, rect.height) * 0.22
+            let inset: CGFloat = 4.5
+            for (x, y, sx, sy) in [(rect.minX + inset, rect.minY + inset, 1.0, 1.0), (rect.maxX - inset, rect.minY + inset, -1.0, 1.0),
+                                   (rect.minX + inset, rect.maxY - inset, 1.0, -1.0), (rect.maxX - inset, rect.maxY - inset, -1.0, -1.0)] as [(CGFloat, CGFloat, CGFloat, CGFloat)] {
+                let l = UIBezierPath()
+                l.move(to: CGPoint(x: x, y: y + tick * sy))
+                l.addLine(to: CGPoint(x: x, y: y))
+                l.addLine(to: CGPoint(x: x + tick * sx, y: y))
+                l.lineWidth = 1.6
+                l.lineCapStyle = .round
+                l.stroke()
+            }
+            // Orta halka
+            let radius = min(rect.width, rect.height) * 0.3
+            let ring = UIBezierPath(ovalIn: CGRect(x: rect.midX - radius, y: rect.midY - radius, width: radius * 2, height: radius * 2))
+            orange.withAlphaComponent(0.32).setStroke()
+            ring.lineWidth = 1.2
+            ring.stroke()
+        }
+        cache[key] = texture
+        return texture
+    }
+
+    /// Kalkan şeridi: fırçalanmış çelik görünümü, uçlarda perçin.
+    static func shieldBar(length: CGFloat, thickness: CGFloat) -> SKTexture {
+        let key = "shb\(Int(length))x\(Int(thickness * 10))"
+        if let cached = cache[key] { return cached }
+        let size = CGSize(width: length + 4, height: thickness + 4)
+        let rect = CGRect(x: 2, y: 2, width: length, height: thickness)
+        let texture = make(size) { c in
+            let path = UIBezierPath(roundedRect: rect, cornerRadius: thickness / 2)
+            c.saveGState()
+            c.setShadow(offset: CGSize(width: 0, height: 0.6), blur: 2, color: UIColor.black.withAlphaComponent(0.7).cgColor)
+            UIColor(hex: 0x8A94A3).setFill()
+            path.fill()
+            c.restoreGState()
+            c.saveGState()
+            path.addClip()
+            let colors = [UIColor(hex: 0xFBFCFE).cgColor, UIColor(hex: 0xB9C2CE).cgColor, UIColor(hex: 0x5E6877).cgColor, UIColor(hex: 0xCDD4DD).cgColor] as CFArray
+            if let g = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors, locations: [0, 0.35, 0.7, 1]) {
+                c.drawLinearGradient(g, start: CGPoint(x: 0, y: rect.minY), end: CGPoint(x: 0, y: rect.maxY), options: [])
+            }
+            c.restoreGState()
+            UIColor(hex: 0x2A2F38).withAlphaComponent(0.85).setStroke()
+            path.lineWidth = 0.7
+            path.stroke()
+            let rivet = max(1.6, thickness * 0.34)
+            UIColor(hex: 0x3B424D).setFill()
+            for x in [rect.minX + thickness * 0.75, rect.maxX - thickness * 0.75] {
+                UIBezierPath(ovalIn: CGRect(x: x - rivet / 2, y: rect.midY - rivet / 2, width: rivet, height: rivet)).fill()
+            }
+        }
+        cache[key] = texture
+        return texture
+    }
+
     static func pickup(hex: UInt32) -> SKTexture {
         let key = "p\(hex)"
         if let cached = cache[key] { return cached }
@@ -201,6 +350,10 @@ private enum NumberTex {
     }
 }
 
+enum BlockKind: String {
+    case normal, ice, shield, explosive
+}
+
 private final class BlockNode: SKSpriteNode {
     var hitPoints: CGFloat = 1
     var maxHitPoints: CGFloat = 1
@@ -222,6 +375,11 @@ private final class BlockNode: SKSpriteNode {
     /// Bloğun içine gömülü özel güç (seviye 41+). Blok kırılınca tetiklenir.
     var embedded: PickupKind?
     var embeddedBadge: SKNode?
+    /// Üreteç 7 özel blok türü ve kalkanın yüzü (0 üst, 1 alt, 2 sol, 3 sağ).
+    var kind: BlockKind = .normal
+    var shieldSide = 0
+    /// Kalkan şeridi ya da patlayıcı çekirdeği.
+    var decor: SKSpriteNode?
 
     init() {
         super.init(texture: nil, color: .clear, size: .zero)
@@ -349,6 +507,12 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
     // Fizik adımı sırasında dünyayı değiştirmemek için temaslar biriktirilir,
     // didSimulatePhysics içinde işlenir.
     private var pendingHits: [(block: BlockNode, ball: BallNode, point: CGPoint)] = []
+    /// Kırılan patlayıcı blokların bekleyen patlamaları (zincirleme patlama özyinelemesiz işlenir).
+    private var pendingBlasts: [(row: Int, col: Int, position: CGPoint, damage: CGFloat)] = []
+    /// Sarsıntı için kamera; dünya düğümü oynatılmaz ki fizik bozulmasın.
+    private let shakeCamera = SKCameraNode()
+    /// Yeni blok türünü ilk kez gören oyuncuya bir kerelik tanıtım kartı.
+    var onBlockKindIntro: ((BlockKind) -> Void)?
     private var pendingPickups: [(pickup: PickupNode, ball: BallNode?)] = []
     /// Kırılan bloklardan çıkan, sırada bekleyen gömülü güçler.
     private var pendingEmbedded: [(kind: PickupKind, row: Int, col: Int, position: CGPoint, ball: BallNode?)] = []
@@ -423,6 +587,8 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         _ = NeonTex.spark; _ = NeonTex.ring; _ = NeonTex.trail; _ = NeonTex.rainbowTrail; _ = NeonTex.radial; _ = NeonTex.balloon
 
         addChild(world)
+        addChild(shakeCamera)
+        camera = shakeCamera
         decorLayer.zPosition = 2
         blocksLayer.zPosition = 4
         aimLayer.zPosition = 10
@@ -489,6 +655,8 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
     /// yeniden hesaplar. İlk satır yalnızca geçerli bir boyut geldikten sonra doğar.
     private func applyLayoutIfPossible() {
         guard size.width >= 200, size.height >= 280 else { return }
+        shakeCamera.removeAction(forKey: "shake")
+        shakeCamera.position = CGPoint(x: size.width / 2, y: size.height / 2)
         let columns = CGFloat(Self.columns)
         let rows = CGFloat(Self.rows)
         let side: CGFloat = 8
@@ -789,6 +957,10 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
             if entry.col == spec.embeddedColumn, let raw = spec.embeddedKind, let kind = PickupKind(rawValue: raw), isFeatureEnabled(kind) {
                 setEmbedded(kind, on: block)
             }
+            if entry.col == spec.typedColumn, let raw = spec.typedKind, let kind = BlockKind(rawValue: raw) {
+                setKind(kind, side: spec.shieldSide, on: block)
+                introduceIfNeeded(kind)
+            }
             block.alpha = 0
             blocksLayer.addChild(block)
             block.run(.fadeIn(withDuration: 0.18))
@@ -813,6 +985,7 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         for entry in snapshot.blocks where entry.hp > 0 && entry.row >= 0 && entry.row < Self.rows && entry.col >= 0 && entry.col < Self.columns {
             let block = makeBlock(hp: CGFloat(entry.hp), row: entry.row, col: entry.col)
             if let raw = entry.special, let kind = PickupKind(rawValue: raw), kind != .coin, kind != .addBall { setEmbedded(kind, on: block) }
+            if let raw = entry.kind, let kind = BlockKind(rawValue: raw), kind != .normal { setKind(kind, side: entry.side ?? 0, on: block) }
             blocksLayer.addChild(block)
         }
         for entry in snapshot.pickups where entry.row >= 0 && entry.row < Self.rows && entry.col >= 0 && entry.col < Self.columns {
@@ -828,7 +1001,7 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         var pickups: [RunSnapshot.Pickup] = []
         for node in blocksLayer.children {
             if let block = node as? BlockNode, block.hitPoints > 0 {
-                blocks.append(RunSnapshot.Block(row: block.row, col: block.col, hp: Double(block.hitPoints), special: block.embedded?.rawValue))
+                blocks.append(RunSnapshot.Block(row: block.row, col: block.col, hp: Double(block.hitPoints), special: block.embedded?.rawValue, kind: block.kind == .normal ? nil : block.kind.rawValue, side: block.kind == .shield ? block.shieldSide : nil))
             } else if let pickup = node as? PickupNode, !pickup.isCollected {
                 pickups.append(RunSnapshot.Pickup(kind: pickup.kind.rawValue, row: pickup.row, col: pickup.col, value: pickup.value))
             }
@@ -880,6 +1053,180 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         block.shownHP = -1
         block.colorHex = 0 // texture'ı yeni boyutla yeniden seçtir
         layoutEmbeddedBadge(on: block)
+        layoutDecor(on: block)
+    }
+
+    // MARK: - Özel bloklar (üreteç 7)
+
+    private func setKind(_ kind: BlockKind, side: Int, on block: BlockNode) {
+        block.kind = kind
+        block.shieldSide = max(0, min(3, side))
+        block.decor?.removeFromParent()
+        block.decor = nil
+        switch kind {
+        case .shield:
+            let bar = SKSpriteNode()
+            bar.zPosition = 1.5
+            block.addChild(bar)
+            block.decor = bar
+        case .explosive:
+            let core = SKSpriteNode(texture: NeonTex.spark, color: SKColor(hex: 0xFF7A1A), size: .zero)
+            core.colorBlendFactor = 1
+            core.blendMode = .add
+            core.zPosition = 0.5
+            core.alpha = 0.55
+            core.run(.repeatForever(.sequence([.fadeAlpha(to: 0.95, duration: 0.55), .fadeAlpha(to: 0.4, duration: 0.65)])), withKey: "pulse")
+            block.addChild(core)
+            block.decor = core
+        case .ice, .normal:
+            break
+        }
+        block.colorHex = 0
+        layoutDecor(on: block)
+        updateAppearance(of: block)
+    }
+
+    private func layoutDecor(on block: BlockNode) {
+        guard let decor = block.decor else { return }
+        let w = block.hitSize.width, h = block.hitSize.height
+        switch block.kind {
+        case .shield:
+            let thickness = max(4, min(w, h) * 0.17)
+            let horizontal = block.shieldSide < 2
+            let length = (horizontal ? w : h) - 6
+            decor.texture = NeonTex.shieldBar(length: length, thickness: thickness)
+            decor.size = CGSize(width: length + 4, height: thickness + 4)
+            decor.zRotation = horizontal ? 0 : .pi / 2
+            let inset = thickness / 2 + 1
+            switch block.shieldSide {
+            case 0: decor.position = CGPoint(x: 0, y: h / 2 - inset)
+            case 1: decor.position = CGPoint(x: 0, y: -h / 2 + inset)
+            case 2: decor.position = CGPoint(x: -w / 2 + inset, y: 0)
+            default: decor.position = CGPoint(x: w / 2 - inset, y: 0)
+            }
+        case .explosive:
+            let side = min(w, h) * 1.05
+            decor.size = CGSize(width: side, height: side)
+            decor.position = .zero
+        default:
+            break
+        }
+    }
+
+    /// Vuruş kalkanlı yüze mi geldi? Temas noktası bloğun merkezine göre en baskın eksende değerlendirilir.
+    private func hitsShield(_ block: BlockNode, at scenePoint: CGPoint) -> Bool {
+        guard block.kind == .shield, let parent = block.parent else { return false }
+        let point = parent.convert(scenePoint, from: self)
+        let dx = (point.x - block.position.x) / max(1, block.hitSize.width / 2)
+        let dy = (point.y - block.position.y) / max(1, block.hitSize.height / 2)
+        let face = abs(dx) > abs(dy) ? (dx > 0 ? 3 : 2) : (dy > 0 ? 0 : 1)
+        return face == block.shieldSide
+    }
+
+    /// Kalkana çarpan top: çelik parlaması ve beyaz kıvılcım; hasar ve skor yok.
+    private func shieldDeflect(_ block: BlockNode, at scenePoint: CGPoint, withEffect: Bool) {
+        guard withEffect else { return }
+        let point = effectsLayer.convert(scenePoint, from: self)
+        burst(at: point, color: SKColor(hex: 0xE8EEF6), count: 3)
+        if let bar = block.decor, bar.action(forKey: "glint") == nil {
+            bar.run(.sequence([.colorize(with: .white, colorBlendFactor: 0.9, duration: 0.03), .colorize(withColorBlendFactor: 0, duration: 0.16)]), withKey: "glint")
+        }
+    }
+
+    /// Buz çatlarken küçük buz kırıntıları.
+    private func iceChips(at position: CGPoint, count: Int) {
+        let total = premiumEffectsEnabled ? count : max(1, count / 2)
+        for index in 0..<total {
+            let chip = SKSpriteNode(color: SKColor(hex: index % 2 == 0 ? 0xE6F7FF : 0x9ED9FF), size: CGSize(width: CGFloat.random(in: 3...6), height: CGFloat.random(in: 3...7)))
+            chip.alpha = 0.95
+            chip.position = position
+            chip.zRotation = CGFloat.random(in: 0...(.pi))
+            effectsLayer.addChild(chip)
+            let angle = CGFloat.random(in: 0...(2 * .pi))
+            let distance = CGFloat.random(in: cellW * 0.4...cellW * 1.0)
+            let move = SKAction.move(to: CGPoint(x: position.x + cos(angle) * distance, y: position.y + sin(angle) * distance - cellH * 0.3), duration: 0.38)
+            move.timingMode = .easeOut
+            chip.run(.sequence([
+                .group([move, .rotate(byAngle: CGFloat.random(in: -6...6), duration: 0.38), .fadeOut(withDuration: 0.38)]),
+                .removeFromParent()
+            ]))
+        }
+    }
+
+    /// Patlayıcı bloğun patlaması: çevredeki 8 bloğa hasar, şok dalgası ve kısa sarsıntı.
+    private func detonate(row: Int, col: Int, at position: CGPoint, damage: CGFloat, fullEffect: Bool) {
+        for block in liveBlocks where abs(block.row - row) <= 1 && abs(block.col - col) <= 1 {
+            if block.kind == .ice { block.hitPoints -= 1 } else { block.hitPoints -= damage }
+            if block.hitPoints <= 0 {
+                destroy(block, bonus: 25 + session.level, celebrate: false, particles: fullEffect ? 5 : 2)
+            } else {
+                updateAppearance(of: block)
+                block.run(.sequence([.scale(to: 0.9, duration: 0.04), .scale(to: 1, duration: 0.06)]), withKey: "impact")
+            }
+        }
+        let orange = SKColor(hex: 0xFF8A1F)
+        let flash = SKSpriteNode(texture: NeonTex.radial, color: SKColor(hex: 0xFFB35C), size: CGSize(width: cellW * 1.2, height: cellW * 1.2))
+        flash.colorBlendFactor = 1
+        flash.blendMode = .add
+        flash.alpha = 0.9
+        flash.position = position
+        effectsLayer.addChild(flash)
+        flash.run(.sequence([.group([.scale(to: 2.8, duration: 0.18), .fadeOut(withDuration: 0.2)]), .removeFromParent()]))
+        guard fullEffect else { return }
+        let wave = SKSpriteNode(texture: NeonTex.ring, color: orange, size: CGSize(width: cellW, height: cellW))
+        wave.colorBlendFactor = 1
+        wave.blendMode = .add
+        wave.alpha = 0.95
+        wave.position = position
+        effectsLayer.addChild(wave)
+        wave.run(.sequence([.group([.scale(to: 3.6, duration: 0.3), .fadeOut(withDuration: 0.3)]), .removeFromParent()]))
+        burst(at: position, color: orange, count: 10)
+        for index in 0..<6 {
+            let debris = SKSpriteNode(color: SKColor(hex: index % 2 == 0 ? 0x2A1A10 : 0xFF8A1F), size: CGSize(width: 5, height: 5))
+            debris.position = position
+            effectsLayer.addChild(debris)
+            let angle = CGFloat(index) / 6 * 2 * .pi + CGFloat.random(in: -0.3...0.3)
+            let distance = cellW * CGFloat.random(in: 1.0...1.6)
+            let move = SKAction.move(to: CGPoint(x: position.x + cos(angle) * distance, y: position.y + sin(angle) * distance), duration: 0.34)
+            move.timingMode = .easeOut
+            debris.run(.sequence([.group([move, .rotate(byAngle: 5, duration: 0.34), .fadeOut(withDuration: 0.34)]), .removeFromParent()]))
+        }
+        shake(intensity: 4)
+        SoundManager.shared.breakBlock()
+        HapticsManager.shared.danger()
+    }
+
+    private func shake(intensity: CGFloat) {
+        guard shakeCamera.action(forKey: "shake") == nil else { return }
+        let center = CGPoint(x: size.width / 2, y: size.height / 2)
+        var steps: [SKAction] = []
+        var amount = intensity
+        for _ in 0..<5 {
+            steps.append(.move(to: CGPoint(x: center.x + CGFloat.random(in: -amount...amount), y: center.y + CGFloat.random(in: -amount...amount)), duration: 0.025))
+            amount *= 0.7
+        }
+        steps.append(.move(to: center, duration: 0.03))
+        shakeCamera.run(.sequence(steps), withKey: "shake")
+    }
+
+    private func flushBlasts() {
+        var guardCount = 0
+        var fullEffects = premiumEffectsEnabled ? 3 : 1
+        while !pendingBlasts.isEmpty && guardCount < 32 {
+            guardCount += 1
+            let blast = pendingBlasts.removeFirst()
+            guard isVolleyActive, !session.isGameOver else { continue }
+            detonate(row: blast.row, col: blast.col, at: blast.position, damage: blast.damage, fullEffect: fullEffects > 0)
+            fullEffects -= 1
+        }
+        pendingBlasts.removeAll(keepingCapacity: true)
+    }
+
+    private func introduceIfNeeded(_ kind: BlockKind) {
+        let key = "seenBlockKind.\(kind.rawValue)"
+        guard kind != .normal, !UserDefaults.standard.bool(forKey: key) else { return }
+        UserDefaults.standard.set(true, forKey: key)
+        onBlockKindIntro?(kind)
     }
 
     // MARK: - Bloğa gömülü özel güçler (seviye 41+)
@@ -964,12 +1311,35 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     private func updateAppearance(of block: BlockNode) {
+        if block.kind == .ice {
+            block.hpSprite.isHidden = true
+            let cracked = block.hitPoints <= 1
+            let marker: UInt32 = cracked ? 0x1000001 : 0x1000002
+            guard marker != block.colorHex else { return }
+            block.colorHex = marker
+            block.tint = SKColor(hex: 0xA8E6FF)
+            block.baseTexture = NeonTex.ice(size: block.hitSize, cracked: cracked, flash: false)
+            block.flashTexture = NeonTex.ice(size: block.hitSize, cracked: cracked, flash: true)
+            block.texture = block.baseTexture
+            return
+        }
+        block.hpSprite.isHidden = false
         let shown = max(1, Int(ceil(block.hitPoints)))
         if shown != block.shownHP {
             block.shownHP = shown
             let number = NumberTex.texture(shown, fontSize: block.hpFontSize)
             block.hpSprite.texture = number
             block.hpSprite.size = number.size()
+        }
+        if block.kind == .explosive {
+            let marker: UInt32 = 0x1000003
+            guard marker != block.colorHex else { return }
+            block.colorHex = marker
+            block.tint = SKColor(hex: 0xFF8A1F)
+            block.baseTexture = NeonTex.explosive(size: block.hitSize, flash: false)
+            block.flashTexture = NeonTex.explosive(size: block.hitSize, flash: true)
+            block.texture = block.baseTexture
+            return
         }
         let hex = Self.colorHex(forHP: block.hitPoints)
         guard hex != block.colorHex else { return }
@@ -1454,7 +1824,13 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
             pendingPickups.removeAll(keepingCapacity: true)
             for entry in pickups { collect(entry.pickup, ball: entry.ball) }
         }
-        flushEmbedded()
+        // Güçler ve patlamalar birbirini tetikleyebilir; ikisi de boşalana kadar sırayla işlenir.
+        var rounds = 0
+        repeat {
+            flushEmbedded()
+            flushBlasts()
+            rounds += 1
+        } while (!pendingEmbedded.isEmpty || !pendingBlasts.isEmpty) && rounds < 6
     }
 
     /// Bir karedeki bütün vuruşları tek geçişte işler. Kaç top vurursa vursun: skor bir kez
@@ -1467,10 +1843,23 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         var effectBudget = premiumEffectsEnabled ? 3 : 1
         var liveEffects = effectsLayer.children.count
 
+        var clanked = false
         for hit in hits {
             let block = hit.block
             guard block.parent != nil, block.hitPoints > 0 else { continue }
-            block.hitPoints -= hit.ball.damage
+            if block.kind == .shield && hitsShield(block, at: hit.point) {
+                // Kalkanlı yüz: hasar ve skor yok (sunucunun skor sınırı da buna göre).
+                shieldDeflect(block, at: hit.point, withEffect: effectBudget > 0 && liveEffects < 36)
+                if effectBudget > 0 { effectBudget -= 1; liveEffects += 3 }
+                clanked = true
+                continue
+            }
+            if block.kind == .ice {
+                block.hitPoints -= 1
+                if block.hitPoints > 0 { iceChips(at: block.position, count: 4) }
+            } else {
+                block.hitPoints -= hit.ball.damage
+            }
             hitCount += 1
             strongest = max(strongest, hit.ball.damage)
             if effectBudget > 0 && liveEffects < 36 {
@@ -1486,6 +1875,10 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
                 block.needsRefresh = true
                 touched.append(block)
             }
+        }
+        if clanked {
+            SoundManager.shared.shieldClank()
+            HapticsManager.shared.blockHit(power: 0.35)
         }
         guard hitCount > 0 else { return }
         refreshCombo()
@@ -1523,6 +1916,11 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
             block.embeddedBadge = nil
             if isVolleyActive { pendingEmbedded.append((kind, block.row, block.col, block.position, ball)) }
         }
+        if block.kind == .explosive && isVolleyActive {
+            pendingBlasts.append((block.row, block.col, block.position, max(1, ceil(block.maxHitPoints / 2))))
+        }
+        if block.kind == .ice { iceChips(at: block.position, count: 9) }
+        block.decor?.removeAllActions()
         session.recordBlockBreak()
         session.addScore(bonus)
         if celebrate {

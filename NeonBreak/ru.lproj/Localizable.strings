@@ -1085,3 +1085,12 @@
 "Uzun, parlak bir kuyruk ve ışık serpintisi" = "Длинный яркий хвост и россыпь света";
 "Gökkuşağı" = "Радуга";
 "Renkten renge akan bir iz" = "След, переливающийся всеми цветами";
+
+/* Özel bloklar (v5.32) */
+"Buz blok" = "Ледяной блок";
+"Canı ne olursa olsun 2 vuruşta kırılır: önce çatlar, sonra dağılır." = "Разбивается за 2 удара при любом запасе прочности: сначала трескается, затем рассыпается.";
+"Kalkanlı blok" = "Блок со щитом";
+"Çelik şeritli yüzü hasar almaz. Diğer yüzlerden vur." = "Сторона со стальной пластиной не получает урона. Бей с других сторон.";
+"Patlayıcı blok" = "Взрывной блок";
+"Kırılınca çevresindeki 8 bloğa hasar verir. Yan yana olanlar zincirleme patlar." = "При разрушении наносит урон 8 соседним блокам. Соседние взрывные блоки детонируют цепочкой.";
+"YENİ" = "НОВОЕ";
